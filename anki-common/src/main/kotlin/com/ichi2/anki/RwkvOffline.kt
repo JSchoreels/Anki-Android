@@ -2,12 +2,18 @@
 
 package com.ichi2.anki
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,6 +56,13 @@ object RwkvOffline {
     private const val READY_POLL_MS = 500L
     private const val READY_POLLS = 1200
 
+    /** The progress notification is shown for replays of at least this many reviews (~30 s and more). */
+    private const val PROGRESS_AFTER_REPLAYED = 100_000L
+    private const val PROGRESS_NOTIFICATION_ID = 0x6b33 // "k3"
+
+    /** The app module's NotificationChannel.SYNC (low importance), which this module cannot see. */
+    private const val PROGRESS_CHANNEL = "Synchronization"
+
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var watcher: Job? = null
     private val readyFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -84,7 +97,7 @@ object RwkvOffline {
             if (replayed >= TOAST_AFTER_REPLAYED && toastEnabled(context)) {
                 showToast(context, "Rebuilding RWKV ($replayed reviews): standard order until done")
             }
-            refreshWhenReady()
+            refreshWhenReady(context)
         } catch (e: Exception) {
             Timber.w(e, "RWKV preparation failed; using the standard scheduler")
             showToast(context, "RWKV unavailable: standard review order")
@@ -97,24 +110,95 @@ object RwkvOffline {
      * with RWKV's counts. Not a ChangeManager change: an open reviewer would swap its current card (its
      * queue switches to RWKV's at the next answer anyway).
      */
-    private fun refreshWhenReady() {
+    private fun refreshWhenReady(context: Context) {
         watcher?.cancel()
         watcher =
             scope.launch {
-                // ponytail: polls (the backend can't call back); a callback from the build thread if it matters
-                repeat(READY_POLLS) {
-                    delay(READY_POLL_MS)
-                    val ready =
-                        CollectionManager.withOpenColOrNull {
-                            backend.rwkvOfflineInstantPassStep(restart = false, statusOnly = true).available
-                        } ?: return@launch
-                    if (ready) {
-                        Timber.i("RWKV ready: refreshing the deck counts")
-                        readyFlow.tryEmit(Unit)
-                        return@launch
+                val progress = ReplayProgress(context)
+                try {
+                    // ponytail: polls (the backend can't call back); a callback from the build thread if it matters
+                    var polls = 0
+                    while (true) {
+                        delay(READY_POLL_MS)
+                        val status =
+                            CollectionManager.withOpenColOrNull {
+                                backend.rwkvOfflineInstantPassStep(restart = false, statusOnly = true)
+                            } ?: return@launch
+                        if (status.available) {
+                            Timber.i("RWKV ready: refreshing the deck counts")
+                            readyFlow.tryEmit(Unit)
+                            return@launch
+                        }
+                        progress.update(status.replayDone, status.replayTotal)
+                        // a replay still under way may take longer than the polls (4M reviews: ~10 min)
+                        if (++polls >= READY_POLLS && status.replayTotal == 0L) return@launch
                     }
+                } finally {
+                    progress.cancel()
                 }
             }
+    }
+
+    /**
+     * A notification with a progress bar while the backend replays a big review history (the first
+     * start, after an update): "Preparing RWKV: 42% · about 6 min left". Silent, on the app's
+     * low-importance sync channel; not shown if notifications are off (the toast still is).
+     */
+    private class ReplayProgress(
+        private val context: Context,
+    ) {
+        private val manager = NotificationManagerCompat.from(context)
+        private var firstDone = -1L
+        private var firstAt = 0L
+        private var shownPercent = -1
+
+        @SuppressLint("MissingPermission") // checked in canNotify
+        fun update(
+            done: Long,
+            total: Long,
+        ) {
+            if (total < PROGRESS_AFTER_REPLAYED || !canNotify()) return
+            val now = SystemClock.elapsedRealtime()
+            if (firstDone < 0) {
+                firstDone = done
+                firstAt = now
+            }
+            val percent = (done * 100 / total).toInt()
+            if (percent == shownPercent) return
+            shownPercent = percent
+            val rate = (done - firstDone).toDouble() / (now - firstAt).coerceAtLeast(1)
+            val left =
+                if (done > firstDone) {
+                    val minutes = ((total - done) / rate / 60_000).toInt()
+                    if (minutes < 1) " · less than a minute left" else " · about $minutes min left"
+                } else {
+                    ""
+                }
+            val notification =
+                NotificationCompat
+                    .Builder(context, PROGRESS_CHANNEL)
+                    .setSmallIcon(android.R.drawable.stat_notify_sync)
+                    .setContentTitle("Preparing RWKV: $percent%$left")
+                    .setContentText("First start with this history ($total reviews). Reviews use the standard order until it is done.")
+                    .setProgress(100, percent, false)
+                    .setOngoing(true)
+                    .setSilent(true)
+                    .setOnlyAlertOnce(true)
+                    .build()
+            manager.notify(PROGRESS_NOTIFICATION_ID, notification)
+        }
+
+        fun cancel() {
+            if (shownPercent >= 0) manager.cancel(PROGRESS_NOTIFICATION_ID)
+        }
+
+        private fun canNotify() =
+            manager.areNotificationsEnabled() &&
+                (
+                    Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_GRANTED
+                )
     }
 
     /**

@@ -403,7 +403,7 @@ object CollectionManager {
                     backend = backend,
                 )
             if (!isRunningAsUnitTest && !isRobolectric) {
-                RwkvOffline.prepare(appContext, backend!!)
+                RwkvOffline.prepareAfterOpen(appContext)
             }
         }
     }

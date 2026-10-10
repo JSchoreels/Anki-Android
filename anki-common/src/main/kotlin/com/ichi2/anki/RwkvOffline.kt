@@ -58,10 +58,21 @@ object RwkvOffline {
     val ready: SharedFlow<Unit> = readyFlow
 
     /**
+     * Queues [prepare] behind the open of the collection: whoever opened it (often the main
+     * thread, e.g. BootService) doesn't wait for the backend's read of the review history, seconds
+     * on a big collection (4M reviews: ~7 s on a Pixel 8a).
+     */
+    fun prepareAfterOpen(context: Context) {
+        scope.launch {
+            CollectionManager.withOpenColOrNull { prepare(context, backend) }
+        }
+    }
+
+    /**
      * Must run on the collection queue, after the collection is opened.
      * On failure the standard review order applies.
      */
-    fun prepare(
+    private fun prepare(
         context: Context,
         backend: Backend,
     ) {

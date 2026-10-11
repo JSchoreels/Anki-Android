@@ -3,7 +3,7 @@
 - The older debug app (`com.ichi2.anki.debug`) is no longer published: move to kuma3 Anki (sync the debug app first, then sign in to AnkiWeb in kuma3 Anki and choose download).
 
 **What is in it**
-AnkiDroid 2.26.0alpha2 built against the JSchoreels FSRS-7 fork of Anki (26.09.3+fsrs7, build 96), with RWKV-Instant running on the device. Unofficial personal build: not from the AnkiDroid team, the Anki project or the fork's author.
+AnkiDroid 2.26.0alpha2 built against the JSchoreels FSRS-7 fork of Anki (26.09.3+fsrs7, build 100), with RWKV-Instant running on the device. Unofficial personal build: not from the AnkiDroid team, the Anki project or the fork's author.
 - RWKV-Instant: presets with "Use RWKV-Instant to choose review cards" pick review cards by predicted recall, as on the fork's desktop. RWKV-Curve and "reschedule" are not implemented.
 - FSRS-7, with the fork's own repair of the state that AnkiWeb sync drops (`s_int`, `s_fast`).
 - Deck options page working on phones, with "Rebuild RWKV State" and a status line.
@@ -18,11 +18,23 @@ AnkiDroid 2.26.0alpha2 built against the JSchoreels FSRS-7 fork of Anki (26.09.3
   (RWKV section) turn on "Use faster, approximate queue updates", or raise "Update the RWKV queue every" N answers.
   On a 22,000-card collection the wait went from about 2 s to under 0.3 s.
 
-**En español**
-- `kuma3-anki-arm64.apk` es **kuma3 Anki**, la app recomendada: más rápida, con su propio icono y su propia carpeta (`kuma3`), así que se instala junto a AnkiDroid.
+<!-- es -->
+**¿Qué archivo?**
+- `kuma3-anki-arm64.apk`: **kuma3 Anki**, la app que hay que usar. Versión rápida, con su propio icono y su propia carpeta de colección (`kuma3`), así que se instala junto a AnkiDroid.
 - La app anterior (`com.ichi2.anki.debug`) ya no se publica: pásate a kuma3 Anki (sincroniza antes la app anterior, luego inicia sesión en AnkiWeb en kuma3 Anki y elige descargar).
-- Al abrir kuma3 Anki: permite "Acceso a todos los archivos", inicia sesión en AnkiWeb y elige descargar. Si usas dos apps de Anki, estudia en una sola y sincroniza antes de cambiar.
+
+**Qué incluye**
+AnkiDroid 2.26.0alpha2 compilado con el fork FSRS-7 de Anki de JSchoreels (26.09.3+fsrs7, build 100), con RWKV-Instant funcionando en el dispositivo. Versión personal no oficial: no es del equipo de AnkiDroid, del proyecto Anki ni del autor del fork.
+- RWKV-Instant: los presets con "Use RWKV-Instant to choose review cards" eligen las tarjetas de repaso según el recuerdo previsto, como en el escritorio del fork. RWKV-Curve y "reschedule" no están implementados.
+- FSRS-7, con la reparación del propio fork para el estado que la sincronización con AnkiWeb pierde (`s_int`, `s_fast`).
+- La página de opciones del mazo funciona en móviles, con "Rebuild RWKV State" y una línea de estado.
+- Extras en la lista de mazos, cada uno se puede apagar en Ajustes > kuma3: mapa de calor de repasos, tiempo respondido hoy por mazo, leaderboard (el servidor del complemento Anki Leaderboard de escritorio; apagado hasta que lo actives).
+- Botón de estudio personalizado en la pantalla de mazo terminado.
+
+**Antes de instalar**
+- Solo para móviles y tablets arm64.
+- kuma3 Anki tiene su propia colección: ábrela, permite "Acceso a todos los archivos", inicia sesión en AnkiWeb y elige descargar. Si usas otra app de Anki, estudia en una sola a la vez y sincroniza antes de cambiar.
+- Sincroniza antes de desinstalar. Mantén la sincronización con AnkiWeb para que tu colección tenga una copia en otro lugar.
 - ¿Colección grande (miles de repasos pendientes) y una espera después de cada respuesta con RWKV-Instant? En las
   opciones del mazo (sección RWKV) activa "Use faster, approximate queue updates" o sube "Update the RWKV queue every"
   N respuestas. En una colección de 22.000 tarjetas la espera bajó de unos 2 s a menos de 0,3 s.
-- Versión personal no oficial (no es del equipo de AnkiDroid ni de Anki). Solo para móviles y tablets arm64.

@@ -204,7 +204,11 @@ jobs:
             tag=${GITHUB_REF#refs/tags/}
             notes=Anki-Android/kuma3/release-notes/kuma3-${tag#v}.md
             [ -f "$notes" ] || { echo "::error::missing $notes"; exit 1; }
-            { cat "$notes"; echo; cat Anki-Android/kuma3/release-template.md; echo; source_lines; } > notes.md
+            template=Anki-Android/kuma3/release-template.md
+            # both files hold English, a "<!-- es -->" line, then Spanish: all English first
+            part() { awk -v es="$2" '/^<!-- es -->$/ { seen = 1; next } seen == es' "$1"; }
+            { part "$notes" 0; echo; part "$template" 0; echo; echo "---"; echo
+              part "$notes" 1; echo; part "$template" 1; echo; source_lines; } > notes.md
           else
             {
               echo "Development build: the newest code, for trying things out. It changes with every push."

@@ -2077,12 +2077,22 @@ open class DeckPicker :
      */
     private fun tryShowStudyOptionsPanel(): Boolean {
         val containerId = binding.studyoptionsFragment?.id ?: return false
-        // a shown dialog is on the back stack too: popping it would close the dialog
+        // kuma3: a shown dialog is on the back stack too: popping it would close the dialog
         if (supportFragmentManager.findFragmentByTag(com.ichi2.anki.utils.ext.DIALOG_FRAGMENT_TAG) == null) {
-            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            // Close other panels before looking for restored study options.
+            supportFragmentManager.popBackStackImmediate(
+                null,
+                FragmentManager.POP_BACK_STACK_INCLUSIVE,
+            )
         }
-        supportFragmentManager.commit {
-            replace(containerId, StudyOptionsFragment())
+
+        val studyOptions = fragment
+        if (studyOptions != null) {
+            studyOptions.refreshInterface()
+        } else {
+            supportFragmentManager.commitNow {
+                replace(containerId, StudyOptionsFragment())
+            }
         }
         return true
     }

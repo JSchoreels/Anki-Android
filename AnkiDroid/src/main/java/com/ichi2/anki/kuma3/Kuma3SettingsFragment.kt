@@ -2,8 +2,10 @@
 
 package com.ichi2.anki.kuma3
 
+import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.ichi2.anki.R
+import com.ichi2.anki.RwkvOffline
 import com.ichi2.anki.leaderboard.Leaderboard
 import com.ichi2.anki.preferences.SettingsFragment
 import com.ichi2.anki.preferences.requirePreference
@@ -27,6 +29,11 @@ class Kuma3SettingsFragment : SettingsFragment() {
                     "The Anki Leaderboard add-on's board (an unofficial client of its server). " +
                         "Sign in from the deck list menu."
                 }
+        }
+        // the backend rebuilds the RWKV state in the new precision right away
+        requirePreference<Preference>(R.string.kuma3_rwkv_precision_key).setOnPreferenceChangeListener { _, _ ->
+            view?.post { RwkvOffline.prepareAfterOpen(requireContext().applicationContext) }
+            true
         }
     }
 }

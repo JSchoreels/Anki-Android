@@ -92,7 +92,8 @@ object RwkvOffline {
         try {
             val started = SystemClock.elapsedRealtime()
             val model = installModel(context)
-            val replayed = backend.rwkvPrepareOffline(modelPath = model.absolutePath)
+            val replayed =
+                backend.rwkvPrepareOffline(modelPath = model.absolutePath, statePrecision = statePrecision(context))
             Timber.i("RWKV prepare: replaying %s reviews in the background; %d ms", replayed, SystemClock.elapsedRealtime() - started)
             if (replayed >= TOAST_AFTER_REPLAYED && toastEnabled(context)) {
                 showToast(context, "Rebuilding RWKV ($replayed reviews): standard order until done")
@@ -205,10 +206,15 @@ object RwkvOffline {
      * Settings > kuma3 > 'Rebuilding RWKV' message (R.string.kuma3_rwkv_toast_key in the app module,
      * which this module cannot see; the app's default preferences file).
      */
-    private fun toastEnabled(context: Context) =
-        context
-            .getSharedPreferences(context.packageName + "_preferences", Context.MODE_PRIVATE)
-            .getBoolean("kuma3_rwkv_toast", true)
+    private fun toastEnabled(context: Context) = kuma3Prefs(context).getBoolean("kuma3_rwkv_toast", true)
+
+    /**
+     * Settings > kuma3 > RWKV state precision (R.string.kuma3_rwkv_precision_key): "f32", "int8" or
+     * "int4"; empty (never set): the backend's default, int8 like the desktop fork.
+     */
+    private fun statePrecision(context: Context) = kuma3Prefs(context).getString("kuma3_rwkv_precision", null) ?: ""
+
+    private fun kuma3Prefs(context: Context) = context.getSharedPreferences(context.packageName + "_preferences", Context.MODE_PRIVATE)
 
     private fun installModel(context: Context): File {
         val dir = File(context.noBackupFilesDir, "rwkv")

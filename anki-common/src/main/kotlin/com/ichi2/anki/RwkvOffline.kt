@@ -59,6 +59,7 @@ object RwkvOffline {
     /** The progress notification is shown for replays of at least this many reviews (~30 s and more). */
     private const val PROGRESS_AFTER_REPLAYED = 100_000L
     private const val PROGRESS_NOTIFICATION_ID = 0x6b33 // "k3"
+    private const val READY_NOTIFICATION_ID = 0x6b34
 
     /** The app module's NotificationChannel.SYNC (low importance), which this module cannot see. */
     private const val PROGRESS_CHANNEL = "Synchronization"
@@ -95,10 +96,11 @@ object RwkvOffline {
             val replayed =
                 backend.rwkvPrepareOffline(modelPath = model.absolutePath, statePrecision = statePrecision(context))
             Timber.i("RWKV prepare: replaying %s reviews in the background; %d ms", replayed, SystemClock.elapsedRealtime() - started)
-            if (replayed >= TOAST_AFTER_REPLAYED && toastEnabled(context)) {
+            val announced = replayed >= TOAST_AFTER_REPLAYED && toastEnabled(context)
+            if (announced) {
                 showToast(context, "Rebuilding RWKV ($replayed reviews): standard order until done")
             }
-            refreshWhenReady(context)
+            refreshWhenReady(context, if (announced) replayed else 0)
         } catch (e: Exception) {
             Timber.w(e, "RWKV preparation failed; using the standard scheduler")
             showToast(context, "RWKV unavailable: standard review order")
@@ -111,10 +113,14 @@ object RwkvOffline {
      * with RWKV's counts. Not a ChangeManager change: an open reviewer would swap its current card (its
      * queue switches to RWKV's at the next answer anyway).
      */
-    private fun refreshWhenReady(context: Context) {
+    private fun refreshWhenReady(
+        context: Context,
+        announcedReplay: Long,
+    ) {
         watcher?.cancel()
         watcher =
             scope.launch {
+                val started = SystemClock.elapsedRealtime()
                 val progress = ReplayProgress(context)
                 try {
                     // ponytail: polls (the backend can't call back); a callback from the build thread if it matters
@@ -128,6 +134,10 @@ object RwkvOffline {
                         if (status.available) {
                             Timber.i("RWKV ready: refreshing the deck counts")
                             readyFlow.tryEmit(Unit)
+                            if (announcedReplay > 0) {
+                                val seconds = (SystemClock.elapsedRealtime() - started + 999) / 1000
+                                notifyReady(context, "Rebuilt from $announcedReplay reviews in $seconds s: reviews use RWKV's order")
+                            }
                             return@launch
                         }
                         progress.update(status.replayDone, status.replayTotal)
@@ -193,14 +203,40 @@ object RwkvOffline {
             if (shownPercent >= 0) manager.cancel(PROGRESS_NOTIFICATION_ID)
         }
 
-        private fun canNotify() =
-            manager.areNotificationsEnabled() &&
-                (
-                    Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-                        PackageManager.PERMISSION_GRANTED
-                )
+        private fun canNotify() = canNotify(context, manager)
     }
+
+    /**
+     * The end of a rebuild that [prepare] announced: a notification (tapping it dismisses it), or a
+     * toast when the app can't post notifications.
+     */
+    @SuppressLint("MissingPermission") // checked in canNotify
+    private fun notifyReady(
+        context: Context,
+        text: String,
+    ) {
+        val manager = NotificationManagerCompat.from(context)
+        if (!canNotify(context, manager)) return showToast(context, "RWKV ready")
+        val notification =
+            NotificationCompat
+                .Builder(context, PROGRESS_CHANNEL)
+                .setSmallIcon(android.R.drawable.stat_notify_sync)
+                .setContentTitle("RWKV ready")
+                .setContentText(text)
+                .setAutoCancel(true)
+                .build()
+        manager.notify(READY_NOTIFICATION_ID, notification)
+    }
+
+    private fun canNotify(
+        context: Context,
+        manager: NotificationManagerCompat,
+    ) = manager.areNotificationsEnabled() &&
+        (
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+        )
 
     /**
      * Settings > kuma3 > 'Rebuilding RWKV' message (R.string.kuma3_rwkv_toast_key in the app module,

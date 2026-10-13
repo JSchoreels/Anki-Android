@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<manifest>
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- kuma3: keeps the app running while the RWKV state is rebuilt (RwkvRebuildService) -->
+        <service
+            android:name="com.ichi2.anki.RwkvRebuildService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+    </application>
 </manifest>

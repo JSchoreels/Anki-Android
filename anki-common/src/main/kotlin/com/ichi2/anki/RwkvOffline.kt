@@ -4,6 +4,7 @@ package com.ichi2.anki
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -18,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -56,9 +58,8 @@ object RwkvOffline {
     private const val READY_POLL_MS = 500L
     private const val READY_POLLS = 1200
 
-    /** The progress notification is shown for replays of at least this many reviews (~30 s and more). */
-    private const val PROGRESS_AFTER_REPLAYED = 100_000L
-    private const val PROGRESS_NOTIFICATION_ID = 0x6b33 // "k3"
+    /** The progress notification, also [RwkvRebuildService]'s. */
+    const val PROGRESS_NOTIFICATION_ID = 0x6b33 // "k3"
     private const val READY_NOTIFICATION_ID = 0x6b34
 
     /** The app module's NotificationChannel.SYNC (low importance), which this module cannot see. */
@@ -100,7 +101,7 @@ object RwkvOffline {
             if (announced) {
                 showToast(context, "Rebuilding RWKV ($replayed reviews): standard order until done")
             }
-            refreshWhenReady(context, if (announced) replayed else 0)
+            refreshWhenReady(context, replayed, announced)
         } catch (e: Exception) {
             Timber.w(e, "RWKV preparation failed; using the standard scheduler")
             showToast(context, "RWKV unavailable: standard review order")
@@ -115,13 +116,18 @@ object RwkvOffline {
      */
     private fun refreshWhenReady(
         context: Context,
-        announcedReplay: Long,
+        replayed: Long,
+        announced: Boolean,
     ) {
-        watcher?.cancel()
+        val previous = watcher
         watcher =
             scope.launch {
+                // its `finally` stops the service: before this one starts it
+                previous?.cancelAndJoin()
                 val started = SystemClock.elapsedRealtime()
                 val progress = ReplayProgress(context)
+                // a rebuild, not a normal start: keep the app running until it is done
+                val service = replayed >= TOAST_AFTER_REPLAYED && RwkvRebuildService.start(context)
                 try {
                     // ponytail: polls (the backend can't call back); a callback from the build thread if it matters
                     var polls = 0
@@ -134,9 +140,9 @@ object RwkvOffline {
                         if (status.available) {
                             Timber.i("RWKV ready: refreshing the deck counts")
                             readyFlow.tryEmit(Unit)
-                            if (announcedReplay > 0) {
+                            if (announced) {
                                 val seconds = (SystemClock.elapsedRealtime() - started + 999) / 1000
-                                notifyReady(context, "Rebuilt from $announcedReplay reviews in $seconds s: reviews use RWKV's order")
+                                notifyReady(context, "Rebuilt from $replayed reviews in $seconds s: reviews use RWKV's order")
                             }
                             return@launch
                         }
@@ -146,12 +152,13 @@ object RwkvOffline {
                     }
                 } finally {
                     progress.cancel()
+                    if (service) RwkvRebuildService.stop(context)
                 }
             }
     }
 
     /**
-     * A notification with a progress bar while the backend replays a big review history (the first
+     * A notification with a progress bar while the backend replays the review history (the first
      * start, after an update): "Preparing RWKV: 42% · about 6 min left". Silent, on the app's
      * low-importance sync channel; not shown if notifications are off (the toast still is).
      */
@@ -168,7 +175,7 @@ object RwkvOffline {
             done: Long,
             total: Long,
         ) {
-            if (total < PROGRESS_AFTER_REPLAYED || !canNotify()) return
+            if (total == 0L || !canNotify()) return
             val now = SystemClock.elapsedRealtime()
             if (firstDone < 0) {
                 firstDone = done
@@ -205,6 +212,18 @@ object RwkvOffline {
 
         private fun canNotify() = canNotify(context, manager)
     }
+
+    /** [RwkvRebuildService]'s notification until [ReplayProgress] shows the first percentage. */
+    fun preparingNotification(context: Context): Notification =
+        NotificationCompat
+            .Builder(context, PROGRESS_CHANNEL)
+            .setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setContentTitle("Preparing RWKV")
+            .setContentText("Reviews use the standard order until it is done.")
+            .setProgress(0, 0, true)
+            .setOngoing(true)
+            .setSilent(true)
+            .build()
 
     /**
      * The end of a rebuild that [prepare] announced: a notification (tapping it dismisses it), or a

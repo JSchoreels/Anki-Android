@@ -95,7 +95,8 @@ fun AnkiActivity.showLoadingDialog(
     if (isAlreadyShowing) {
         // if a dialog is already showing and it has the same input params then just update the
         // dialog with the new message, otherwise remove the instance
-        val fragmentView = fragment.view // sanity check
+        // kuma3: the dialog's own views (fragment.view is always null: the view is made in onCreateDialog)
+        val fragmentView = fragment.dialog?.window?.decorView // sanity check
         if (fragmentView != null && cancellable == fragment.isCancelable) {
             fragmentView.findViewById<TextView>(R.id.text)?.text =
                 message ?: getString(CommonString.dialog_processing)

@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import anki.media.CheckMediaResponse
 import com.ichi2.anki.CollectionManager.withCol
+import com.ichi2.anki.ProgressContext
 import com.ichi2.anki.common.annotations.NeedsTest
 import com.ichi2.anki.observability.undoableOp
 import com.ichi2.anki.progress.HasProgress
@@ -84,13 +85,22 @@ class MediaCheckViewModel :
             progressManager.withProgress { withCol { media.restoreTrash() } }
         }
 
-    // TODO: investigate: the underlying implementation exposes progress, which we do not yet handle.
+    // kuma3: deleted in batches, so the dialog shows "done/total" (a few thousand files took minutes with no sign of progress)
     fun deleteUnusedMedia(): Deferred<Unit> =
         viewModelScope.async {
             progressManager.withProgress(message = MediaCheckProgress.DELETING_MEDIA) {
                 val unused = mediaCheckResult.value?.unusedList ?: listOf()
-                withCol { media.trashFiles(unused) }
+                var done = 0L
+                for (batch in unused.chunked(DELETE_BATCH)) {
+                    withCol { media.trashFiles(batch) }
+                    done += batch.size
+                    updateProgress(amount = ProgressContext.Amount(done, unused.size.toLong()))
+                }
                 deletedFilesCount.value = unused.size
             }
         }
+
+    companion object {
+        private const val DELETE_BATCH = 100
+    }
 }

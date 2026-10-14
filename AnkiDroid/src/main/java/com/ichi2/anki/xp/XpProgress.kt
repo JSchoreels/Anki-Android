@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import com.ichi2.anki.R
 
 /**
@@ -22,6 +23,8 @@ import com.ichi2.anki.R
  * withProgressDialog in place of `dialog.show()`.
  */
 object XpProgress {
+    private val AMOUNT = Regex("""(\d+)/(\d+)\s*$""")
+
     @Suppress("DEPRECATION") // ProgressDialog, like its caller
     fun show(dialog: android.app.ProgressDialog) {
         if (!XpChrome.isOn()) return dialog.show()
@@ -89,11 +92,52 @@ object XpProgress {
                         compoundDrawablePadding = (10 * d).toInt()
                     },
                 )
-                addView(
-                    Blocks(context),
-                    LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (20 * d).toInt()).apply { topMargin = (14 * d).toInt() },
-                )
             }
+        val blocks = Blocks(context)
+        body.addView(
+            blocks,
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (20 * d).toInt()).apply {
+                topMargin =
+                    (14 * d).toInt()
+            },
+        )
+        val remaining =
+            TextView(context).apply {
+                textSize = 14f
+                setTextColor(Color.BLACK)
+                visibility = View.GONE
+            }
+        body.addView(
+            remaining,
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                topMargin =
+                    (8 * d).toInt()
+            },
+        )
+        // A message ending in "done/total" (ProgressManager amounts): fill the bar and estimate the time left
+        var firstAt = 0L
+        var firstDone = 0L
+        body.findViewById<TextView>(R.id.text).doAfterTextChanged { text ->
+            val m = AMOUNT.find(text ?: "") ?: return@doAfterTextChanged
+            val done = m.groupValues[1].toLong()
+            val total = m.groupValues[2].toLong().coerceAtLeast(1)
+            blocks.fraction = done.toFloat() / total
+            val now = SystemClock.uptimeMillis()
+            if (firstAt == 0L) {
+                firstAt = now
+                firstDone = done
+                return@doAfterTextChanged
+            }
+            if (done <= firstDone) return@doAfterTextChanged
+            val secs = (now - firstAt) / 1000.0 / (done - firstDone) * (total - done)
+            remaining.visibility = View.VISIBLE
+            remaining.text =
+                when {
+                    secs < 60 -> "${secs.toInt().coerceAtLeast(1)} Seconds Remaining"
+                    secs < 120 -> "1 Minute Remaining"
+                    else -> "${(secs / 60).toInt()} Minutes Remaining"
+                }
+        }
         return androidx.appcompat.app.AlertDialog
             .Builder(context)
             .setCustomTitle(XpWindows.titleBar(context, "Please wait..."))
@@ -110,6 +154,13 @@ object XpProgress {
         private val d = resources.displayMetrics.density
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val start = SystemClock.uptimeMillis()
+
+        /** < 0: unknown, the run of blocks slides; else the bar fills with blocks like XP's copy dialog */
+        var fraction = -1f
+            set(v) {
+                field = v.coerceIn(0f, 1f)
+                invalidate()
+            }
 
         override fun onDraw(canvas: Canvas) {
             val w = width.toFloat()
@@ -141,12 +192,21 @@ object XpProgress {
                 )
             canvas.save()
             canvas.clipRect(3 * d, 3 * d, w - 3 * d, h - 3 * d)
-            for (i in 0 until 8) {
-                val left = x + i * (block + gap)
-                canvas.drawRect(left, 3 * d, left + block, h - 3 * d, paint)
+            if (fraction >= 0) {
+                val end = 3 * d + (w - 6 * d) * fraction
+                var left = 3 * d
+                while (left < end) {
+                    canvas.drawRect(left, 3 * d, minOf(left + block, end), h - 3 * d, paint)
+                    left += block + gap
+                }
+            } else {
+                for (i in 0 until 8) {
+                    val left = x + i * (block + gap)
+                    canvas.drawRect(left, 3 * d, left + block, h - 3 * d, paint)
+                }
+                postInvalidateOnAnimation()
             }
             canvas.restore()
-            postInvalidateOnAnimation()
         }
     }
 }

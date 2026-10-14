@@ -23,13 +23,17 @@ import anki.media.CheckMediaResponse
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.ProgressContext
 import com.ichi2.anki.common.annotations.NeedsTest
+import com.ichi2.anki.libanki.Collection
 import com.ichi2.anki.observability.undoableOp
 import com.ichi2.anki.progress.HasProgress
 import com.ichi2.anki.progress.ProgressManager
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
+import java.io.File
 
 /** The operation [MediaCheckViewModel] is running, shown as a progress message by the UI. */
 enum class MediaCheckProgress {
@@ -71,13 +75,27 @@ class MediaCheckViewModel :
     fun checkMedia(): Deferred<Unit> =
         viewModelScope.async {
             progressManager.withProgress(message = MediaCheckProgress.CHECKING_MEDIA) {
-                mediaCheckResult.value = withCol { media.check() }
+                mediaCheckResult.value = withCol { keepAudioTags(media.check()) }
             }
         }
 
+    /**
+     * kuma3: emptied file by file, so the dialog shows "done/total" (thousands of files took minutes with only
+     * "Processing..."); the backend's emptyTrash then removes anything left.
+     */
     fun deleteTrash(): Deferred<Unit> =
         viewModelScope.async {
-            progressManager.withProgress { withCol { media.emptyTrash() } }
+            progressManager.withProgress(message = MediaCheckProgress.DELETING_MEDIA) {
+                val trash = withCol { File(media.dir.parentFile, "media.trash") }
+                val files = withContext(Dispatchers.IO) { trash.listFiles().orEmpty() }
+                files.toList().chunked(DELETE_BATCH).forEachIndexed { i, batch ->
+                    withContext(Dispatchers.IO) { batch.forEach { it.delete() } }
+                    updateProgress(
+                        amount = ProgressContext.Amount(minOf((i + 1L) * DELETE_BATCH, files.size.toLong()), files.size.toLong()),
+                    )
+                }
+                withCol { media.emptyTrash() }
+            }
         }
 
     fun restoreTrash(): Deferred<Unit> =
@@ -102,5 +120,32 @@ class MediaCheckViewModel :
 
     companion object {
         private const val DELETE_BATCH = 100
+        private val AUDIO_TAG = Regex("""\[audio:\s*([^\]]+?)\s*]""")
+
+        /**
+         * kuma3: files played by `[audio:file]` tags (kuma3's own audio, see card_template / the German cards) are in
+         * use, but Anki's media check only knows `[sound:]` and HTML: without this, "Delete unused" removed them
+         * (2026-10-14: 64 card audio files, also from AnkiWeb).
+         */
+        private fun Collection.keepAudioTags(result: CheckMediaResponse): CheckMediaResponse {
+            val used =
+                db
+                    .queryStringList("select flds from notes where flds like '%[audio:%'")
+                    .flatMapTo(HashSet()) { flds -> AUDIO_TAG.findAll(flds).map { it.groupValues[1] } }
+            if (used.isEmpty() || result.unusedList.none { it in used }) return result
+            val unused = result.unusedList.filter { it !in used }
+            val report =
+                result.report
+                    .lines()
+                    .filterNot { line -> line.startsWith("Unused: ") && line.removePrefix("Unused: ") in used }
+                    .map { line -> if (line.startsWith("Unused files:")) line.replace(Regex("""\d+"""), unused.size.toString()) else line }
+                    .joinToString("\n")
+            return result
+                .toBuilder()
+                .clearUnused()
+                .addAllUnused(unused)
+                .setReport(report)
+                .build()
+        }
     }
 }

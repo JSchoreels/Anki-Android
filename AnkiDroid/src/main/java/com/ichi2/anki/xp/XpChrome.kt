@@ -85,7 +85,7 @@ object XpChrome {
     fun resume(activity: DeckPicker) {
         if (!isOn()) return
         XpGame.newDay()
-        XpHome.resume() // the Player box; XpHome puts the next deck on the taskbar
+        XpHome.resume() // the Player box
     }
 
     /** the Retro CRT setting changed: redraw the open screen */
@@ -199,7 +199,6 @@ object XpChrome {
             },
         )
         bar.findViewById<View>(R.id.xp_start).setOnClickListener { activity.onNavigationPressed() }
-        bar.findViewById<View>(R.id.xp_task).setOnClickListener { XpWindows.quests(activity) }
         ViewCompat.setOnApplyWindowInsetsListener(bar) { v, insets ->
             v.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
             insets

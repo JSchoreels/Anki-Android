@@ -219,9 +219,6 @@ object XpHome {
             } else if (hidden > 0) {
                 notifyItemChanged(0)
             }
-            // the taskbar button: the top-level deck with the most cards due
-            picker.findViewById<TextView>(R.id.xp_task)?.text =
-                waiting.filter { it.depth == 0 }.maxByOrNull { due(it) }?.let { "${it.lastDeckNameComponent} · ${due(it)}" } ?: "kuma3"
         }
 
         override fun getItemCount() = if (hidden > 0) 1 else 0

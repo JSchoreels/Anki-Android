@@ -118,11 +118,15 @@ open class PageWebViewClient : SafeWebViewClient() {
             )
             // kuma3: the Anki XP day theme restyles the backend pages (assets/xp/pages.css)
             if (Themes.currentTheme == DayTheme.XP) {
+                // the congrats page also gets the XP desktop and window (assets/xp/congrats.css)
+                val sheets = if (url.orEmpty().contains("/congrats")) listOf("xp/pages.css", "xp/congrats.css") else listOf("xp/pages.css")
                 val css =
-                    webView.context.assets
-                        .open("xp/pages.css")
-                        .bufferedReader()
-                        .use { it.readText() }
+                    sheets.joinToString("\n") { sheet ->
+                        webView.context.assets
+                            .open(sheet)
+                            .bufferedReader()
+                            .use { it.readText() }
+                    }
                 webView.evaluateAfterDOMContentLoaded(
                     "var s = document.createElement('style'); s.textContent = ${JSONObject.quote(css)}; document.head.appendChild(s);",
                 )

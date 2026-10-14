@@ -19,6 +19,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.ActionMenuView
 import androidx.appcompat.widget.Toolbar
@@ -29,6 +31,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.core.widget.TextViewCompat
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
 import com.ichi2.anki.AnkiActivity
@@ -47,6 +51,13 @@ import java.util.WeakHashMap
  */
 object XpChrome {
     const val TASKBAR_DP = 40
+
+    /** toolbar icons: white, half white when disabled */
+    private val WHITE_ICONS =
+        ColorStateList(
+            arrayOf(intArrayOf(-android.R.attr.state_enabled), intArrayOf()),
+            intArrayOf(Color.argb(128, 255, 255, 255), Color.WHITE),
+        )
 
     private var startupPlayed = false
 
@@ -119,8 +130,27 @@ object XpChrome {
         // Material's letter spacing spreads Tahoma out; XP has none
         if (v is TextView) v.letterSpacing = 0f
         when {
-            v is Toolbar -> v.background = ContextCompat.getDrawable(ctx, R.drawable.xp_titlebar)
-            parent is ActionMenuView -> v.background = ContextCompat.getDrawable(ctx, R.drawable.xp_caption)
+            v is Toolbar -> {
+                v.background = ContextCompat.getDrawable(ctx, R.drawable.xp_titlebar)
+                // white on Luna blue, also on toolbars outside the app bar theme (congrats, other pages)
+                v.setTitleTextColor(Color.WHITE)
+                v.setSubtitleTextColor(Color.WHITE)
+                v.overflowIcon?.setTint(Color.WHITE)
+                (v as? MaterialToolbar)?.setNavigationIconTint(Color.WHITE)
+            }
+            parent is Toolbar && v is ImageButton -> v.setColorFilter(Color.WHITE)
+            // a text action ("Custom study"): white bold text, no caption box
+            parent is ActionMenuView && v is TextView && v.text.isNotEmpty() -> {
+                v.setTextColor(Color.WHITE)
+                v.typeface = ResourcesCompat.getFont(ctx, R.font.xp_tahoma_bold)
+                v.setShadowLayer(1f, 1.5f, 1.5f, Color.rgb(0x0f, 0x10, 0x89))
+                TextViewCompat.setCompoundDrawableTintList(v, WHITE_ICONS)
+            }
+            parent is ActionMenuView -> {
+                v.background = ContextCompat.getDrawable(ctx, R.drawable.xp_caption)
+                if (v is TextView) TextViewCompat.setCompoundDrawableTintList(v, WHITE_ICONS)
+                if (v is ImageView) v.setColorFilter(Color.WHITE)
+            }
             v is TextView && parent is Toolbar -> {
                 v.typeface = ResourcesCompat.getFont(ctx, R.font.xp_tahoma_bold)
                 v.setShadowLayer(1f, 1.5f, 1.5f, Color.rgb(0x0f, 0x10, 0x89))

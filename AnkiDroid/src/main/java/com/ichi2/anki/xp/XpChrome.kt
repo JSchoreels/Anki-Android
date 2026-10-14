@@ -30,8 +30,10 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.navigation.NavigationView
 import com.ichi2.anki.AnkiActivity
+import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.DeckPicker
 import com.ichi2.anki.R
+import com.ichi2.anki.launchCatchingTask
 import com.ichi2.anki.settings.enums.DayTheme
 import com.ichi2.anki.ui.windows.reviewer.AnswerButton
 import com.ichi2.themes.Themes
@@ -76,6 +78,11 @@ object XpChrome {
         if (!isOn()) return
         XpGame.newDay()
         XpHome.resume() // the Player box
+        // the other devices' parts (kuma3 Skins, the tablet): without them the level counts this phone only
+        activity.launchCatchingTask {
+            withCol { XpGame.readNotes(this) }
+            XpHome.resume()
+        }
     }
 
     /** the Retro CRT setting changed: redraw the open screen */

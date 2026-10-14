@@ -40,6 +40,7 @@ import com.ichi2.anki.snackbar.showSnackbar
 import com.ichi2.anki.startup.redirectToMainEntryPoint
 import com.ichi2.anki.ui.internationalization.sentenceCase
 import com.ichi2.anki.utils.openUrl
+import com.ichi2.anki.xp.XpProgress
 import com.ichi2.utils.create
 import com.ichi2.utils.message
 import com.ichi2.utils.neutralButton
@@ -432,7 +433,7 @@ suspend fun <T> withProgressDialog(
                 |
                         """.trimMargin(),
                     )
-                    dialog.show()
+                    XpProgress.show(dialog) // kuma3: an XP progress window with the Anki XP day theme, else dialog.show()
                     AnkiDroidApp.instance.progressDialogShown = true
                     dialogIsOurs = true
                 } else {

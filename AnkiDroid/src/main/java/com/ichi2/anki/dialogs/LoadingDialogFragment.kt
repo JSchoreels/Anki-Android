@@ -14,6 +14,8 @@ import com.google.android.material.loadingindicator.LoadingIndicator
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.CommonString
 import com.ichi2.anki.R
+import com.ichi2.anki.xp.XpChrome
+import com.ichi2.anki.xp.XpProgress
 import com.ichi2.utils.cancelable
 import com.ichi2.utils.create
 import com.ichi2.utils.customView
@@ -26,6 +28,11 @@ class LoadingDialogFragment : DialogFragment() {
         val dialogView = layoutInflater.inflate(R.layout.fragment_loading, null)
         val canBeCancelled = arguments?.getBoolean(KEY_CANCELLABLE) ?: true
         isCancelable = canBeCancelled
+        // kuma3: an XP progress window with the Anki XP day theme
+        if (XpChrome.isOn()) {
+            val message = arguments?.getString(KEY_MESSAGE) ?: getString(CommonString.dialog_processing)
+            return XpProgress.loadingDialog(requireContext(), message, canBeCancelled)
+        }
         dialogView.findViewById<TextView>(R.id.text).text =
             arguments?.getString(KEY_MESSAGE) ?: getString(CommonString.dialog_processing)
         return AlertDialog

@@ -206,8 +206,42 @@ body{padding:10px 14px}
             }.show()
     }
 
-    /** the deck report after a session (shown once on the deck list) */
-    fun summary(context: Context) {
+    private var reportWaiting = false
+
+    /**
+     * The deck report after a session, shown once on the deck list: when nothing has been loading for 1.5 s
+     * (the deck list reloads more than once after reviews, each time behind "Please wait...")
+     */
+    fun summary(activity: android.app.Activity) {
+        val s = XpGame.session ?: return
+        if (!s.finished || reportWaiting) return
+        reportWaiting = true
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        var idleSince = android.os.SystemClock.uptimeMillis()
+        val check =
+            object : Runnable {
+                override fun run() {
+                    if (activity.isFinishing || activity.isDestroyed) {
+                        reportWaiting = false
+                        return
+                    }
+                    val now = android.os.SystemClock.uptimeMillis()
+                    val busy =
+                        com.ichi2.anki.AnkiDroidApp.instance.progressDialogShown ||
+                            (activity.window.attributes.flags and android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0
+                    if (busy) idleSince = now
+                    if (now - idleSince < 1500) {
+                        handler.postDelayed(this, 250)
+                        return
+                    }
+                    reportWaiting = false
+                    report(activity)
+                }
+            }
+        handler.postDelayed(check, 250)
+    }
+
+    private fun report(context: Context) {
         val s = XpGame.session ?: return
         if (!s.finished) return
         XpGame.session = null

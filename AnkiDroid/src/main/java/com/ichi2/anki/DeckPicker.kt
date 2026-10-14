@@ -1558,6 +1558,7 @@ open class DeckPicker :
         // As `loadDeckCounts` is cancelled in `migrate()`
         val message = dialogHandler.popMessage()
         super.onResume()
+        XpChrome.resume(this) // kuma3: Anki XP taskbar text and the session report
         if (navDrawerIsReady() && hasCollectionStoragePermissions()) {
             refreshState()
         }

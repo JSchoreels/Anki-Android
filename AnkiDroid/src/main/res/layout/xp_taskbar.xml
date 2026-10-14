@@ -30,6 +30,7 @@
         xmlns:tools="http://schemas.android.com/tools" />
 
     <TextView
+        android:id="@+id/xp_task"
         android:layout_width="0dp"
         android:layout_height="32dp"
         android:layout_gravity="center_vertical"

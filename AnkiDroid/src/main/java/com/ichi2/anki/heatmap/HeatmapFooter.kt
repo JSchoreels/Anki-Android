@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ichi2.anki.DeckPicker
 import com.ichi2.anki.utils.ext.launchCollectionInLifecycleScope
+import com.ichi2.anki.xp.XpChrome
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 import java.time.LocalDate
@@ -137,6 +138,7 @@ class HeatmapFooter(
                 action()
                 showPeriod()
             }
+            XpChrome.pushButton(this) // kuma3: XP push buttons with the Anki XP day theme
         }
         zoom =
             button("") {

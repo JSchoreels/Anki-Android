@@ -100,6 +100,31 @@
         <item name="snackbarStyle">@style/SnackbarStyle.Xp</item>
         <item name="snackbarTextViewStyle">@style/SnackbarTextStyle.Xp</item>
         <item name="snackbarButtonStyle">@style/SnackbarButtonStyle.Xp</item>
+        <item name="toolbarStyle">@style/Xp.Toolbar</item>
+    </style>
+
+    <!-- Luna title bar text: bold Tahoma with the dark blue XP shadow -->
+    <style name="Xp.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="titleTextAppearance">@style/Xp.Toolbar.Title</item>
+        <item name="subtitleTextAppearance">@style/Xp.Toolbar.Subtitle</item>
+    </style>
+
+    <style name="Xp.Toolbar.Title" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:fontFamily">@font/xp_tahoma_bold</item>
+        <item name="fontFamily">@font/xp_tahoma_bold</item>
+        <item name="android:shadowColor">#0F1089</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <style name="Xp.Toolbar.Subtitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+        <item name="android:fontFamily">@font/xp_tahoma</item>
+        <item name="fontFamily">@font/xp_tahoma</item>
+        <item name="android:shadowColor">#0F1089</item>
+        <item name="android:shadowDx">1.5</item>
+        <item name="android:shadowDy">1.5</item>
+        <item name="android:shadowRadius">1</item>
     </style>
 
     <!-- XP window: Luna blue frame, rounded top corners -->

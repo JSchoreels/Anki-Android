@@ -48,15 +48,48 @@ import java.util.WeakHashMap
 object XpChrome {
     const val TASKBAR_DP = 40
 
+    private var startupPlayed = false
+
+    fun isOn() = Themes.currentTheme == DayTheme.XP
+
     fun install(activity: AnkiActivity) {
-        if (Themes.currentTheme != DayTheme.XP) return
+        if (!isOn()) return
+        XpGame.init(activity)
         val decor = activity.window.decorView
         val dressed = WeakHashMap<View, Unit>()
         decor.viewTreeObserver.addOnGlobalLayoutListener { walk(decor, dressed) }
         val crt = Crt(activity.resources.displayMetrics.density)
         decor.overlay.add(crt)
         decor.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> crt.setBounds(0, 0, v.width, v.height) }
-        if (activity is DeckPicker) addTaskbar(activity)
+        if (activity is DeckPicker) {
+            addTaskbar(activity)
+            if (!startupPlayed) {
+                startupPlayed = true
+                XpSound.startup()
+            }
+        }
+    }
+
+    /** DeckPicker.onResume: the taskbar's level and streak, and the report of the session just finished */
+    fun resume(activity: DeckPicker) {
+        if (!isOn()) return
+        XpGame.newDay()
+        val g = XpGame.g
+        activity.findViewById<TextView>(R.id.xp_task)?.text =
+            "kuma3 · Lv ${XpGame.level(g.xp) + 1}${if (g.streak > 0) " · 🔥${g.streak}" else ""} · ${g.reps}/${g.goal}"
+        XpWindows.summary(activity)
+    }
+
+    /** the Retro CRT setting changed: redraw the open screen */
+    fun crtChanged(context: android.content.Context) {
+        (context as? android.app.Activity)?.window?.decorView?.invalidate()
+    }
+
+    /** an XP push button (the heatmap's < T > Month) */
+    fun pushButton(v: TextView) {
+        if (!isOn()) return
+        v.background = ContextCompat.getDrawable(v.context, R.drawable.xp_button_ripple)
+        v.setTextColor(Color.BLACK)
     }
 
     /** px the taskbar takes above the navigation bar (0 when there is none) */
@@ -139,6 +172,7 @@ object XpChrome {
             },
         )
         bar.findViewById<View>(R.id.xp_start).setOnClickListener { activity.onNavigationPressed() }
+        bar.findViewById<View>(R.id.xp_task).setOnClickListener { XpWindows.quests(activity) }
         ViewCompat.setOnApplyWindowInsetsListener(bar) { v, insets ->
             v.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
             insets
@@ -178,6 +212,7 @@ object XpChrome {
         }
 
         override fun draw(canvas: Canvas) {
+            if (!XpGame.crt) return
             canvas.drawRect(bounds, lines)
             canvas.drawRect(bounds, rim)
         }

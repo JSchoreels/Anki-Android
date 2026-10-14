@@ -138,6 +138,7 @@ import com.ichi2.anki.utils.ext.getLongOrNull
 import com.ichi2.anki.utils.ext.setUserFlagForCards
 import com.ichi2.anki.utils.ext.showDialogFragment
 import com.ichi2.anki.utils.remainingTime
+import com.ichi2.anki.xp.XpReview
 import com.ichi2.themes.Themes
 import com.ichi2.themes.Themes.currentTheme
 import com.ichi2.utils.Permissions.canRecordAudio
@@ -266,10 +267,21 @@ open class Reviewer :
         startLoadingCollection()
         registerOnForgetHandler { listOf(currentCardId!!) }
         previousCardId = savedInstanceState?.getLongOrNull(KEY_PREVIOUS_CARD_ID)
+        xp = XpReview.attach(this) // kuma3: the Anki XP game (only with the Anki XP day theme)
+    }
+
+    /** kuma3: the Anki XP game, null unless the Anki XP day theme is on */
+    private var xp: XpReview? = null
+
+    override fun onMediaGroupCompleted() {
+        super.onMediaGroupCompleted()
+        xp?.audioDone()
     }
 
     override fun onPause() {
         answerTimer.pause()
+        xp?.pause()
+        if (isFinishing) xp?.finish()
         super.onPause()
     }
 
@@ -278,6 +290,7 @@ open class Reviewer :
             stopTimerOnAnswer && isDisplayingAnswer -> {}
             else -> launchCatchingTask { answerTimer.resume() }
         }
+        xp?.resume()
         super.onResume()
         if (typeAnswer?.autoFocusEditText() == true) {
             answerField?.focusWithKeyboard()
@@ -1598,6 +1611,7 @@ open class Reviewer :
                     }
                 showSnackbar(leechMessage, Snackbar.LENGTH_SHORT)
             }
+            xp?.answered(rating.number + 1)
         }
 
         // showing the timebox reached dialog if the timebox is reached
@@ -1638,6 +1652,7 @@ open class Reviewer :
         answerTimer.setupForCard(getColUnsafe, currentCard!!)
         delayedHide(100)
         super.displayCardQuestion()
+        currentCard?.let { xp?.question(it) }
     }
 
     @VisibleForTesting
@@ -1655,6 +1670,7 @@ open class Reviewer :
             answerTimer.pause()
         }
         super.displayCardAnswer()
+        xp?.answerShown()
     }
 
     private fun runStateMutationHook() {

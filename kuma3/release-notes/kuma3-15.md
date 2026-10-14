@@ -1,0 +1,14 @@
+**Changes since release 14**
+
+- New day theme: **Anki XP** (Settings > Appearance > Day theme). kuma3 looks like Windows XP: Luna blue title bars with XP caption buttons, a taskbar with the green Start button (it opens the side menu) and a clock, the Tahoma font (Wine's free copy), the deck list as a white Explorer list, cards in a maximized Notepad, XP push buttons, dialogs and balloon tips, XP-style statistics and deck options pages, and a retro CRT screen (can be turned off).
+- With Anki XP on, reviews are the Anki XP game from kuma3 Skins: XP for every answer (10 × the multiplier, 2 for Again), a combo for fast answers (the 10 s clock starts after the word audio), ×2 to ×5 multipliers, 1.5× overtime after the daily goal, a boss card per deck per day (×3 XP), three daily quests, levels, streaks, 17 trophies, points × mult pop-ups, combo fire and 8-bit sounds and vibration. Tap the game bar or the taskbar button for the quests, trophies, statistics and settings (sounds, vibration, CRT, daily goal, combo time). A session report shows when you leave the reviewer.
+- XP, the streak and the trophies are shared with kuma3 Skins through the same "🐻 Anki XP progress" notes, so every app and device adds up to one total. kuma3 writes its note when you leave the reviewer.
+- Other day themes are unchanged.
+
+<!-- es -->
+**Cambios desde la versión 14**
+
+- Nuevo tema de día: **Anki XP** (Settings > Appearance > Day theme). kuma3 se ve como Windows XP: barras de título azul Luna con botones XP, una barra de tareas con el botón Inicio verde (abre el menú lateral) y un reloj, la letra Tahoma (la copia libre de Wine), la lista de mazos como una lista blanca del Explorador, las tarjetas en un Bloc de notas maximizado, botones, diálogos y globos de XP, las páginas de estadísticas y opciones del mazo al estilo XP, y una pantalla CRT retro (se puede apagar).
+- Con Anki XP, los repasos son el juego de Anki XP de kuma3 Skins: XP por cada respuesta (10 × el multiplicador, 2 con Again), un combo por respuestas rápidas (el reloj de 10 s empieza después del audio de la palabra), multiplicadores de ×2 a ×5, 1,5× de horas extra después de la meta diaria, una tarjeta jefe por mazo y día (×3 XP), tres misiones diarias, niveles, rachas, 17 trofeos, puntos × multiplicador, fuego en el combo y sonidos de 8 bits y vibración. Toca la barra del juego o el botón de la barra de tareas para las misiones, los trofeos, las estadísticas y los ajustes (sonidos, vibración, CRT, meta diaria, tiempo del combo). Al salir de los repasos se muestra un informe de la sesión.
+- El XP, la racha y los trofeos se comparten con kuma3 Skins mediante las mismas notas "🐻 Anki XP progress", así que todas las apps y dispositivos suman un solo total. kuma3 escribe su nota al salir de los repasos.
+- Los demás temas de día no cambian.

@@ -158,11 +158,6 @@ object XpChrome {
                 v.background = ContextCompat.getDrawable(ctx, R.drawable.xp_list)
                 (v.layoutParams as? ViewGroup.MarginLayoutParams)?.setMargins(px(ctx.resources.displayMetrics.density, 6))
             }
-            v.id == R.id.review_summary_text_view -> {
-                v.background = ContextCompat.getDrawable(ctx, R.drawable.xp_status)
-                (v as TextView).gravity = android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL
-                v.setPaddingRelative(px(ctx.resources.displayMetrics.density, 8), v.paddingTop, v.paddingEnd, v.paddingBottom)
-            }
         }
     }
 

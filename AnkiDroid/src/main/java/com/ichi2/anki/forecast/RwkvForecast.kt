@@ -106,6 +106,8 @@ object RwkvForecast {
         val text = SpannableStringBuilder(studiedToday)
         forecast?.let { text.append("\n").append(forecastText(deckPicker, it)) }
         deckPicker.deckPickerBinding.reviewSummaryTextView.text = text
+        com.ichi2.anki.xp.XpHome
+            .summary(text) // kuma3: Anki XP shows it in the Today box
         graph?.show(forecast?.cardsList?.takeIf { Kuma3Settings.rwkvForecastGraph })
     }
 

@@ -28,6 +28,7 @@ import com.ichi2.anki.widgets.DeckAdapter
 object XpHome {
     private var player: Player? = null
     private var done: Done? = null
+    private var today: Today? = null
 
     /** the deck search is open: show every deck */
     var searching = false
@@ -47,13 +48,18 @@ object XpHome {
         if (!XpChrome.isOn()) {
             player = null
             done = null
+            today = null
             return ConcatAdapter(listOf(decks) + footers.map { it.second })
         }
         val p = Player(picker).also { player = it }
-        val d = Done(picker, decks).also { done = it }
+        val d = Done(decks).also { done = it }
+        // the "Studied … today" line and the RWKV forecast: a box after RWKV recall, not a bar at the bottom
+        val t = Today().also { today = it }
+        picker.deckPickerBinding.reviewSummaryTextView.visibility = View.GONE
+        val rest = footers.take(2) + ("Today" to t) + footers.drop(2)
         val labels = mutableMapOf<RecyclerView.Adapter<*>, String>(p to "Player", decks to "Decks", d to "Decks")
-        footers.forEach { labels[it.second] = it.first }
-        val concat = ConcatAdapter(listOf(p, decks, d) + footers.map { it.second })
+        rest.forEach { labels[it.second] = it.first }
+        val concat = ConcatAdapter(listOf(p, decks, d) + rest.map { it.second })
         list.addItemDecoration(Boxes(picker, concat, labels))
         return concat
     }
@@ -69,6 +75,15 @@ object XpHome {
         d.last = data
         d.hasSubDecks = hasSubDecks
         d.resubmit()
+    }
+
+    /** RwkvForecast.show: the summary line, with its colours and links */
+    fun summary(text: CharSequence) {
+        today?.let {
+            it.text = text
+            @Suppress("NotifyDataSetChanged") // zero or one row
+            it.notifyDataSetChanged()
+        }
     }
 
     /** DeckPicker.onResume, after the game's new day */
@@ -199,7 +214,6 @@ object XpHome {
 
     /** "▸ 5 decks done for today": shows or folds the decks with nothing due */
     private class Done(
-        val picker: DeckPicker,
         val decks: DeckAdapter,
     ) : RecyclerView.Adapter<Holder>() {
         var last: List<DisplayDeckNode> = emptyList()
@@ -243,6 +257,35 @@ object XpHome {
                         open = !open
                         resubmit()
                     }
+                },
+            )
+        }
+    }
+
+    /** the "Studied … today" line and the RWKV forecast */
+    private class Today : RecyclerView.Adapter<Holder>() {
+        var text: CharSequence = ""
+
+        override fun getItemCount() = if (text.isEmpty()) 0 else 1
+
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int,
+        ) = frame(parent)
+
+        override fun onBindViewHolder(
+            holder: Holder,
+            position: Int,
+        ) {
+            val c = holder.frame.context
+            holder.frame.removeAllViews()
+            holder.frame.addView(
+                text(c, 14f).apply {
+                    text = this@Today.text
+                    movementMethod =
+                        android.text.method.LinkMovementMethod
+                            .getInstance()
+                    setPadding(px(c, 10f), px(c, 4f), px(c, 10f), px(c, 6f))
                 },
             )
         }

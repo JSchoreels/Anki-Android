@@ -10,9 +10,11 @@ import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
 import android.util.AttributeSet
+import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.View
 import android.widget.TextView
+import androidx.activity.findViewTreeOnBackPressedDispatcherOwner
 import androidx.core.content.res.ResourcesCompat
 import com.ichi2.anki.R
 
@@ -144,8 +146,28 @@ class XpDialogClose(
             if (cancel != null && cancel.visibility == VISIBLE) {
                 cancel.performClick()
             } else {
-                rootView.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK))
-                rootView.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK))
+                // Back: AppCompat dialogs (ComponentDialog) handle it through their OnBackPressedDispatcher, which
+                // cancels the dialog; key events are no longer used for Back on recent Android
+                val owner = rootView.findViewTreeOnBackPressedDispatcherOwner()
+                if (owner != null) {
+                    owner.onBackPressedDispatcher.onBackPressed()
+                } else {
+                    val t = android.os.SystemClock.uptimeMillis()
+                    rootView.dispatchKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, 0))
+                    rootView.dispatchKeyEvent(
+                        KeyEvent(
+                            t,
+                            t,
+                            KeyEvent.ACTION_UP,
+                            KeyEvent.KEYCODE_BACK,
+                            0,
+                            0,
+                            KeyCharacterMap.VIRTUAL_KEYBOARD,
+                            0,
+                            KeyEvent.FLAG_TRACKING,
+                        ),
+                    )
+                }
             }
         }
     }

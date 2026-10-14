@@ -62,9 +62,7 @@ object XpChrome {
         val decor = activity.window.decorView
         val dressed = WeakHashMap<View, Unit>()
         decor.viewTreeObserver.addOnGlobalLayoutListener { walk(decor, dressed) }
-        val crt = Crt(activity.resources.displayMetrics.density)
-        decor.overlay.add(crt)
-        decor.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> crt.setBounds(0, 0, v.width, v.height) }
+        if (!watchWindows()) addCrt(decor)
         if (activity is DeckPicker) {
             if (!startupPlayed) {
                 startupPlayed = true
@@ -83,6 +81,43 @@ object XpChrome {
             withCol { XpGame.readNotes(this) }
             XpHome.resume()
         }
+    }
+
+    private var watching = false
+
+    /**
+     * The CRT on every window the app opens, not only activities: popup menus, bottom sheets and dialogs are windows
+     * of their own. Swaps WindowManagerGlobal's list of root views for one that sees each new window (what Square's
+     * curtains library does). False when the platform refuses, then only activities get the CRT.
+     */
+    private fun watchWindows(): Boolean {
+        if (watching) return true
+        watching =
+            runCatching {
+                val global = Class.forName("android.view.WindowManagerGlobal")
+                val instance = global.getMethod("getInstance").invoke(null)
+                val field = global.getDeclaredField("mViews").apply { isAccessible = true }
+
+                @Suppress("UNCHECKED_CAST")
+                val old = field.get(instance) as ArrayList<View>
+                field.set(
+                    instance,
+                    object : ArrayList<View>(old) {
+                        override fun add(element: View): Boolean {
+                            if (isOn()) addCrt(element)
+                            return super.add(element)
+                        }
+                    },
+                )
+            }.onFailure { timber.log.Timber.w(it, "Anki XP: CRT on dialogs and menus") }.isSuccess
+        return watching
+    }
+
+    private fun addCrt(root: View) {
+        val crt = Crt(root.resources.displayMetrics.density)
+        root.overlay.add(crt)
+        crt.setBounds(0, 0, root.width, root.height)
+        root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> crt.setBounds(0, 0, v.width, v.height) }
     }
 
     /** the Retro CRT setting changed: redraw the open screen */

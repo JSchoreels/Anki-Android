@@ -1,0 +1,54 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* kuma3 XP theme on the card: the card sits in a Notepad-like XP window on the desktop. Scoped to body.kuma3-xp
+   (set by CardAppearance only for the Anki XP day theme). The note type's own styling inside the card is kept;
+   only the page around it changes. */
+html:has(body.kuma3-xp), body.kuma3-xp.card, body.kuma3-xp {
+    background: linear-gradient(#2a6fd6, #8cc4f5 60%, #3f9a2c 60.5%, #2c7a1c) fixed !important;
+    min-height: 100vh;
+}
+
+body.kuma3-xp #content {
+    background: #ffffff;
+    color: #000000;
+    margin: 12px 8px;
+    padding: 34px 12px 14px;
+    border: 3px solid #0831d9;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+/* Title bar */
+body.kuma3-xp #content::before {
+    content: "card.txt - Notepad";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 26px;
+    line-height: 26px;
+    padding-left: 8px;
+    text-align: left;
+    color: #ffffff;
+    font: bold 14px "Trebuchet MS", Tahoma, Roboto, sans-serif;
+    text-shadow: 1px 1px #0f1089;
+    background: linear-gradient(#0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 96%, #003dd7);
+    border-radius: 5px 5px 0 0;
+}
+
+/* Close button */
+body.kuma3-xp #content::after {
+    content: "✕";
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    color: #ffffff;
+    font: bold 13px Tahoma, Roboto, sans-serif;
+    background: linear-gradient(#e8896b, #d33f14);
+    border: 1px solid #ffffff;
+    border-radius: 3px;
+}

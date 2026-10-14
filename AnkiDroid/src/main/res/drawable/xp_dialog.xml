@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3 XP theme: dialog as an XP window (beige face, thick Luna frame, rounded top corners) -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="24dp" android:insetTop="16dp" android:insetRight="24dp" android:insetBottom="16dp">
+    <shape android:shape="rectangle">
+        <corners android:topLeftRadius="8dp" android:topRightRadius="8dp" android:bottomLeftRadius="0dp" android:bottomRightRadius="0dp" />
+        <solid android:color="@color/xp_face" />
+        <stroke android:width="3dp" android:color="@color/xp_edge" />
+    </shape>
+</inset>

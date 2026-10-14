@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3 XP theme: the XP push button with a light press ripple -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33316AC5">
+    <item android:drawable="@drawable/xp_button" />
+</ripple>

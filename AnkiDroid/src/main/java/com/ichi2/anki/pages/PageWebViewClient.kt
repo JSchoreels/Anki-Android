@@ -11,11 +11,14 @@ import android.webkit.WebView
 import androidx.core.view.isVisible
 import com.google.android.material.color.MaterialColors
 import com.ichi2.anki.OnPageFinishedCallback
+import com.ichi2.anki.settings.enums.DayTheme
 import com.ichi2.anki.utils.openUrl
 import com.ichi2.anki.workarounds.SafeWebViewClient
 import com.ichi2.anki.workarounds.SafeWebViewLayout
+import com.ichi2.themes.Themes
 import com.ichi2.utils.AssetHelper.guessMimeType
 import com.ichi2.utils.toRGBHex
+import org.json.JSONObject
 import timber.log.Timber
 import java.io.ByteArrayInputStream
 import java.io.IOException
@@ -107,6 +110,17 @@ open class PageWebViewClient : SafeWebViewClient() {
                 """document.body.style.setProperty("background-color", "$bgColor", "important");
                     console.log("Background color set");""",
             )
+            // kuma3: the Anki XP day theme restyles the backend pages (assets/xp/pages.css)
+            if (Themes.currentTheme == DayTheme.XP) {
+                val css =
+                    webView.context.assets
+                        .open("xp/pages.css")
+                        .bufferedReader()
+                        .use { it.readText() }
+                webView.evaluateAfterDOMContentLoaded(
+                    "var s = document.createElement('style'); s.textContent = ${JSONObject.quote(css)}; document.head.appendChild(s);",
+                )
+            }
         }
     }
 

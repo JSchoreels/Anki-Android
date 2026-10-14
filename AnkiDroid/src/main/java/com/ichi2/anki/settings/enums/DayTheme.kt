@@ -18,4 +18,5 @@ enum class DayTheme(
     LIGHT(R.string.theme_light_value, R.style.Theme_Light),
     PLAIN(R.string.theme_plain_value, R.style.Theme_Light_Plain),
     EINK(R.string.theme_eink_scheme_value, R.style.Theme_Light_Eink),
+    XP(R.string.theme_xp_value, R.style.Theme_Light_Xp), // kuma3
 }

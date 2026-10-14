@@ -1,0 +1,73 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* kuma3 XP theme on the backend's web pages (statistics, deck options, card info, congrats, import, image
+   occlusion). Injected by PageWebViewClient when the day theme is Anki XP. Only Anki's own CSS variables and a few
+   generic elements are touched, so a backend update can't break a page, at worst it loses some XP look. */
+:root {
+    --canvas: #ece9d8;
+    --canvas-elevated: #ffffff;
+    --canvas-elevated-hover: #c1d2ee;
+    --canvas-inset: #ffffff;
+    --canvas-overlay: #ffffe1;
+    --window-bg: #ece9d8;
+    --fg: #000000;
+    --fg-subtle: #444444;
+    --fg-link: #0000ff;
+    --link-color: #0000ff;
+    --border: #7f9db9;
+    --border-subtle: #7f9db9;
+    --border-strong: #003c74;
+    --border-focus: #316ac5;
+    --border-radius: 3px;
+    --border-radius-medium: 0px;
+    --button-bg: #ece9d8;
+    --button-gradient-start: #ffffff;
+    --button-gradient-end: #d6d0c5;
+    --button-primary-bg: #0054e3;
+    --button-primary-gradient-start: #3c8cf3;
+    --button-primary-gradient-end: #0054e3;
+    --highlight-bg: #316ac5;
+    --highlight-fg: #ffffff;
+    --state-new: #0000ff;
+    --state-learn: #c00000;
+    --state-review: #008000;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --bs-body-bg: #ece9d8;
+    --bs-body-color: #000000;
+    --bs-border-color: #7f9db9;
+    --bs-primary-rgb: 0, 84, 227;
+    --bs-border-radius: 3px;
+    --bs-border-radius-sm: 3px;
+    --bs-border-radius-lg: 3px;
+}
+
+html, body {
+    background: #ece9d8 !important;
+    font-family: Tahoma, Verdana, "DejaVu Sans", Roboto, sans-serif;
+}
+
+/* Sections become XP windows: white body, Luna title strip on top */
+.container {
+    border: 1px solid #0831d9 !important;
+    border-top: 6px solid #0054e3 !important;
+    border-radius: 6px 6px 0 0 !important;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+button, .btn, select, input[type="number"], input[type="text"] {
+    border-radius: 3px !important;
+}
+
+button, .btn {
+    background: linear-gradient(#ffffff, #ecebe6 86%, #d6d0c5) !important;
+    border: 1px solid #003c74 !important;
+    color: #000000 !important;
+}
+
+button:active, .btn:active {
+    background: linear-gradient(#cdcac3, #e3e3db 8%, #f2f2f1) !important;
+}
+
+h1, h2 {
+    font-family: "Trebuchet MS", Tahoma, Roboto, sans-serif;
+    color: #215dc6;
+}

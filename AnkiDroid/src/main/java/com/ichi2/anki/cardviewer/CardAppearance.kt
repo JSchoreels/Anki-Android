@@ -54,6 +54,10 @@ class CardAppearance(
             if (currentTheme == DayTheme.PLAIN) {
                 cardClass.append(" ankidroid_plain_mode")
             }
+            // kuma3: the Anki XP day theme (assets/xp/card.css)
+            if (currentTheme == DayTheme.XP) {
+                cardClass.append(" kuma3-xp")
+            }
         }
         return cardClass.toString()
     }

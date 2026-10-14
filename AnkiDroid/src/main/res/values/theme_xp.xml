@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3: the Anki XP look (Windows XP Luna) on every native screen. Colours from the kuma3 Skins "Anki XP" skin. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="DuplicateCrowdInStrings">
+    <color name="xp_face">#ECE9D8</color>
+    <color name="xp_luna">#0054E3</color>
+    <color name="xp_luna_dark">#003DD7</color>
+    <color name="xp_edge">#0831D9</color>
+    <color name="xp_select">#316AC5</color>
+    <color name="xp_hover">#C1D2EE</color>
+    <color name="xp_taskbar">#245EDB</color>
+    <color name="xp_start">#3C9A3C</color>
+    <color name="xp_control_border">#7F9DB9</color>
+    <color name="xp_button_border">#003C74</color>
+    <color name="xp_tooltip">#FFFFE1</color>
+    <color name="xp_new">#0000FF</color>
+    <color name="xp_learn">#C00000</color>
+    <color name="xp_due">#008000</color>
+
+    <style name="Base.Theme.Light.Xp" parent="Base.Theme.Light">
+        <item name="colorPrimary">@color/xp_luna</item>
+        <item name="colorPrimaryDark">@color/xp_luna_dark</item>
+        <item name="colorAccent">@color/xp_select</item>
+        <item name="colorSurface">@color/xp_face</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorSecondaryContainer">@color/xp_hover</item>
+        <item name="colorSurfaceContainerHighest">?attr/colorSurfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">#F1EFE2</item>
+        <item name="colorSurfaceContainer">#F1EFE2</item>
+        <item name="colorSurfaceContainerLow">?android:attr/colorBackground</item>
+        <item name="android:colorBackground">@color/xp_face</item>
+        <item name="android:windowBackground">@color/xp_face</item>
+        <item name="preferenceCategoryTitleTextColor">#215DC6</item>
+
+        <item name="appBarColor">@color/xp_luna</item>
+        <item name="actionBarTextColor">@color/white</item>
+        <item name="actionModeBackground">@color/xp_select</item>
+        <item name="tabLayoutBackgroundColor">@color/xp_luna</item>
+        <item name="customTabNavBarColor">@color/xp_taskbar</item>
+        <item name="android:statusBarColor">@color/xp_luna_dark</item>
+        <item name="android:navigationBarColor">@color/xp_taskbar</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+
+        <item name="currentDeckBackgroundColor">@color/xp_hover</item>
+        <item name="focusedRowBackgroundColor">@color/xp_hover</item>
+        <item name="dynDeckColor">@color/xp_select</item>
+        <item name="newCountColor">@color/xp_new</item>
+        <item name="learnCountColor">@color/xp_learn</item>
+        <item name="reviewCountColor">@color/xp_due</item>
+
+        <!-- XP push buttons: one look for all four, the text colour tells them apart -->
+        <item name="againButtonRef">@drawable/xp_button</item>
+        <item name="hardButtonRef">@drawable/xp_button</item>
+        <item name="goodButtonRef">@drawable/xp_button</item>
+        <item name="easyButtonRef">@drawable/xp_button</item>
+        <item name="againButtonRippleRef">@drawable/xp_button_ripple</item>
+        <item name="hardButtonRippleRef">@drawable/xp_button_ripple</item>
+        <item name="goodButtonRippleRef">@drawable/xp_button_ripple</item>
+        <item name="easyButtonRippleRef">@drawable/xp_button_ripple</item>
+        <item name="againButtonBackground">@color/xp_face</item>
+        <item name="hardButtonBackground">@color/xp_face</item>
+        <item name="goodButtonBackground">@color/xp_face</item>
+        <item name="easyButtonBackground">@color/xp_face</item>
+        <item name="answerButtonTextColor">@color/black</item>
+        <item name="againButtonTextColor">@color/xp_learn</item>
+        <item name="hardButtonTextColor">@color/black</item>
+        <item name="goodButtonTextColor">@color/xp_due</item>
+        <item name="easyButtonTextColor">@color/xp_new</item>
+        <item name="againTextColor">@color/xp_learn</item>
+        <item name="hardTextColor">@color/black</item>
+        <item name="goodTextColor">@color/xp_due</item>
+        <item name="easyTextColor">@color/xp_new</item>
+        <item name="againBackgroundColor">@color/xp_face</item>
+        <item name="hardBackgroundColor">@color/xp_face</item>
+        <item name="goodBackgroundColor">@color/xp_face</item>
+        <item name="easyBackgroundColor">@color/xp_face</item>
+        <item name="showAnswerButtonBackground">#D6D0C5</item>
+        <item name="showAnswerColor">@color/black</item>
+        <item name="topBarColor">#C6D3F7</item>
+
+        <item name="alternativeBackgroundColor">@color/white</item>
+        <item name="cardBrowserDivider">#D6D2C2</item>
+        <item name="editTextBackgroundColor">@color/white</item>
+        <item name="editTextHighlightColor">@color/xp_hover</item>
+        <item name="toolbarBackgroundColor">@color/xp_face</item>
+        <item name="toolbarIconColor">@color/black</item>
+        <item name="popupBackgroundColor">@color/white</item>
+        <item name="fab_normal">@color/xp_start</item>
+        <item name="fab_pressed">#2C7A1C</item>
+        <item name="incrementerButtonBackground">@color/xp_luna</item>
+        <item name="clozeColor">@color/xp_new</item>
+        <item name="widgetStrokeWidth">1dp</item>
+        <item name="widgetStrokeColor">@color/xp_control_border</item>
+
+        <item name="dialogBackground">@color/xp_face</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.AnkiDroid.AlertDialog.Xp</item>
+        <item name="snackbarStyle">@style/SnackbarStyle.Xp</item>
+        <item name="snackbarTextViewStyle">@style/SnackbarTextStyle.Xp</item>
+        <item name="snackbarButtonStyle">@style/SnackbarButtonStyle.Xp</item>
+    </style>
+
+    <!-- XP window: Luna blue frame, rounded top corners -->
+    <style name="ThemeOverlay.AnkiDroid.AlertDialog.Xp" parent="ThemeOverlay.AnkiDroid.AlertDialog">
+        <item name="android:windowBackground">@drawable/xp_dialog</item>
+        <item name="colorPrimary">@color/xp_luna</item>
+    </style>
+
+    <!-- XP balloon tip -->
+    <style name="SnackbarStyle.Xp" parent="Widget.Material3.Snackbar">
+        <item name="android:background">@drawable/xp_tooltip</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+    </style>
+
+    <style name="SnackbarTextStyle.Xp" parent="Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="SnackbarButtonStyle.Xp" parent="Widget.Material3.Button.TextButton.Snackbar">
+        <item name="android:textColor">@color/xp_select</item>
+    </style>
+
+    <style name="Theme_Light_Xp" parent="Base.Theme.Light.Xp"/>
+</resources>

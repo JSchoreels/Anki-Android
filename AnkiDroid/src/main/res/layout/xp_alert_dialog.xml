@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3 XP theme: every AlertDialog as a classic XP message box (Luna title with the red close box, an icon by
+     kind beside the message, centered XP push buttons). Same view ids as appcompat's abc_alert_dialog_material, so
+     AlertController fills it as usual; set as android:layout of the Anki XP alertDialogStyle (theme_xp.xml). -->
+<androidx.appcompat.widget.AlertDialogLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@id/parentPanel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="start|top"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@id/topPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@id/title_template"
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:background="@drawable/xp_titlebar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="10dp"
+            android:paddingEnd="5dp">
+
+            <ImageView
+                android:id="@android:id/icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="6dp"
+                android:scaleType="fitCenter"
+                tools:ignore="ContentDescription" />
+
+            <androidx.appcompat.widget.DialogTitle
+                android:id="@id/alertTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:fontFamily="@font/xp_tahoma_bold"
+                android:shadowColor="#0F1089"
+                android:shadowDx="1.5"
+                android:shadowDy="1.5"
+                android:shadowRadius="1"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+
+            <com.ichi2.anki.xp.XpDialogClose
+                android:layout_width="26dp"
+                android:layout_height="26dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@id/contentPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp">
+
+        <View
+            android:id="@id/scrollIndicatorUp"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="top"
+            android:background="#A0A0A0"
+            android:visibility="gone" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="6dp">
+
+                <com.ichi2.anki.xp.XpDialogIcon
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="14dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <android.widget.Space
+                        android:id="@id/textSpacerNoTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@android:id/message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lineSpacingMultiplier="1.15"
+                        android:textColor="#000000"
+                        android:textSize="16sp" />
+
+                    <android.widget.Space
+                        android:id="@id/textSpacerNoButtons"
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <View
+            android:id="@id/scrollIndicatorDown"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="#A0A0A0"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@id/customPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp">
+
+        <FrameLayout
+            android:id="@id/custom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@id/buttonPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="12dp">
+
+        <android.widget.Button
+            android:id="@android:id/button1"
+            style="@style/Xp.DialogButton" />
+
+        <android.widget.Button
+            android:id="@android:id/button2"
+            style="@style/Xp.DialogButton" />
+
+        <android.widget.Button
+            android:id="@android:id/button3"
+            style="@style/Xp.DialogButton" />
+    </LinearLayout>
+</androidx.appcompat.widget.AlertDialogLayout>

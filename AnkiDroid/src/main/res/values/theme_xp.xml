@@ -97,6 +97,7 @@
 
         <item name="dialogBackground">@color/xp_face</item>
         <item name="alertDialogTheme">@style/ThemeOverlay.AnkiDroid.AlertDialog.Xp</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.AnkiDroid.AlertDialog.Xp</item>
         <item name="snackbarStyle">@style/SnackbarStyle.Xp</item>
         <item name="snackbarTextViewStyle">@style/SnackbarTextStyle.Xp</item>
         <item name="snackbarButtonStyle">@style/SnackbarButtonStyle.Xp</item>
@@ -131,6 +132,31 @@
     <style name="ThemeOverlay.AnkiDroid.AlertDialog.Xp" parent="ThemeOverlay.AnkiDroid.AlertDialog">
         <item name="android:windowBackground">@drawable/xp_dialog</item>
         <item name="colorPrimary">@color/xp_luna</item>
+        <!-- the classic XP message box layout (title bar, icon, centered push buttons) -->
+        <item name="alertDialogStyle">@style/Xp.AlertDialog</item>
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
+
+    <style name="Xp.AlertDialog" parent="MaterialAlertDialog.Material3">
+        <item name="android:layout">@layout/xp_alert_dialog</item>
+    </style>
+
+    <!-- an XP push button in a message box -->
+    <style name="Xp.DialogButton" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">5dp</item>
+        <item name="android:layout_marginEnd">5dp</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:minHeight">38dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:background">@drawable/xp_button_ripple</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">@font/xp_tahoma</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
 
     <!-- XP balloon tip -->

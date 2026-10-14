@@ -202,6 +202,7 @@ import com.ichi2.anki.worker.SyncMediaWorker
 import com.ichi2.anki.worker.SyncWorker
 import com.ichi2.anki.worker.UniqueWorkNames
 import com.ichi2.anki.xp.XpChrome
+import com.ichi2.anki.xp.XpWindows
 import com.ichi2.themes.Themes
 import com.ichi2.ui.AccessibleSearchView
 import com.ichi2.ui.BadgeDrawableBuilder
@@ -936,6 +937,7 @@ open class DeckPicker :
         fun onDecksReloaded(param: Unit) {
             hideProgressBar()
             tryShowStudyOptionsPanel()
+            XpWindows.summary(this) // kuma3: the Anki XP session report, after the deck list's "Processing..."
         }
 
         fun onStartupResponse(response: StartupResponse) {
@@ -1558,7 +1560,7 @@ open class DeckPicker :
         // As `loadDeckCounts` is cancelled in `migrate()`
         val message = dialogHandler.popMessage()
         super.onResume()
-        XpChrome.resume(this) // kuma3: Anki XP taskbar text and the session report
+        XpChrome.resume(this) // kuma3: Anki XP taskbar text
         if (navDrawerIsReady() && hasCollectionStoragePermissions()) {
             refreshState()
         }

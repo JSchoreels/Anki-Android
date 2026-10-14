@@ -23,6 +23,7 @@ import com.ichi2.anki.sync.fullUploadOrDownload
 import com.ichi2.anki.sync.syncCollection
 import com.ichi2.anki.ui.internationalization.sentenceCase
 import com.ichi2.anki.worker.SyncMediaWorker
+import com.ichi2.anki.xp.XpProgress
 import com.ichi2.preferences.VersatileTextWithASwitchPreference
 import com.ichi2.utils.NetworkUtils
 import com.ichi2.utils.dismissSafely
@@ -335,10 +336,13 @@ suspend fun monitorMediaSync(deckPicker: DeckPicker) {
                 }.setNegativeButton(TR.syncAbortButton()) { _, _ ->
                     isAborted = true
                     cancelMediaSync(backend)
-                }.show()
+                }.apply { XpProgress.dress(this, "Syncing media...") } // kuma3: an XP progress window with Anki XP
+                .show()
         }
 
-    fun showMessage(msg: String) = deckPicker.showSnackbar(msg, Snackbar.LENGTH_SHORT)
+    // kuma3: the loop below runs on IO, so views are touched on the main thread (on Android 17 the first
+    // setMessage threw, which showed "Media sync failed." while the media sync carried on)
+    suspend fun showMessage(msg: String) = withContext(Dispatchers.Main) { deckPicker.showSnackbar(msg, Snackbar.LENGTH_SHORT) }
 
     // stop monitoring when the activity is destroyed: the loop below holds the activity
     withContext(Dispatchers.Main) {
@@ -360,7 +364,7 @@ suspend fun monitorMediaSync(deckPicker: DeckPicker) {
                     break
                 }
                 val text = resp.progress.run { "$added\n$removed\n$checked" }
-                dialog.setMessage(text)
+                withContext(Dispatchers.Main) { dialog.setMessage(text) }
                 delay(100)
             }
             showMessage(if (isAborted) TR.syncMediaAborted() else TR.syncMediaComplete())

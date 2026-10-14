@@ -45,6 +45,23 @@ object XpProgress {
         )
     }
 
+    /** An AlertDialog builder (the media sync window) as an XP progress window: Luna title and the green blocks */
+    fun dress(
+        builder: androidx.appcompat.app.AlertDialog.Builder,
+        title: String,
+    ) {
+        if (!XpChrome.isOn()) return
+        val context = builder.context
+        val d = context.resources.displayMetrics.density
+        builder.setCustomTitle(XpWindows.titleBar(context, title))
+        builder.setView(
+            LinearLayout(context).apply {
+                setPadding((20 * d).toInt(), (6 * d).toInt(), (20 * d).toInt(), (6 * d).toInt())
+                addView(Blocks(context), LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (20 * d).toInt()))
+            },
+        )
+    }
+
     /** LoadingDialogFragment's dialog (Check media, …) as the same XP window; the message keeps the id R.id.text */
     fun loadingDialog(
         context: Context,

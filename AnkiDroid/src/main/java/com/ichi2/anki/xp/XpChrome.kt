@@ -59,10 +59,7 @@ object XpChrome {
     fun install(activity: AnkiActivity) {
         if (!isOn()) return
         XpGame.init(activity)
-        val decor = activity.window.decorView
-        val dressed = WeakHashMap<View, Unit>()
-        decor.viewTreeObserver.addOnGlobalLayoutListener { walk(decor, dressed) }
-        if (!watchWindows()) addCrt(decor)
+        if (!watchWindows()) dressWindow(activity.window.decorView)
         if (activity is DeckPicker) {
             if (!startupPlayed) {
                 startupPlayed = true
@@ -86,9 +83,9 @@ object XpChrome {
     private var watching = false
 
     /**
-     * The CRT on every window the app opens, not only activities: popup menus, bottom sheets and dialogs are windows
+     * The XP looks and the CRT on every window the app opens, not only activities: popup menus, bottom sheets and dialogs are windows
      * of their own. Swaps WindowManagerGlobal's list of root views for one that sees each new window (what Square's
-     * curtains library does). False when the platform refuses, then only activities get the CRT.
+     * curtains library does). False when the platform refuses, then only activities get them.
      */
     private fun watchWindows(): Boolean {
         if (watching) return true
@@ -104,7 +101,7 @@ object XpChrome {
                     instance,
                     object : ArrayList<View>(old) {
                         override fun add(element: View): Boolean {
-                            if (isOn()) addCrt(element)
+                            if (isOn()) dressWindow(element)
                             return super.add(element)
                         }
                     },
@@ -113,7 +110,10 @@ object XpChrome {
         return watching
     }
 
-    private fun addCrt(root: View) {
+    /** XP looks (title bars, buttons, lists) and the CRT on a window's root view */
+    private fun dressWindow(root: View) {
+        val dressed = WeakHashMap<View, Unit>()
+        root.viewTreeObserver.addOnGlobalLayoutListener { walk(root, dressed) }
         val crt = Crt(root.resources.displayMetrics.density)
         root.overlay.add(crt)
         crt.setBounds(0, 0, root.width, root.height)

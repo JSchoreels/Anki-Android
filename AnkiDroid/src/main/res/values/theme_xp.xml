@@ -30,6 +30,9 @@
         <item name="colorSurfaceContainerLow">?android:attr/colorBackground</item>
         <item name="android:colorBackground">@color/xp_face</item>
         <item name="android:windowBackground">@color/xp_face</item>
+        <item name="android:fontFamily">@font/xp_tahoma_family</item>
+        <item name="fontFamily">@font/xp_tahoma_family</item>
+        <item name="navDrawerImage">@drawable/xp_start_header</item>
         <item name="preferenceCategoryTitleTextColor">#215DC6</item>
 
         <item name="appBarColor">@color/xp_luna</item>

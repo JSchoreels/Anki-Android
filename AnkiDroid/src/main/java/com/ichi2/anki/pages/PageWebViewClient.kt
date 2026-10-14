@@ -11,6 +11,7 @@ import android.webkit.WebView
 import androidx.core.view.isVisible
 import com.google.android.material.color.MaterialColors
 import com.ichi2.anki.OnPageFinishedCallback
+import com.ichi2.anki.R
 import com.ichi2.anki.settings.enums.DayTheme
 import com.ichi2.anki.utils.openUrl
 import com.ichi2.anki.workarounds.SafeWebViewClient
@@ -73,6 +74,11 @@ open class PageWebViewClient : SafeWebViewClient() {
         if (request.method != "GET" || path == null || !isInternalUrl(request.url)) return null
         if (path == "/favicon.png") {
             return WebResourceResponse("image/x-icon", null, ByteArrayInputStream(byteArrayOf()))
+        }
+        // kuma3: the Anki XP theme's Tahoma for pages.css
+        if (path == "/_xp/tahoma.ttf" || path == "/_xp/tahomabd.ttf") {
+            val font = if (path.endsWith("bd.ttf")) R.font.xp_tahoma_bold else R.font.xp_tahoma
+            return WebResourceResponse("font/ttf", null, view.context.resources.openRawResource(font))
         }
 
         val assetPath =

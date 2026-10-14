@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3 XP theme: Wine's Tahoma (LGPL-2.1-or-later, from the fonts-wine package), the Windows XP UI font -->
+<font-family xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <font android:font="@font/xp_tahoma" android:fontStyle="normal" android:fontWeight="400" app:font="@font/xp_tahoma" app:fontStyle="normal" app:fontWeight="400" />
+    <font android:font="@font/xp_tahoma_bold" android:fontStyle="normal" android:fontWeight="700" app:font="@font/xp_tahoma_bold" app:fontStyle="normal" app:fontWeight="700" />
+</font-family>

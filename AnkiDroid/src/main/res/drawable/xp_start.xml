@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3 XP theme: the green Start button -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true"><shape>
+        <corners android:topRightRadius="14dp" android:bottomRightRadius="14dp" />
+        <gradient android:type="radial" android:gradientRadius="90dp" android:centerX="0.2" android:centerY="0.1" android:startColor="#3C9B2F" android:endColor="#1F5A16" /></shape></item>
+    <item><shape>
+        <corners android:topRightRadius="14dp" android:bottomRightRadius="14dp" />
+        <gradient android:type="radial" android:gradientRadius="90dp" android:centerX="0.2" android:centerY="0.1" android:startColor="#7CD15F" android:centerColor="#3C9B2F" android:endColor="#2A7A1F" /></shape></item>
+</selector>

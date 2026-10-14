@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3 XP theme: Luna window title bar (light top edge, blue body, dark bottom edge) -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape><solid android:color="#003DD7" /></shape></item>
+    <item android:bottom="2dp"><shape><gradient android:angle="270" android:startColor="#0053EE" android:centerColor="#0050EE" android:endColor="#0066FF" /></shape></item>
+    <item android:gravity="top" android:height="2dp"><shape><solid android:color="#0997FF" /></shape></item>
+</layer-list>

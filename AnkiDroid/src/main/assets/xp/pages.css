@@ -40,9 +40,16 @@
     --bs-border-radius-lg: 3px;
 }
 
+/* Wine's Tahoma, served by PageWebViewClient from res/font */
+@font-face { font-family: "XP Tahoma"; src: url("/_xp/tahoma.ttf"); }
+@font-face { font-family: "XP Tahoma"; font-weight: bold; src: url("/_xp/tahomabd.ttf"); }
+
+html, body, button, select, input {
+    font-family: "XP Tahoma", Tahoma, Roboto, sans-serif !important;
+}
+
 html, body {
     background: #ece9d8 !important;
-    font-family: Tahoma, Verdana, "DejaVu Sans", Roboto, sans-serif;
 }
 
 /* Sections become XP windows: white body, Luna title strip on top */

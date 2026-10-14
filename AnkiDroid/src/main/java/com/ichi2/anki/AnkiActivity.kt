@@ -94,6 +94,7 @@ import com.ichi2.anki.snackbar.showSnackbar
 import com.ichi2.anki.utils.ext.requireString
 import com.ichi2.anki.utils.ext.showDialogFragment
 import com.ichi2.anki.workarounds.AppLoadedFromBackupWorkaround.showedActivityFailedScreen
+import com.ichi2.anki.xp.XpChrome
 import com.ichi2.compat.customtabs.CustomTabActivityHelper
 import com.ichi2.compat.customtabs.CustomTabsFallback
 import com.ichi2.compat.customtabs.CustomTabsHelper
@@ -307,6 +308,11 @@ open class AnkiActivity(
         get() = CollectionManager.getColUnsafe()
 
     fun colIsOpenUnsafe(): Boolean = CollectionManager.isOpenUnsafe()
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        XpChrome.install(this) // kuma3: Anki XP title bars, taskbar, CRT (only with the Anki XP day theme)
+    }
 
     override fun setContentView(view: View?) {
         if (animationDisabled()) {

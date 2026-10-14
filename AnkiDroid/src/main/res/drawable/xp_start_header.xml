@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3 XP theme: the side menu header as the Start menu's blue user strip with the kuma3 picture -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape><gradient android:angle="270" android:startColor="#1868CE" android:centerColor="#1E70D9" android:endColor="#4791EB" /></shape></item>
+    <item android:gravity="bottom" android:height="3dp"><shape><gradient android:startColor="#00FFFFFF" android:centerColor="#F9A35A" android:endColor="#00FFFFFF" /></shape></item>
+    <item android:drawable="@mipmap/ic_launcher" android:width="72dp" android:height="72dp" android:gravity="start|center_vertical" android:left="16dp" />
+</layer-list>

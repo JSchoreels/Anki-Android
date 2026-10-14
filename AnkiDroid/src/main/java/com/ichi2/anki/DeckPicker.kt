@@ -57,6 +57,7 @@ import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.navigationBars
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.draganddrop.DropHelper
 import androidx.fragment.app.FragmentContainerView
@@ -200,6 +201,7 @@ import com.ichi2.anki.widgets.DeckHierarchyLinesDecoration
 import com.ichi2.anki.worker.SyncMediaWorker
 import com.ichi2.anki.worker.SyncWorker
 import com.ichi2.anki.worker.UniqueWorkNames
+import com.ichi2.anki.xp.XpChrome
 import com.ichi2.themes.Themes
 import com.ichi2.ui.AccessibleSearchView
 import com.ichi2.ui.BadgeDrawableBuilder
@@ -722,10 +724,19 @@ open class DeckPicker :
                 left = bars.left,
                 right = if (fragmented) 0 else bars.right,
             )
-            deckPickerBinding.reviewSummaryTextView.updatePadding(bottom = withKeyboard.bottom)
+            // kuma3: the Anki XP taskbar sits under the 'Studied X cards' status bar
+            val xpTaskbar = XpChrome.taskbarHeight(this)
+            if (xpTaskbar > 0) {
+                deckPickerBinding.reviewSummaryTextView.updateLayoutParams<MarginLayoutParams> {
+                    bottomMargin =
+                        withKeyboard.bottom + xpTaskbar
+                }
+            } else {
+                deckPickerBinding.reviewSummaryTextView.updatePadding(bottom = withKeyboard.bottom)
+            }
 
             val bottomNavView = findViewById<View?>(R.id.bottom_navigation)
-            val bottomNavOffset = if (bottomNavView?.isVisible == true) BOTTOM_NAV_HEIGHT_DP.dp.toPx(this) else 0
+            val bottomNavOffset = (if (bottomNavView?.isVisible == true) BOTTOM_NAV_HEIGHT_DP.dp.toPx(this) else 0) + xpTaskbar
             // the keyboard covers the bottom navigation: clear whichever is taller
             floatingActionButtonBinding.root.updatePadding(
                 bottom = maxOf(bars.bottom + bottomNavOffset, withKeyboard.bottom),

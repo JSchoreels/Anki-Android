@@ -57,7 +57,6 @@ import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.navigationBars
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.draganddrop.DropHelper
 import androidx.fragment.app.FragmentContainerView
@@ -733,19 +732,10 @@ open class DeckPicker :
                 left = bars.left,
                 right = if (fragmented) 0 else bars.right,
             )
-            // kuma3: the Anki XP taskbar sits under the 'Studied X cards' status bar
-            val xpTaskbar = XpChrome.taskbarHeight(this)
-            if (xpTaskbar > 0) {
-                deckPickerBinding.reviewSummaryTextView.updateLayoutParams<MarginLayoutParams> {
-                    bottomMargin =
-                        withKeyboard.bottom + xpTaskbar
-                }
-            } else {
-                deckPickerBinding.reviewSummaryTextView.updatePadding(bottom = withKeyboard.bottom)
-            }
+            deckPickerBinding.reviewSummaryTextView.updatePadding(bottom = withKeyboard.bottom)
 
             val bottomNavView = findViewById<View?>(R.id.bottom_navigation)
-            val bottomNavOffset = (if (bottomNavView?.isVisible == true) BOTTOM_NAV_HEIGHT_DP.dp.toPx(this) else 0) + xpTaskbar
+            val bottomNavOffset = (if (bottomNavView?.isVisible == true) BOTTOM_NAV_HEIGHT_DP.dp.toPx(this) else 0)
             // the keyboard covers the bottom navigation: clear whichever is taller
             floatingActionButtonBinding.root.updatePadding(
                 bottom = maxOf(bars.bottom + bottomNavOffset, withKeyboard.bottom),
@@ -1568,7 +1558,7 @@ open class DeckPicker :
         // As `loadDeckCounts` is cancelled in `migrate()`
         val message = dialogHandler.popMessage()
         super.onResume()
-        XpChrome.resume(this) // kuma3: Anki XP taskbar text
+        XpChrome.resume(this) // kuma3: Anki XP Player box
         if (navDrawerIsReady() && hasCollectionStoragePermissions()) {
             refreshState()
         }

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<!-- kuma3 XP theme: the taskbar (dark top line, light band, blue body) -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><shape><gradient android:angle="270" android:startColor="#245EDB" android:centerColor="#2157D6" android:endColor="#1941A5" /></shape></item>
-    <item android:top="1dp" android:gravity="top" android:height="5dp"><shape><gradient android:angle="270" android:startColor="#3682E5" android:endColor="#2663DA" /></shape></item>
-    <item android:gravity="top" android:height="1dp"><shape><solid android:color="#1F2F86" /></shape></item>
-</layer-list>

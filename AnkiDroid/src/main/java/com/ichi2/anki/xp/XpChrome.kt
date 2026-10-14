@@ -15,7 +15,6 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
@@ -24,13 +23,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.ActionMenuView
 import androidx.appcompat.widget.Toolbar
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
-import androidx.core.view.updatePadding
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
@@ -46,12 +40,9 @@ import java.util.WeakHashMap
 /**
  * kuma3: the Anki XP chrome on top of the XP day theme (theme_xp.xml has the colours). Restyles views the theme
  * can't reach: toolbars become Luna title bars with caption-button actions, Material buttons become XP push buttons,
- * the deck list becomes a white Explorer list, the deck picker gets the taskbar (Start opens the side menu) and
- * every screen gets the skin's CRT scanlines. One call from AnkiActivity.onPostCreate.
+ * the deck list becomes a white Explorer list, every screen gets the skin's CRT scanlines. One call from AnkiActivity.onPostCreate.
  */
 object XpChrome {
-    const val TASKBAR_DP = 40
-
     /** toolbar icons: white, half white when disabled */
     private val WHITE_ICONS =
         ColorStateList(
@@ -73,7 +64,6 @@ object XpChrome {
         decor.overlay.add(crt)
         decor.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> crt.setBounds(0, 0, v.width, v.height) }
         if (activity is DeckPicker) {
-            addTaskbar(activity)
             if (!startupPlayed) {
                 startupPlayed = true
                 XpSound.startup()
@@ -99,16 +89,6 @@ object XpChrome {
         v.background = ContextCompat.getDrawable(v.context, R.drawable.xp_button_ripple)
         v.setTextColor(Color.BLACK)
     }
-
-    /** px the taskbar takes above the navigation bar (0 when there is none) */
-    fun taskbarHeight(activity: AnkiActivity): Int =
-        if (activity.findViewById<View?>(R.id.xp_taskbar)?.isVisible ==
-            true
-        ) {
-            px(activity.resources.displayMetrics.density, TASKBAR_DP)
-        } else {
-            0
-        }
 
     private fun walk(
         v: View,
@@ -187,23 +167,6 @@ object XpChrome {
     }
 
     private fun ViewGroup.MarginLayoutParams.setMargins(m: Int) = setMargins(m, m, m, m)
-
-    private fun addTaskbar(activity: DeckPicker) {
-        val root = activity.findViewById<View>(R.id.deck_picker_content_wrapper)?.parent as? CoordinatorLayout ?: return
-        val bar = LayoutInflater.from(activity).inflate(R.layout.xp_taskbar, root, false)
-        root.addView(
-            bar,
-            CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                gravity =
-                    android.view.Gravity.BOTTOM
-            },
-        )
-        bar.findViewById<View>(R.id.xp_start).setOnClickListener { activity.onNavigationPressed() }
-        ViewCompat.setOnApplyWindowInsetsListener(bar) { v, insets ->
-            v.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
-            insets
-        }
-    }
 
     private fun px(
         density: Float,

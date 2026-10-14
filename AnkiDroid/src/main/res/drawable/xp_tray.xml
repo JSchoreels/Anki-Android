@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<!-- kuma3 XP theme: the light blue notification area at the right of the taskbar -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><shape><gradient android:angle="270" android:startColor="#18B5F2" android:centerColor="#0D8DEA" android:endColor="#095BC9" /></shape></item>
-    <item android:gravity="start" android:width="1dp"><shape><solid android:color="#092E8C" /></shape></item>
-</layer-list>

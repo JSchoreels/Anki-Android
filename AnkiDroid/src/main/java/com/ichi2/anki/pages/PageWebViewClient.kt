@@ -130,6 +130,15 @@ open class PageWebViewClient : SafeWebViewClient() {
                 webView.evaluateAfterDOMContentLoaded(
                     "var s = document.createElement('style'); s.textContent = ${JSONObject.quote(css)}; document.head.appendChild(s);",
                 )
+                // and its Easter egg (assets/xp/congrats.js)
+                if (url.orEmpty().contains("/congrats")) {
+                    webView.evaluateAfterDOMContentLoaded(
+                        webView.context.assets
+                            .open("xp/congrats.js")
+                            .bufferedReader()
+                            .use { it.readText() },
+                    )
+                }
             }
         }
     }

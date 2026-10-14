@@ -582,15 +582,23 @@ open class DeckPicker :
             .attach(this, deckListAdapter)
         com.ichi2.anki.forecast.RwkvForecast
             .attach(this)
+        // kuma3: with Anki XP the list is XP group boxes (Player, Decks, Activity, RWKV recall)
         deckPickerBinding.decks.adapter =
-            androidx.recyclerview.widget.ConcatAdapter(
+            com.ichi2.anki.xp.XpHome.adapter(
+                this,
+                deckPickerBinding.decks,
                 deckListAdapter,
-                com.ichi2.anki.heatmap
-                    .HeatmapFooter(this),
-                com.ichi2.anki.forecast.RwkvForecast
-                    .graphFooter(this),
-                com.ichi2.anki.leaderboard
-                    .LeaderboardFooter(this),
+                listOf(
+                    "Activity" to
+                        com.ichi2.anki.heatmap
+                            .HeatmapFooter(this),
+                    "RWKV recall" to
+                        com.ichi2.anki.forecast.RwkvForecast
+                            .graphFooter(this),
+                    "Leaderboard" to
+                        com.ichi2.anki.leaderboard
+                            .LeaderboardFooter(this),
+                ),
             )
         if (Prefs.devBottomNavEnabled) {
             deckPickerBinding.decks.addItemDecoration(
@@ -913,10 +921,9 @@ open class DeckPicker :
 
         fun onDeckListChanged(deckList: FlattenedDeckList) {
             // Filtering must not recreate the study options fragment: its menu invalidation closes search.
-            deckListAdapter.submit(
-                data = deckList.data,
-                hasSubDecks = deckList.hasSubDecks,
-            )
+            // kuma3: Anki XP folds the decks with nothing due
+            com.ichi2.anki.xp.XpHome
+                .submit(deckListAdapter, deckList.data, deckList.hasSubDecks)
         }
 
         fun onFocusedDeckChanged(deckId: DeckId?) {
@@ -1336,6 +1343,7 @@ open class DeckPicker :
 
                     override fun onQueryTextChange(newText: String): Boolean {
                         viewModel.updateDeckFilter(newText)
+                        com.ichi2.anki.xp.XpHome.searching = newText.isNotEmpty() // kuma3
                         return true
                     }
                 },

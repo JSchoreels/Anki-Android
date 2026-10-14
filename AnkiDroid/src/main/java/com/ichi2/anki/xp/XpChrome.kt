@@ -81,13 +81,11 @@ object XpChrome {
         }
     }
 
-    /** DeckPicker.onResume: the taskbar's level and streak */
+    /** DeckPicker.onResume: the Player box's level and streak */
     fun resume(activity: DeckPicker) {
         if (!isOn()) return
         XpGame.newDay()
-        val g = XpGame.g
-        activity.findViewById<TextView>(R.id.xp_task)?.text =
-            "kuma3 · Lv ${XpGame.level(g.xp) + 1}${if (g.streak > 0) " · 🔥${g.streak}" else ""} · ${g.reps}/${g.goal}"
+        XpHome.resume() // the Player box; XpHome puts the next deck on the taskbar
     }
 
     /** the Retro CRT setting changed: redraw the open screen */

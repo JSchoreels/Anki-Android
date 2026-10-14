@@ -22,12 +22,14 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.widget.addTextChangedListener
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.R
 import com.ichi2.anki.common.coroutines.applicationScope
 import com.ichi2.anki.launchCatchingTask
 import com.ichi2.anki.libanki.Card
+import com.ichi2.anki.libanki.Decks
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.cos
@@ -77,8 +79,16 @@ class XpReview private constructor(
         }
 
     init {
-        val area = activity.findViewById<LinearLayout>(R.id.bottom_area_layout)
-        area?.addView(bar, 0, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(40)))
+        // The game strip covers AnkiDroid's counts bar under the title (Anki XP "maximized" reviewer): it draws the
+        // live counts and the flag/mark icons of the views underneath, so the reviewer's own logic is untouched.
+        activity.findViewById<android.widget.RelativeLayout>(R.id.top_bar)?.let { top ->
+            top.setPadding(0, 0, 0, 0)
+            top.background = ResourcesCompat.getDrawable(activity.resources, R.drawable.xp_status, null) // also under the side insets
+            bar.counts = listOf(R.id.new_number, R.id.learn_number, R.id.review_number).mapNotNull { activity.findViewById<TextView>(it) }
+            bar.icons = listOf(R.id.flag_icon, R.id.mark_icon).mapNotNull { activity.findViewById<android.widget.ImageView>(it) }
+            bar.counts.forEach { tv -> tv.addTextChangedListener(afterTextChanged = { bar.invalidate() }) }
+            top.addView(bar, android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(30)))
+        }
         bar.setOnClickListener { XpWindows.quests(activity) }
         XpGame.startSession()
         activity.launchCatchingTask {
@@ -94,6 +104,8 @@ class XpReview private constructor(
     fun question(card: Card) {
         cardId = card.id
         deckId = card.did
+        // the deck's name in the Luna title bar
+        runCatching { activity.supportActionBar?.title = Decks.basename(activity.getColUnsafe.decks.name(card.did)) }
         shown = false
         broke = false
         thinkMs = 0
@@ -396,9 +408,13 @@ class XpBar(
     private val text =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             typeface = ResourcesCompat.getFont(context, R.font.xp_tahoma)
-            textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
+            textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13f, resources.displayMetrics)
         }
     private val bold = Paint(text).apply { typeface = ResourcesCompat.getFont(context, R.font.xp_tahoma_bold) }
+
+    /** the reviewer's count views (new, learn, due) and flag/mark icons, drawn at the right */
+    var counts: List<TextView> = emptyList()
+    var icons: List<android.widget.ImageView> = emptyList()
 
     /** fraction of the combo clock left, or < 0 when hidden */
     var timeLeft = -1f
@@ -430,21 +446,22 @@ class XpBar(
         XpGame.newDay()
         val g = XpGame.g
         val w = width.toFloat()
-        // the combo clock: blue while waiting for the word audio, green, red in the last 3 s
-        val clockH = 6 * d
+        // the combo clock along the bottom edge: blue while waiting for the word audio, green, red in the last 3 s
+        val clockH = 4 * d
+        val h = height.toFloat()
         if (timeLeft >= 0) {
             paint.shader = null
             paint.color = Color.rgb(0xc9, 0xc6, 0xb8)
-            canvas.drawRect(0f, 0f, w, clockH, paint)
+            canvas.drawRect(0f, h - clockH, w, h, paint)
             paint.color =
                 when {
                     !clockRunning -> Color.rgb(0x9d, 0xb3, 0xd6)
                     timeLeft * XpGame.limit <= 3 -> Color.rgb(0xe0, 0x20, 0x20)
                     else -> Color.rgb(0x2e, 0xd3, 0x30)
                 }
-            canvas.drawRect(0f, 0f, w * (if (clockRunning) timeLeft else 1f), clockH, paint)
+            canvas.drawRect(0f, h - clockH, w * (if (clockRunning) timeLeft else 1f), h, paint)
         }
-        val cy = clockH + (height - clockH) / 2
+        val cy = (h - clockH) / 2
         val base = cy - (text.ascent() + text.descent()) / 2
         var x = 8 * d
         // goal ring
@@ -494,8 +511,27 @@ class XpBar(
             } else {
                 1f
             }
+        // counts (and the flag/mark icons) at the right end
+        var rx = w - 8 * d
+        for (tv in counts.asReversed()) {
+            val s = tv.text?.toString().orEmpty()
+            if (s.isEmpty() || tv.visibility == View.GONE) continue
+            val cpaint = Paint(text).apply { color = tv.currentTextColor }
+            rx -= cpaint.measureText(s)
+            canvas.drawText(s, rx, base, cpaint)
+            rx -= 6 * d
+        }
+        for (icon in icons.asReversed()) {
+            val dr = icon.drawable ?: continue
+            if (icon.visibility != View.VISIBLE) continue
+            val size = 16 * d
+            rx -= size
+            dr.setBounds(rx.toInt(), (cy - size / 2).toInt(), (rx + size).toInt(), (cy + size / 2).toInt())
+            dr.draw(canvas)
+            rx -= 4 * d
+        }
         val cw = cp.measureText(multText + comboText)
-        val cx = w - 8 * d - cw
+        val cx = rx - 6 * d - cw
         val k = (SystemClock.uptimeMillis() - juiceAt) / (if (juiceBig) 600f else 450f)
         canvas.save()
         if (k in 0f..1f) {

@@ -1,38 +1,13 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-/* kuma3 XP theme on the card: a maximized Notepad, white page under its menu bar (the Luna title bar is kuma3's
-   own toolbar above). Scoped to body.kuma3-xp (set by CardAppearance only for the Anki XP day theme). The note
-   type's own styling inside the card is kept. The CRT scanlines come from XpChrome, over the whole screen. */
-@font-face { font-family: "XP Tahoma"; src: url("file:///android_res/font/xp_tahoma.ttf"); }
-
+/* kuma3 XP theme on the card: the "maximized" reviewer (Luna title bar and game strip are native views above),
+   so the card is a plain white page edge to edge. Scoped to body.kuma3-xp (set by CardAppearance only for the
+   Anki XP day theme); the note type's own styling inside the card is kept. The CRT scanlines come from
+   XpChrome, over the whole screen. */
 html:has(body.kuma3-xp), body.kuma3-xp.card, body.kuma3-xp {
     background: #ffffff !important;
     min-height: 100vh;
 }
 
-body.kuma3-xp {
-    margin: 0 !important;
-}
-
 body.kuma3-xp #content {
     color: #000000;
-    padding: 30px 12px 14px;
-}
-
-/* Notepad's menu bar */
-body.kuma3-xp::before {
-    content: "File   Edit   Format   View   Help";
-    white-space: pre;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    height: 22px;
-    line-height: 22px;
-    padding-left: 8px;
-    text-align: left;
-    color: #000000;
-    font: 13px "XP Tahoma", Tahoma, Roboto, sans-serif;
-    background: #ece9d8;
-    border-bottom: 1px solid #d6d2c2;
 }

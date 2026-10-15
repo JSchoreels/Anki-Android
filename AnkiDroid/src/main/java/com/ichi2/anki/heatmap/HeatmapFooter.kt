@@ -112,16 +112,20 @@ class HeatmapFooter(
                 grid.show(month.atDay(1), month.lengthOfMonth())
                 caption.text = month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault()))
             } else {
-                grid.show(LocalDate.of(day.year, 1, 1), day.lengthOfYear())
-                caption.text = day.year.toString()
+                // kuma3: half a year, 18 weeks back and 8 ahead, instead of January to December (mostly empty)
+                val first = day.minusWeeks(18)
+                val last = day.plusWeeks(8)
+                grid.show(first, (last.toEpochDay() - first.toEpochDay() + 1).toInt())
+                val fmt = DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())
+                caption.text = "${first.format(fmt)} – ${last.format(fmt)}"
             }
-            zoom.text = if (monthView) "Year" else "Month"
+            zoom.text = if (monthView) "6 months" else "Month"
         }
 
-        /** < and > move one month in month view, one year in year view. */
+        /** < and > move one month in month view, half a year in the six-month view. */
         fun move(steps: Long) {
             val day = shown ?: data.today
-            shown = if (monthView) day.withDayOfMonth(1).plusMonths(steps) else day.withDayOfYear(1).plusYears(steps)
+            shown = if (monthView) day.withDayOfMonth(1).plusMonths(steps) else day.plusWeeks(26 * steps)
         }
 
         fun button(
@@ -195,7 +199,8 @@ class HeatmapFooter(
             line.append("$label: ".replace(' ', ' '))
             val start = line.length
             line.append(value.replace(' ', ' '))
-            val ink = if (XpChrome.isOn()) GREENS[3] else color
+            // the darkest green on a day theme's white list (6.9:1)
+            val ink = if (com.ichi2.themes.Themes.currentTheme is com.ichi2.anki.settings.enums.DayTheme) GREENS[3] else color
             line.setSpan(ForegroundColorSpan(ink), start, line.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             line.setSpan(StyleSpan(android.graphics.Typeface.BOLD), start, line.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }

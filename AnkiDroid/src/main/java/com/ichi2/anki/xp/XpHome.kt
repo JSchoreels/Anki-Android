@@ -23,7 +23,8 @@ import com.ichi2.anki.widgets.DeckAdapter
 import com.ichi2.anki.xp.XpChrome.px
 
 /**
- * kuma3: the Anki XP deck list as XP group boxes: Player (level, XP, streak, quests), Decks (only the decks with
+ * kuma3: in every theme the decks with nothing due fold into one row and the studied-today line with the RWKV
+ * forecast sits in the list. Anki XP adds the Player box and draws the deck list as XP group boxes: Player (level, XP, streak, quests), Decks (only the decks with
  * cards due; the finished ones fold into one row), Activity (heatmap) and RWKV recall. Stock list with XP off.
  */
 object XpHome {
@@ -45,14 +46,17 @@ object XpHome {
         decks: DeckAdapter,
         footers: List<Pair<String, RecyclerView.Adapter<*>>>,
     ): RecyclerView.Adapter<*> {
-        if (!XpChrome.isOn()) return ConcatAdapter(listOf(decks) + footers.map { it.second })
-        val p = Player(picker).also { player = it }
         val d = Done(decks).also { done = it }
-        // the "Studied … today" line and the RWKV forecast: a box after RWKV recall, not a bar at the bottom
+        // the "Studied … today" line and the RWKV forecast in the list, not a bar at the bottom under the + button
         val t = Today().also { today = it }
         picker.deckPickerBinding.reviewSummaryTextView.visibility = View.GONE
         // footers come as Activity, RWKV recall, then the rest: what to act on first, the year of history last
         val rest = listOf("Today" to t, footers[1], footers[0]) + footers.drop(2)
+        if (!XpChrome.isOn()) {
+            player = null
+            return ConcatAdapter(listOf(decks, d) + rest.map { it.second })
+        }
+        val p = Player(picker).also { player = it }
         val labels = mutableMapOf<RecyclerView.Adapter<*>, String>(p to "Player", decks to "Decks", d to "Decks")
         rest.forEach { labels[it.second] = it.first }
         val concat = ConcatAdapter(listOf(p, decks, d) + rest.map { it.second })
@@ -94,8 +98,11 @@ object XpHome {
         sp: Float,
     ) = TextView(context).apply {
         textSize = sp
-        setTextColor(Color.BLACK)
-        typeface = ResourcesCompat.getFont(context, R.font.xp_tahoma)
+        // the theme's own text colour and font outside Anki XP (night themes too)
+        if (XpChrome.isOn()) {
+            setTextColor(Color.BLACK)
+            typeface = ResourcesCompat.getFont(context, R.font.xp_tahoma)
+        }
     }
 
     private fun link(
@@ -244,7 +251,7 @@ object XpHome {
             holder.frame.addView(
                 text(c, 14f).apply {
                     text = if (open) "▾ Hide $hidden decks done for today" else "▸ $hidden decks done for today"
-                    setTextColor(Color.rgb(0x59, 0x59, 0x59)) // 7:1 on white
+                    if (XpChrome.isOn()) setTextColor(Color.rgb(0x59, 0x59, 0x59)) else alpha = 0.7f // 7:1 on white
                     setPadding(px(c, 16f), px(c, 10f), px(c, 16f), px(c, 10f))
                     setOnClickListener {
                         open = !open

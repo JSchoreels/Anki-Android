@@ -57,7 +57,8 @@
         <item name="learnCountColor">@color/material_red_700</item>
         <item name="reviewCountColor">@color/material_green_800</item>
         <item name="buryCountColor">@color/disabled_gray_light</item>
-        <item name="zeroCountColor">#1f000000</item>
+        <!-- kuma3: 4.6:1 on white (12% black was 1.3:1) -->
+        <item name="zeroCountColor">#757575</item>
         <!-- Study Screen colors -->
         <item name="againButtonBackground">@color/material_red_700</item>
         <item name="hardButtonBackground">@color/material_blue_grey_700</item>

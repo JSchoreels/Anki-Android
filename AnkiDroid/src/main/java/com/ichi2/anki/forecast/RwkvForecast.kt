@@ -59,11 +59,9 @@ object RwkvForecast {
     private val SAFE = Color.rgb(0x43, 0xA0, 0x47)
     private val MINIMUM = Color.rgb(0x1E, 0x88, 0xE5)
 
-    /** Text in a category's colour: the XP look's white list needs the darker shade (4.5:1 or more) */
+    /** Text in a category's colour: a day theme's white list needs the darker shade (4.5:1 or more) */
     private fun ink(color: Int) =
-        if (!com.ichi2.anki.xp.XpChrome
-                .isOn()
-        ) {
+        if (!(com.ichi2.themes.Themes.currentTheme is com.ichi2.anki.settings.enums.DayTheme)) {
             color
         } else {
             when (color) {
@@ -290,9 +288,7 @@ object RwkvForecast {
         private val text =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color =
-                    if (com.ichi2.anki.xp.XpChrome
-                            .isOn()
-                    ) {
+                    if (com.ichi2.themes.Themes.currentTheme is com.ichi2.anki.settings.enums.DayTheme) {
                         Color.DKGRAY
                     } else {
                         Color.GRAY

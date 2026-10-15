@@ -60,17 +60,19 @@ html, body {
     box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
 }
 
-button, .btn, select, input[type="number"], input[type="text"] {
+button:not(.badge):not(.scheduler-help), .btn, select, input[type="number"], input[type="text"] {
     border-radius: 3px !important;
 }
 
-button, .btn {
+/* not the small revert (.badge) and help (.scheduler-help) icon buttons: framed they became big boxes over the
+   labels and toggles */
+button:not(.badge):not(.scheduler-help), .btn {
     background: linear-gradient(#ffffff, #ecebe6 86%, #d6d0c5) !important;
     border: 1px solid #003c74 !important;
     color: #000000 !important;
 }
 
-button:active, .btn:active {
+button:not(.badge):not(.scheduler-help):active, .btn:active {
     background: linear-gradient(#cdcac3, #e3e3db 8%, #f2f2f1) !important;
 }
 
@@ -81,7 +83,14 @@ h1, h2 {
 
 /* Deck options Preset / This deck / Today only tabs: the button rule above wipes Anki's active underline, so
    the active tab gets the XP selection colour (only TabbedValue uses aria-pressed) */
-button[aria-pressed="true"] {
+li.active > button[aria-pressed="true"] {
     background: #316ac5 !important;
+    color: #ffffff !important;
+}
+
+/* the chosen scheduler (FSRS-6 / FSRS-7 / RWKV-...) in the same selection colour as the tabs */
+.scheduler-choices label.active {
+    background: #316ac5 !important;
+    border-color: #003c74 !important;
     color: #ffffff !important;
 }

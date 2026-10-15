@@ -11,7 +11,6 @@ import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -112,8 +111,9 @@ object RwkvForecast {
     }
 
     /**
-     * `due 25 (20 + 5 waiting) | minimum 49 | near 13 | safe 316`
-     * `+1 in 1 h · +4 in 3 h · 48 by tomorrow (81 with minimum) · if you stop reviewing now`
+     * `25 below target: 20 ready, 5 waiting`
+     * `49 below minimum · 13 close · 316 safe`
+     * `If you stop now: +1 in 1 h · +4 in 3 h · 48 by tomorrow (81 with minimum)`
      */
     private fun forecastText(
         deckPicker: DeckPicker,
@@ -156,26 +156,26 @@ object RwkvForecast {
         val safe = now[SAFE].orEmpty().map { it.cardId }
         val minimum = now[MINIMUM].orEmpty().map { it.cardId }
         val waiting = cards.filter { it.waiting }.map { it.cardId }
-        count("due ${due.size}", due, DUE)
+        count("${due.size} below target", due, DUE)
         if (waiting.isNotEmpty()) {
-            // reviewable now + waiting for the repeat spacing
+            // reviewable now, and waiting for the repeat spacing
             val waitingIds = waiting.toSet()
             val ready = due.filter { it !in waitingIds }
-            out.append(" (")
-            count("${ready.size}", ready)
-            out.append(" + ")
+            out.append(": ")
+            count("${ready.size} ready", ready)
+            out.append(", ")
             count("${waiting.size} waiting", waiting)
-            out.append(")")
         }
-        if (minimum.isNotEmpty()) {
-            out.append(" | ")
-            count("minimum ${minimum.size}", minimum, MINIMUM)
-        }
-        out.append(" | ")
-        count("near ${near.size}", near, NEAR)
-        out.append(" | ")
-        count("safe ${safe.size}", safe, SAFE)
         out.append("\n")
+        if (minimum.isNotEmpty()) {
+            count("${minimum.size} below minimum", minimum, MINIMUM)
+            out.append(" · ")
+        }
+        count("${near.size} close", near, NEAR)
+        out.append(" · ")
+        count("${safe.size} safe", safe, SAFE)
+        out.append("\n")
+        out.append("If you stop now: ")
         val in1h = dueAt(1).filter { it !in dueNow }
         val in3h = dueAt(2).filter { it !in dueNow }
         val tomorrow = dueAt(3)
@@ -187,9 +187,6 @@ object RwkvForecast {
         if (forecast.hasRolloverWithMinimum() && forecast.rolloverWithMinimum > tomorrow.size) {
             out.append(" (${forecast.rolloverWithMinimum} with minimum)")
         }
-        val note = out.length
-        out.append(" · if you stop reviewing now")
-        out.setSpan(RelativeSizeSpan(0.85f), note, out.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         return out
     }
 

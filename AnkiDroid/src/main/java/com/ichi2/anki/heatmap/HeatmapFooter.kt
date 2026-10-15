@@ -155,7 +155,7 @@ class HeatmapFooter(
                         marginEnd = (3 * density).toInt()
                     }
                 addView(button("<") { move(-1) }, spacing)
-                addView(button("T") { shown = null }, spacing)
+                addView(button("Today") { shown = null }, spacing)
                 addView(button(">") { move(1) }, spacing)
                 addView(zoom, spacing)
             }

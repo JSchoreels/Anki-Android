@@ -157,7 +157,7 @@ object XpHome {
                     addView(
                         text(c, 13f).apply {
                             text =
-                                "🔥 ${g.streak} day${if (g.streak == 1) "" else "s"}   Quests $got/${quests.size}   Today ${g.reps}/${g.goal}"
+                                "🔥 ${g.streak} day${if (g.streak == 1) "" else "s"}   Quests $got/${quests.size}   Goal ${g.reps}/${g.goal}"
                         },
                         LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
                     )

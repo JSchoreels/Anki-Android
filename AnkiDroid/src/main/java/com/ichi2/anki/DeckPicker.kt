@@ -897,6 +897,7 @@ open class DeckPicker :
             }
 
             supportActionBar?.apply {
+                title = "kuma3" // kuma3: not the build's app name (AnkiDroid in debug builds)
                 subtitle = if (dueCount == 0) null else resources.getQuantityString(CommonPlurals.widget_cards_due, dueCount, dueCount)
                 val toolbar = findViewById<Toolbar>(R.id.toolbar)
                 TooltipCompat.setTooltipText(toolbar, toolbar.subtitle)

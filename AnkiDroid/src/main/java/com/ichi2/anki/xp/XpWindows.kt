@@ -168,7 +168,7 @@ body{padding:10px 14px}
                 "Vibration: ${if (XpGame.vibrate) "on" else "off"}",
                 "Retro CRT screen: ${if (XpGame.crt) "on" else "off"}",
                 "Daily goal: ${XpGame.g.goal} reps",
-                "Combo time limit: ${XpGame.limit} s",
+                "Speed bonus time: ${XpGame.limit} s",
             )
         AlertDialog
             .Builder(context)
@@ -241,7 +241,7 @@ body{padding:10px 14px}
         if (!s.finished) return
         XpGame.session = null
         val g = XpGame.g
-        val perfect = s.reps >= 20 && s.again == 0
+        val perfect = s.reps >= 20
         if (perfect) XpGame.checkTrophies(listOf("perfect")).also { XpGame.save() }
         XpSound.chime(listOf(523.0, 659.0, 784.0, 1047.0, 784.0, 1047.0), XpSound.Wave.SQUARE)
         val mins = max(1, ((TimeManager.time.intTimeMS() - s.start) / 60000).toInt())
@@ -259,7 +259,7 @@ body{padding:10px 14px}
         window(
             context,
             "Session report",
-            "<div class=q>✔ Well done${if (perfect) " · 💎 Flawless" else ""}</div>" +
+            "<div class=q>✔ Well done${if (perfect) " · 💎 Clean sweep" else ""}</div>" +
                 rows.joinToString("", "<table class=report>", "</table>") { (k, v) -> "<tr><td>$k</td><td>${esc(v)}</td></tr>" },
         )
     }

@@ -55,7 +55,7 @@ class XpReview private constructor(
     private var clockOn = false
     private var clockStart = 0L
     private var pausedAt = 0L
-    private var broke = false
+    private var questionAt = 0L
     private var thinkMs = 0L
     private var token = 0
 
@@ -70,11 +70,6 @@ class XpReview private constructor(
                 bar.setClock(left.toFloat() / limit, true)
                 if (left in 1..3000 && (left + 999) / 1000 < (before * limit + 999).toLong() / 1000 && XpGame.combo >= 3) {
                     XpSound.chime(listOf(1200.0), XpSound.Wave.SINE, 0.2)
-                }
-                if (left == 0L && !broke) {
-                    broke = true
-                    comboBroken(XpGame.breakCombo())
-                    bar.invalidate()
                 }
             }
         }
@@ -108,8 +103,8 @@ class XpReview private constructor(
         // the deck's name in the Luna title bar
         runCatching { activity.supportActionBar?.title = Decks.basename(activity.getColUnsafe.decks.name(card.did)) }
         shown = false
-        broke = false
         thinkMs = 0
+        questionAt = SystemClock.uptimeMillis()
         val hasAudio = runCatching { card.renderOutput(activity.getColUnsafe).questionAvTags.isNotEmpty() }.getOrDefault(false)
         clockOn = !hasAudio
         clockStart = SystemClock.uptimeMillis()
@@ -118,9 +113,13 @@ class XpReview private constructor(
         val t = ++token
         if (hasAudio) handler.postDelayed({ if (t == token) audioDone() }, 5000)
         if (XpGame.firstClock()) {
-            balloon("⏱ Combo clock", "The green line under the bar is your time: answer within ${XpGame.limit} s to grow your combo.")
+            balloon(
+                "⏱ Speed bonus",
+                "Show the answer before the green line runs out (${XpGame.limit} s) for ${XpGame.FAST_POINTS} points instead of " +
+                    "${XpGame.POINTS}. Every grade counts the same, Again too: grade honestly.",
+            )
         }
-        if (XpGame.isBoss(deckId, cardId)) balloon("👑 BOSS CARD", "Failed ${card.lapses}×: ×3 XP if you get it right.")
+        if (XpGame.isBoss(deckId, cardId)) balloon("👑 BOSS CARD", "Failed ${card.lapses}×: ×3 XP on this card, whatever you press.")
     }
 
     fun audioDone() {
@@ -138,10 +137,11 @@ class XpReview private constructor(
     }
 
     fun answered(ease: Int) {
-        val r = XpGame.score(ease, thinkMs, deckId, cardId)
+        val idle = SystemClock.uptimeMillis() - questionAt > XpGame.IDLE_MS
+        val r = XpGame.score(ease, thinkMs, idle, deckId, cardId)
         XpSound.blip(ease, XpGame.combo)
         XpSound.buzz(activity, ease.toString())
-        if (ease == 1) pop("+${r.xp} XP") else pointsMult(r.mult, r.xp)
+        pointsMult(r.points, r.mult, r.xp)
         comboBroken(r.brokeCombo)
         if (r.multUp) {
             XpSound.chime(listOf(660.0, 880.0))
@@ -162,7 +162,11 @@ class XpReview private constructor(
     }
 
     fun resume() {
-        if (pausedAt != 0L) clockStart += SystemClock.uptimeMillis() - pausedAt
+        if (pausedAt != 0L) {
+            val away = SystemClock.uptimeMillis() - pausedAt
+            clockStart += away
+            questionAt += away
+        }
         pausedAt = 0
     }
 
@@ -244,6 +248,7 @@ class XpReview private constructor(
 
     /** the skin's Points × Mult: a blue 10 and a red ×m slide in, slam into the total, which counts up and flies off */
     private fun pointsMult(
+        points: Int,
         mult: Double,
         xp: Int,
     ) {
@@ -265,7 +270,7 @@ class XpReview private constructor(
                 clipChildren = false
                 clipToPadding = false
             }
-        val c = chip("10", Color.rgb(0x00, 0x9d, 0xff))
+        val c = chip("$points", Color.rgb(0x00, 0x9d, 0xff))
         val x = chip("×${if (mult % 1.0 == 0.0) mult.toInt().toString() else "%.1f".format(mult)}", Color.rgb(0xfe, 0x5f, 0x55))
         row.addView(c)
         row.addView(

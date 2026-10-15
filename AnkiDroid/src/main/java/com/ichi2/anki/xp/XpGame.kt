@@ -34,6 +34,14 @@ object XpGame {
     private const val DECK = "kumapie"
     private const val SEP = "\u001f"
     const val QUEST_XP = 100
+
+    /** points per answer, any grade; within the clock (speed bonus) */
+    const val POINTS = 10
+    const val FAST_POINTS = 15
+
+    /** this long on one card (minus time outside the app) and the combo is over */
+    const val IDLE_MS = 5 * 60_000L
+
     val MILESTONES = listOf(10, 25, 50, 100)
     val LIMITS = listOf(5, 8, 10, 15, 20)
 
@@ -59,7 +67,7 @@ object XpGame {
         get() = prefs.getBoolean("crt", true)
         set(v) = prefs.edit { putBoolean("crt", v) }
 
-    /** The combo time limit in seconds */
+    /** The speed bonus time in seconds (the clock): faster flips earn [FAST_POINTS] instead of [POINTS] */
     var limit: Int
         get() = prefs.getInt("limit", 10)
         set(v) = prefs.edit { putInt("limit", v) }
@@ -227,7 +235,7 @@ object XpGame {
         return listOf(
             Quest("reps", "Do $reps reps", reps, g.reps),
             Quest("combo", "Reach a $combo-rep combo", combo, g.today.best),
-            Quest("fast", "$fast answers in under $limit s", fast, g.today.fast),
+            Quest("fast", "$fast speed bonuses", fast, g.today.fast),
         )
     }
 
@@ -245,7 +253,7 @@ object XpGame {
         listOf(
             Trophy("goal", "🎯", "Goal getter", "Reach the daily goal") { g.goalHit },
             Trophy("overtime", "⏱️", "Overtime", "Double the daily goal in a day") { g.reps >= 2 * g.goal },
-            Trophy("speed", "🏎️", "Speedy", "50 fast answers in a day") { g.today.fast >= 50 },
+            Trophy("speed", "🏎️", "Speedy", "50 speed bonuses in a day") { g.today.fast >= 50 },
             Trophy("combo10", "⚡", "On a roll", "A 10-rep combo") { g.record >= 10 },
             Trophy("combo25", "⚡", "Unstoppable", "A 25-rep combo") { g.record >= 25 },
             Trophy("combo50", "🌩️", "Lightning", "A 50-rep combo") { g.record >= 50 },
@@ -257,7 +265,7 @@ object XpGame {
             Trophy("reps10000", "🏛️", "Ten thousand", "10,000 reps here") { totalReps() >= 10000 },
             Trophy("level10", "⭐", "Level 10", "Reach level 10") { level(g.xp) + 1 >= 10 },
             Trophy("level25", "🌟", "Level 25", "Reach level 25") { level(g.xp) + 1 >= 25 },
-            Trophy("perfect", "💎", "Flawless", "Finish a deck (20+ reps) without Again") { false },
+            Trophy("perfect", "💎", "Clean sweep", "Finish a sitting of 20+ reps") { false },
             Trophy("boss", "👑", "Boss slayer", "Beat a boss card") { g.bosses >= 1 },
             Trophy("boss10", "👑", "Boss hunter", "Beat 10 boss cards") { g.bosses >= 10 },
         )
@@ -338,6 +346,7 @@ object XpGame {
     class Result(
         val xp: Int,
         val ease: Int,
+        val points: Int,
         val mult: Double,
         val brokeCombo: Int,
         val multUp: Boolean,
@@ -384,9 +393,15 @@ object XpGame {
         save()
     }
 
+    /**
+     * One answer. Honest grading never costs anything: every grade earns the same points and grows the combo, so
+     * pressing Hard instead of Again never pays (it would feed FSRS/RWKV a lie). Speed only adds (flipping within
+     * the clock earns [FAST_POINTS]); the combo breaks only when the reviewer closes or after [IDLE_MS] away.
+     */
     fun score(
         ease: Int,
         thinkMs: Long,
+        idle: Boolean,
         deckId: Long,
         cardId: Long,
     ): Result {
@@ -399,13 +414,15 @@ object XpGame {
         val wasHit = g.goalHit
         val record = g.record
         val firstToday = g.reps == 0
-        val broke = if (ease == 1 || !fast) breakCombo() else 0
-        if (ease > 1 && fast) combo++
+        val broke = if (idle) breakCombo() else 0
+        combo++
         val boss = isBoss(deckId, cardId)
-        val xp = if (ease == 1) 2 else Math.round(10 * mult()).toInt() * (if (boss) 3 else 1)
+        val points = if (fast) FAST_POINTS else POINTS
+        val mult = mult() * (if (boss) 3 else 1)
+        val xp = Math.round(points * mult).toInt()
         val t = today()
         t.put("reps", t.optInt("reps") + 1)
-        if (fast && ease > 1) t.put("fast", t.optInt("fast") + 1)
+        if (fast) t.put("fast", t.optInt("fast") + 1)
         t.put("best", max(t.optInt("best"), combo))
         t.put("xp", t.optInt("xp") + xp)
         t.put("goal", g.goal)
@@ -427,7 +444,7 @@ object XpGame {
             g = merge()
             wins += "👑 Boss defeated!" to "Triple XP: +$xp."
         } else if (boss) {
-            wins += "👑 The boss won this round" to "It comes back later today: beat it then for ×3 XP."
+            wins += "👑 The boss won this round" to "Triple XP anyway: +$xp. It comes back later today."
         }
         if (combo in MILESTONES) wins += "$combo combo!" to "$combo in a row. Keep going!"
         if (combo > record && !recordShown && record >= 5) {
@@ -452,7 +469,7 @@ object XpGame {
         if (levelUp) wins += "Level ${level(g.xp) + 1}!" to "Keep the combo going."
         for (tr in checkTrophies()) wins += "🏆 ${tr.icon} ${tr.name}" to tr.desc
         save()
-        return Result(xp, ease, mult() * (if (boss) 3 else 1), broke, mult() > m0 && combo > 0, boss, wins, levelUp)
+        return Result(xp, ease, points, mult, broke, mult() > m0 && combo > 0, boss, wins, levelUp)
     }
 
     // ---------------------------------------------------------------- the shared progress note

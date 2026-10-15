@@ -323,6 +323,13 @@ object XpGame {
         var finished = false
     }
 
+    /** true once ever: the reviewer explains the combo clock the first time it runs */
+    fun firstClock(): Boolean {
+        if (prefs.getBoolean("clockHint", false)) return false
+        prefs.edit { putBoolean("clockHint", true) }
+        return true
+    }
+
     fun startSession() {
         session = Session(g.xp, now())
     }

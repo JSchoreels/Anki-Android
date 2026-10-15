@@ -1282,6 +1282,7 @@ open class Reviewer :
             // Set the undo tooltip, only if the icon is shown in the action bar
             undoIcon.actionView?.let { undoView ->
                 TooltipCompat.setTooltipText(undoView, undoIcon.title)
+                undoView.contentDescription = undoIcon.title // kuma3: TalkBack said only "button"
             }
 
             menu.findItem(R.id.action_redo)?.apply {

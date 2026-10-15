@@ -116,6 +116,9 @@ class XpReview private constructor(
         // the clock waits for the word audio, or 5 s if it never reports back
         val t = ++token
         if (hasAudio) handler.postDelayed({ if (t == token) audioDone() }, 5000)
+        if (XpGame.firstClock()) {
+            balloon("⏱ Combo clock", "The green line under the bar is your time: answer within ${XpGame.limit} s to grow your combo.")
+        }
         if (XpGame.isBoss(deckId, cardId)) balloon("👑 BOSS CARD", "Failed ${card.lapses}×: ×3 XP if you get it right.")
     }
 

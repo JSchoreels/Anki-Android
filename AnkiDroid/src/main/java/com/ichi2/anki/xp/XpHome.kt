@@ -51,7 +51,8 @@ object XpHome {
         // the "Studied … today" line and the RWKV forecast: a box after RWKV recall, not a bar at the bottom
         val t = Today().also { today = it }
         picker.deckPickerBinding.reviewSummaryTextView.visibility = View.GONE
-        val rest = footers.take(2) + ("Today" to t) + footers.drop(2)
+        // footers come as Activity, RWKV recall, then the rest: what to act on first, the year of history last
+        val rest = listOf("Today" to t, footers[1], footers[0]) + footers.drop(2)
         val labels = mutableMapOf<RecyclerView.Adapter<*>, String>(p to "Player", decks to "Decks", d to "Decks")
         rest.forEach { labels[it.second] = it.first }
         val concat = ConcatAdapter(listOf(p, decks, d) + rest.map { it.second })
@@ -97,6 +98,16 @@ object XpHome {
         typeface = ResourcesCompat.getFont(context, R.font.xp_tahoma)
     }
 
+    private fun link(
+        context: Context,
+        label: String,
+        open: () -> Unit,
+    ) = text(context, 13f).apply {
+        text = label
+        setTextColor(Color.rgb(0x1d, 0x4f, 0xa8))
+        setOnClickListener { open() }
+    }
+
     private class Holder(
         val frame: FrameLayout,
     ) : RecyclerView.ViewHolder(frame)
@@ -108,7 +119,7 @@ object XpHome {
             },
         )
 
-    /** Lv 4 [=====     ] 45/500 XP, then streak, quests, today's reps and Trophies */
+    /** Lv 4 [=====     ] 45/500 XP, then streak, goal, and the Quests and Trophies links */
     private class Player(
         val picker: DeckPicker,
     ) : RecyclerView.Adapter<Holder>() {
@@ -156,18 +167,12 @@ object XpHome {
                     setPadding(0, pad / 2, 0, 0)
                     addView(
                         text(c, 13f).apply {
-                            text =
-                                "🔥 ${g.streak} day${if (g.streak == 1) "" else "s"}   Quests $got/${quests.size}   Goal ${g.reps}/${g.goal}"
+                            text = "🔥 ${g.streak} day${if (g.streak == 1) "" else "s"}   Goal ${g.reps}/${g.goal}"
                         },
                         LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
                     )
-                    addView(
-                        text(c, 13f).apply {
-                            text = "Trophies ▸"
-                            setTextColor(Color.rgb(0x1d, 0x4f, 0xa8))
-                            setOnClickListener { XpWindows.trophies(picker) }
-                        },
-                    )
+                    addView(link(c, "Quests $got/${quests.size} ▸") { XpWindows.quests(picker) })
+                    addView(link(c, "Trophies ▸") { XpWindows.trophies(picker) }.apply { setPadding(pad, 0, 0, 0) })
                 }
             holder.frame.removeAllViews()
             holder.frame.addView(
@@ -176,7 +181,6 @@ object XpHome {
                     setPadding(pad, pad / 2, pad, pad / 2)
                     addView(top)
                     addView(bottom)
-                    setOnClickListener { XpWindows.quests(picker) }
                 },
             )
         }

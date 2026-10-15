@@ -58,6 +58,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.edit
 import androidx.core.content.getSystemService
 import androidx.core.net.toFile
 import androidx.core.net.toUri
@@ -1292,6 +1293,24 @@ abstract class AbstractFlashcardViewer :
         recreateWebView()
     }
 
+    /**
+     * kuma3: a text box of the card's own can't get the keyboard while "Type answer into the card" is off (the card
+     * can't take focus then). After a few taps on one, offer to turn the setting on; it applies at once.
+     */
+    private var textBoxTaps = 0
+
+    private fun cardTextBoxTapped() {
+        if (typeAnswer?.useInputTag != false || ++textBoxTaps != 3) return
+        showSnackbar("To type in this card, turn on \u201cType answer into the card\u201d", Snackbar.LENGTH_INDEFINITE) {
+            setAction("Turn on") {
+                sharedPrefs().edit { putBoolean(getString(R.string.use_input_tag_key), true) }
+                typeAnswer = createInstance(sharedPrefs())
+                webView?.isFocusableInTouchMode = true
+                webView?.requestFocus()
+            }
+        }
+    }
+
     protected open fun recreateWebView() {
         if (webView == null) {
             webView = createWebView()
@@ -2059,7 +2078,10 @@ abstract class AbstractFlashcardViewer :
                 val scrollParent = findScrollParent(this)
                 scrollParent?.requestDisallowInterceptTouchEvent(true)
             }
-            return super.onTouchEvent(event)
+            return super.onTouchEvent(event).also {
+                // kuma3: a tap on a text box in the card
+                if (event.action == MotionEvent.ACTION_UP && hitTestResult.type == HitTestResult.EDIT_TEXT_TYPE) cardTextBoxTapped()
+            }
         }
 
         override fun onOverScrolled(

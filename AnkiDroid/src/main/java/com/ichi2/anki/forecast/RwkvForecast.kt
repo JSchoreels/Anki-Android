@@ -55,7 +55,7 @@ object RwkvForecast {
     private const val NEAR_MARGIN = 0.03f
 
     private val DUE = Color.rgb(0xE5, 0x39, 0x35)
-    private val NEAR = Color.rgb(0xFB, 0x8C, 0x00)
+    private val NEAR = Color.rgb(0xE6, 0x51, 0x00)
     private val SAFE = Color.rgb(0x43, 0xA0, 0x47)
     private val MINIMUM = Color.rgb(0x1E, 0x88, 0xE5)
 
@@ -68,7 +68,6 @@ object RwkvForecast {
         } else {
             when (color) {
                 DUE -> Color.rgb(0xC6, 0x28, 0x28)
-                NEAR -> Color.rgb(0xB4, 0x53, 0x09)
                 SAFE -> Color.rgb(0x2E, 0x7D, 0x32)
                 MINIMUM -> Color.rgb(0x15, 0x65, 0xC0)
                 else -> color
@@ -342,6 +341,8 @@ object RwkvForecast {
             if (width == 0 || cards.isEmpty()) return
             layOut(width)
             val base = graphHeight
+            paint.color = Color.argb(40, Color.red(NEAR), Color.green(NEAR), Color.blue(NEAR))
+            for (t in cards.map { it.targetRetention }.distinct()) canvas.drawRect(x(t), 0f, x(t + NEAR_MARGIN), base, paint)
             paint.color = Color.GRAY
             paint.strokeWidth = 0.5f * density
             canvas.drawLine(pad, base, width - pad, base, paint)

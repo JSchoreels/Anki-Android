@@ -14,7 +14,7 @@ import kotlin.math.roundToInt
 /**
  * Anki XP on the Statistics page: an "At a glance" group box above Today with the four numbers a quick check
  * needs (due today, due tomorrow, studied today, retention against the deck's target), for the deck the page
- * shows. Read here in Kotlin and injected into the backend page, so pages.css draws it like every other
+ * shows, then a Player box with the reward (level, today's XP, streak, goal: the Home Player box's numbers). Read here in Kotlin and injected into the backend page, so pages.css draws it like every other
  * section. Only with the Anki XP day theme.
  */
 object XpGlance {
@@ -33,9 +33,15 @@ object XpGlance {
         deckName: String,
     ) {
         if (!XpChrome.isOn()) return
+        XpGame.init(page.requireContext())
         page.lifecycleScope.launch {
             val g =
-                runCatching { withCol { read(this, deckName) } }.onFailure { Timber.w(it, "Anki XP: reading the glance") }.getOrNull()
+                runCatching {
+                    withCol {
+                        XpGame.readNotes(this)
+                        read(this, deckName)
+                    }
+                }.onFailure { Timber.w(it, "Anki XP: reading the glance") }.getOrNull()
                     ?: return@launch
             runCatching { page.webViewLayout.evaluateJavascript(script(g, deckName), null) }
         }
@@ -122,19 +128,37 @@ object XpGlance {
             $retention
             </div>
             <p class="xp-glance-deck">${esc(deckName)}</p>"""
+        val p = XpGame.g
+        val lv = XpGame.level(p.xp)
+        val longest = XpGame.longestStreak
+        val player =
+            """<div class="position-relative"><h1>Player</h1></div>
+            <div class="xp-glance">
+            ${cell("Lv ${lv + 1}", "level", "${p.xp - XpGame.levelStart(lv)}/${100 * (lv + 1)} XP")}
+            ${cell("+${p.today.xp}", "XP today", if (p.today.best > 0) "best combo ${p.today.best}" else "")}
+            ${cell("🔥 ${p.streak}", "day streak", if (longest > p.streak) "longest $longest" else "your longest")}
+            ${cell(
+                "${p.reps}/${p.goal}",
+                "daily goal",
+                if (p.goalHit) "done today" else "${p.goal - p.reps} reps to go",
+                if (p.goalHit) "met" else "",
+            )}
+            </div>
+            <p class="xp-glance-deck">All decks, every device</p>"""
         // The graphs render after the page loads, so wait for the first section; keep one box and refresh it.
         return """(function () {
-            var html = ${JSONObject.quote(html)}, tries = 0;
-            (function place() {
-                var box = document.getElementById("xp-glance");
+            var boxes = [["xp-glance", ${JSONObject.quote(html)}], ["xp-player", ${JSONObject.quote(player)}]], tries = 0;
+            (function place() { boxes.forEach(function (b) {
+                var box = document.getElementById(b[0]);
                 if (!box) {
-                    var first = document.querySelector(".container > .position-relative > h1");
-                    if (!first) { if (tries++ < 50) setTimeout(place, 200); return; }
+                    // the page's first section, not one of these boxes, so both go above it in order
+                    var first = document.querySelector(".container:not([id^=xp-]) > .position-relative > h1");
+                    if (!first) { if (b[0] === "xp-glance" && tries++ < 50) setTimeout(place, 200); return; }
                     // the first section, or its .row wrapper where the page has one (deck options does, graphs don't)
                     var sec = first.closest(".container");
                     var anchor = sec.parentElement.classList.contains("row") ? sec.parentElement : sec;
                     box = document.createElement("div");
-                    box.id = "xp-glance";
+                    box.id = b[0];
                     box.className = "container";
                     var node = box;
                     if (anchor !== sec) {
@@ -144,8 +168,8 @@ object XpGlance {
                     }
                     anchor.parentNode.insertBefore(node, anchor);
                 }
-                box.innerHTML = html;
-            })();
+                box.innerHTML = b[1];
+            }); })();
         })();"""
     }
 

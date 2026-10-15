@@ -49,7 +49,6 @@ class XpReview private constructor(
     private val overlay = activity.findViewById<FrameLayout>(android.R.id.content)
     private val handler = Handler(Looper.getMainLooper())
     private var cardId = 0L
-    private var cardReps = 0
     private var deckId = 0L
     private var shown = true
     private var clockOn = false
@@ -103,9 +102,7 @@ class XpReview private constructor(
     }
 
     fun question(card: Card) {
-        XpGame.undone(card.id, card.reps) // an undone answer takes its rep and XP back
         cardId = card.id
-        cardReps = card.reps
         deckId = card.did
         // the deck's name in the Luna title bar
         runCatching { activity.supportActionBar?.title = Decks.basename(activity.getColUnsafe.decks.name(card.did)) }
@@ -137,7 +134,7 @@ class XpReview private constructor(
     }
 
     fun answered(ease: Int) {
-        val r = XpGame.score(ease, thinkMs, deckId, cardId, cardReps)
+        val r = XpGame.score(ease, thinkMs, deckId, cardId)
         XpSound.blip(ease, XpGame.combo)
         XpSound.buzz(activity, ease.toString())
         if (ease == 1) pop("+${r.xp} XP") else pointsMult(r.mult, r.xp)

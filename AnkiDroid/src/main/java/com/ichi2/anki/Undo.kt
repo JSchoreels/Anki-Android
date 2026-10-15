@@ -35,6 +35,11 @@ suspend fun tryUndo(): String {
                 OpChangesAfterUndo.getDefaultInstance()
             }
         }
+    // kuma3: an undone answer takes back the Anki XP game's rep and XP too
+    if (changes.operation == TR.actionsAnswerCard()) {
+        com.ichi2.anki.xp.XpGame
+            .undoAnswer()
+    }
     return if (changes.operation.isEmpty()) {
         TR.actionsNothingToUndo()
     } else {

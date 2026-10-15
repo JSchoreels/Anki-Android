@@ -165,8 +165,10 @@ object XpGame {
                 streak = 0,
                 days = days,
             )
-        // the review streak, as the heatmap counts it (read with the notes)
-        return Merged(m.ach, m.bosses, m.xp, m.record, m.goal, m.day, m.today, reviewStreak, m.days)
+        // the review streak, as the heatmap counts it (read with the notes), plus today once reviewed here
+        val repsHere = mine.optJSONObject("days")?.optJSONObject(day)?.optInt("reps") ?: 0
+        val streak = reviewStreak + if (!reviewedToday && repsHere > 0) 1 else 0
+        return Merged(m.ach, m.bosses, m.xp, m.record, m.goal, m.day, m.today, streak, m.days)
     }
 
     /** this device's part for today */
@@ -346,8 +348,6 @@ object XpGame {
 
     /** The game before one answer, so an undone answer gives back its rep, XP, quests and boss */
     private class Before(
-        val cardId: Long,
-        val cardReps: Int,
         val ease: Int,
         val mine: String,
         val bosses: String,
@@ -356,17 +356,10 @@ object XpGame {
 
     private val answers = ArrayDeque<Before>()
 
-    /**
-     * XpReview.question: the last answered card back with the review count it had before that answer means the
-     * answer was undone (after Again the card comes back with one more review, so it doesn't match).
-     */
-    fun undone(
-        cardId: Long,
-        cardReps: Int,
-    ) {
-        val last = answers.lastOrNull() ?: return
-        if (last.cardId != cardId || last.cardReps != cardReps) return
-        answers.removeLast()
+    /** tryUndo undid an "Answer Card": the game as it was before that answer */
+    fun undoAnswer() {
+        if (!::prefs.isInitialized) return
+        val last = answers.removeLastOrNull() ?: return
         mine = JSONObject(last.mine)
         val b = JSONObject(last.bosses)
         bosses
@@ -389,10 +382,9 @@ object XpGame {
         thinkMs: Long,
         deckId: Long,
         cardId: Long,
-        cardReps: Int,
     ): Result {
         newDay()
-        answers.addLast(Before(cardId, cardReps, ease, mine.toString(), bosses.toString(), combo))
+        answers.addLast(Before(ease, mine.toString(), bosses.toString(), combo))
         if (answers.size > 50) answers.removeFirst()
         val fast = thinkMs < limit * 1000L
         val lv = level(g.xp)
@@ -436,9 +428,8 @@ object XpGame {
             recordShown = true
         }
         if (firstToday) {
-            // the streak was read before today's first review: it counts today now
-            val streak = g.streak + if (reviewedToday) 0 else 1
-            wins += "🔥 $streak-day streak" to (if (streak > 1) "Another day in a row. Keep it going!" else "Day 1. Come back tomorrow!")
+            wins +=
+                "🔥 ${g.streak}-day streak" to (if (g.streak > 1) "Another day in a row. Keep it going!" else "Day 1. Come back tomorrow!")
         }
         if (g.goalHit && !wasHit) wins += "Daily goal done!" to "Overtime: every rep now gives 1.5× XP."
         for (q in quests()) {

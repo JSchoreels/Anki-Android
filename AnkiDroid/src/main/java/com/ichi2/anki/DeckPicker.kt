@@ -1565,6 +1565,7 @@ open class DeckPicker :
         val message = dialogHandler.popMessage()
         super.onResume()
         XpChrome.resume(this) // kuma3: Anki XP Player box
+        supportActionBar?.title = "kuma3" // kuma3: not the build's app name, also after another screen
         if (navDrawerIsReady() && hasCollectionStoragePermissions()) {
             refreshState()
         }

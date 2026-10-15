@@ -78,3 +78,10 @@ h1, h2 {
     font-family: "Trebuchet MS", Tahoma, Roboto, sans-serif;
     color: #215dc6;
 }
+
+/* Deck options Preset / This deck / Today only tabs: the button rule above wipes Anki's active underline, so
+   the active tab gets the XP selection colour (only TabbedValue uses aria-pressed) */
+button[aria-pressed="true"] {
+    background: #316ac5 !important;
+    color: #ffffff !important;
+}

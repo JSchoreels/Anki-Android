@@ -569,7 +569,7 @@ class XpBar(
         // XP bar between the level and the combo
         val right = cx - 10 * d
         if (right - x > 30 * d) {
-            val lo = 50 * lv * (lv + 1)
+            val lo = XpGame.levelStart(lv)
             val frac = ((g.xp - lo).toFloat() / (100 * (lv + 1))).coerceIn(0f, 1f)
             val top = cy - 6 * d
             val bottom = cy + 6 * d

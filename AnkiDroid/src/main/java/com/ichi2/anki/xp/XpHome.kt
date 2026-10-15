@@ -20,6 +20,7 @@ import com.ichi2.anki.DeckPicker
 import com.ichi2.anki.R
 import com.ichi2.anki.deckpicker.DisplayDeckNode
 import com.ichi2.anki.widgets.DeckAdapter
+import com.ichi2.anki.xp.XpChrome.px
 
 /**
  * kuma3: the Anki XP deck list as XP group boxes: Player (level, XP, streak, quests), Decks (only the decks with
@@ -41,16 +42,10 @@ object XpHome {
     /** the deck picker's adapter: [footers] are (label, adapter) in order after the deck list */
     fun adapter(
         picker: DeckPicker,
-        list: RecyclerView,
         decks: DeckAdapter,
         footers: List<Pair<String, RecyclerView.Adapter<*>>>,
     ): RecyclerView.Adapter<*> {
-        if (!XpChrome.isOn()) {
-            player = null
-            done = null
-            today = null
-            return ConcatAdapter(listOf(decks) + footers.map { it.second })
-        }
+        if (!XpChrome.isOn()) return ConcatAdapter(listOf(decks) + footers.map { it.second })
         val p = Player(picker).also { player = it }
         val d = Done(decks).also { done = it }
         // the "Studied … today" line and the RWKV forecast: a box after RWKV recall, not a bar at the bottom
@@ -60,7 +55,7 @@ object XpHome {
         val labels = mutableMapOf<RecyclerView.Adapter<*>, String>(p to "Player", decks to "Decks", d to "Decks")
         rest.forEach { labels[it.second] = it.first }
         val concat = ConcatAdapter(listOf(p, decks, d) + rest.map { it.second })
-        list.addItemDecoration(Boxes(picker, concat, labels))
+        picker.deckPickerBinding.decks.addItemDecoration(Boxes(picker, concat, labels))
         return concat
     }
 
@@ -92,11 +87,6 @@ object XpHome {
     }
 
     private fun due(n: DisplayDeckNode) = n.newCount + n.lrnCount + n.revCount
-
-    private fun px(
-        context: Context,
-        dp: Float,
-    ) = (dp * context.resources.displayMetrics.density + 0.5f).toInt()
 
     private fun text(
         context: Context,
@@ -137,8 +127,7 @@ object XpHome {
             XpGame.init(c)
             val g = XpGame.g
             val lv = XpGame.level(g.xp)
-            // level L starts at 50·L·(L+1) XP (the inverse of XpGame.level)
-            val from = 50 * lv * (lv + 1)
+            val from = XpGame.levelStart(lv)
             val span = 100 * (lv + 1)
             val quests = XpGame.quests()
             val got = quests.count { it.id in g.today.got }

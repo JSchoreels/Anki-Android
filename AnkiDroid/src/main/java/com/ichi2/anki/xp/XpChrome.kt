@@ -7,16 +7,19 @@ import android.graphics.BitmapShader
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorFilter
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.RadialGradient
 import android.graphics.Rect
 import android.graphics.Shader
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.webkit.WebView
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -72,8 +75,7 @@ object XpChrome {
     fun resume(activity: DeckPicker) {
         if (!isOn()) return
         XpGame.newDay()
-        XpHome.resume() // the Player box
-        // the other devices' parts (kuma3 Skins, the tablet): without them the level counts this phone only
+        // the Player box, with the other devices' parts (kuma3 Skins, the tablet): without them the level counts this phone only
         activity.launchCatchingTask {
             withCol { XpGame.readNotes(this) }
             XpHome.resume()
@@ -110,14 +112,35 @@ object XpChrome {
         return watching
     }
 
-    /** XP looks (title bars, buttons, lists) and the CRT on a window's root view */
+    /**
+     * XP looks (title bars, buttons, lists) and the CRT on a window's root view. An activity gets the whole CRT; a
+     * menu or dialog sits over one, so it gets only scanlines, only on its first solid background (not on its shadow
+     * or the dimmed screen), in step with the screen's lines underneath.
+     */
     private fun dressWindow(root: View) {
         val dressed = WeakHashMap<View, Unit>()
         root.viewTreeObserver.addOnGlobalLayoutListener { walk(root, dressed) }
-        val crt = Crt(root.resources.displayMetrics.density)
-        root.overlay.add(crt)
-        crt.setBounds(0, 0, root.width, root.height)
-        root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ -> crt.setBounds(0, 0, v.width, v.height) }
+        val screen = (root.layoutParams as? WindowManager.LayoutParams)?.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
+        var on: View? = null
+        val crt = Crt(root.context, rim = screen)
+        root.viewTreeObserver.addOnGlobalLayoutListener {
+            val target = if (screen) root else solid(root) ?: return@addOnGlobalLayoutListener
+            if (target !== on) {
+                on?.overlay?.remove(crt)
+                target.overlay.add(crt)
+                on = target
+            }
+            val at = IntArray(2).also { target.getLocationOnScreen(it) }
+            crt.place(target.width, target.height, at[1])
+        }
+    }
+
+    /** the first view with a background that isn't see-through */
+    private fun solid(v: View): View? {
+        val bg = v.background
+        if (bg != null && !(bg is ColorDrawable && bg.alpha == 0)) return v
+        if (v is ViewGroup) for (i in 0 until v.childCount) solid(v.getChildAt(i))?.let { return it }
+        return null
     }
 
     /** the Retro CRT setting changed: redraw the open screen */
@@ -198,35 +221,47 @@ object XpChrome {
             }
             v.id == R.id.decks -> {
                 v.background = ContextCompat.getDrawable(ctx, R.drawable.xp_list)
-                (v.layoutParams as? ViewGroup.MarginLayoutParams)?.setMargins(px(ctx.resources.displayMetrics.density, 6))
+                (v.layoutParams as? ViewGroup.MarginLayoutParams)?.setMargins(px(ctx, 6f))
             }
         }
     }
 
     private fun ViewGroup.MarginLayoutParams.setMargins(m: Int) = setMargins(m, m, m, m)
 
-    private fun px(
-        density: Float,
-        dp: Int,
-    ) = (dp * density + 0.5f).toInt()
+    fun px(
+        context: android.content.Context,
+        dp: Float,
+    ) = (dp * context.resources.displayMetrics.density + 0.5f).toInt()
 
-    /** The skin's CRT look: a dark line every 3dp and a darker rim. Drawn over the window, never blurs text. */
+    /** The skin's CRT look: a dark line every 3dp and a darker [rim]. Drawn over the window, never blurs text. */
     private class Crt(
-        density: Float,
+        context: android.content.Context,
+        val rim: Boolean,
     ) : Drawable() {
+        private val period = px(context, 3f).coerceAtLeast(3)
         private val lines =
             Paint().apply {
-                val period = px(density, 3).coerceAtLeast(3)
                 val bmp = Bitmap.createBitmap(1, period, Bitmap.Config.ARGB_8888)
                 for (y in 0 until (period / 3).coerceAtLeast(1)) bmp.setPixel(0, y, Color.argb(30, 0, 0, 0))
                 shader = BitmapShader(bmp, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
             }
-        private val rim = Paint()
+        private val edge = Paint()
+
+        /** [w]×[h] at [top] px from the screen's top: the lines stay on the same screen rows in every window */
+        fun place(
+            w: Int,
+            h: Int,
+            top: Int,
+        ) {
+            lines.shader.setLocalMatrix(Matrix().apply { setTranslate(0f, -(top % period).toFloat()) })
+            setBounds(0, 0, w, h)
+            invalidateSelf()
+        }
 
         override fun onBoundsChange(bounds: Rect) {
             val r = Math.hypot(bounds.width().toDouble(), bounds.height().toDouble()).toFloat() / 2
             if (r <= 0f) return
-            rim.shader =
+            edge.shader =
                 RadialGradient(
                     bounds.exactCenterX(),
                     bounds.exactCenterY(),
@@ -240,7 +275,7 @@ object XpChrome {
         override fun draw(canvas: Canvas) {
             if (!XpGame.crt) return
             canvas.drawRect(bounds, lines)
-            canvas.drawRect(bounds, rim)
+            if (rim) canvas.drawRect(bounds, edge)
         }
 
         override fun setAlpha(alpha: Int) {}

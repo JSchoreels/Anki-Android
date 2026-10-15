@@ -585,7 +585,6 @@ open class DeckPicker :
         deckPickerBinding.decks.adapter =
             com.ichi2.anki.xp.XpHome.adapter(
                 this,
-                deckPickerBinding.decks,
                 deckListAdapter,
                 listOf(
                     "Activity" to

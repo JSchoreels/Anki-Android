@@ -202,6 +202,9 @@ object XpGame {
 
     fun level(xp: Int) = floor((sqrt(1 + 0.08 * xp) - 1) / 2).toInt()
 
+    /** XP where level [lv] (0-based) starts: the inverse of [level]; the level is 100·(lv+1) XP long */
+    fun levelStart(lv: Int) = 50 * lv * (lv + 1)
+
     fun mult(): Double = min(5, 1 + combo / 5) * (if (g.reps >= g.goal) 1.5 else 1.0)
 
     fun setGoal(goal: Int) {

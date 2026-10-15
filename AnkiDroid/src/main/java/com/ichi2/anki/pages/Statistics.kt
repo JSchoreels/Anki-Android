@@ -93,10 +93,16 @@ class Statistics : PageFragment(R.layout.page_statistics) {
             )
     }
 
-    // kuma3: Anki XP's "At a glance" box once the page has loaded (xp/XpGlance.kt)
+    // kuma3: once the page has loaded, apply the deck again (the first call can come before the page) and draw
+    // Anki XP's "At a glance" box (xp/XpGlance.kt, from changeDeck)
     override fun onCreateWebViewClient(savedInstanceState: Bundle?) =
         super.onCreateWebViewClient(savedInstanceState).apply {
-            onPageFinishedCallbacks.add { XpGlance.show(this@Statistics, binding.deckName.text.toString()) }
+            onPageFinishedCallbacks.add {
+                binding.deckName.text
+                    .toString()
+                    .takeIf { it.isNotEmpty() }
+                    ?.let(::changeDeck)
+            }
         }
 
     private fun onDeckSelected(deck: SelectableDeck?) {
@@ -121,10 +127,14 @@ class Statistics : PageFragment(R.layout.page_statistics) {
         binding.deckName.text = selectedDeckName
         val javascriptCode =
             """
-            var textBox = document.getElementById("statisticsSearchText");
-            textBox.value = "deck:\"$selectedDeckName\"";
-            textBox.dispatchEvent(new Event("input", { bubbles: true }));
-            textBox.dispatchEvent(new Event("change"));
+            (function set(tries) {
+                var textBox = document.getElementById("statisticsSearchText");
+                // kuma3: the page draws the box after it loads; wait for it instead of failing on null
+                if (!textBox) { if (tries < 50) setTimeout(function () { set(tries + 1); }, 100); return; }
+                textBox.value = "deck:\"$selectedDeckName\"";
+                textBox.dispatchEvent(new Event("input", { bubbles: true }));
+                textBox.dispatchEvent(new Event("change"));
+            })(0);
             """.trimIndent()
         webViewLayout.evaluateJavascript(javascriptCode, null)
         XpGlance.show(this, selectedDeckName) // kuma3

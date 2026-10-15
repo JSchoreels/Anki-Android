@@ -83,7 +83,10 @@ class XpReview private constructor(
             bar.counts = listOf(R.id.new_number, R.id.learn_number, R.id.review_number).mapNotNull { activity.findViewById<TextView>(it) }
             bar.icons = listOf(R.id.flag_icon, R.id.mark_icon).mapNotNull { activity.findViewById<android.widget.ImageView>(it) }
             bar.counts.forEach { tv -> tv.addTextChangedListener(afterTextChanged = { bar.invalidate() }) }
-            top.addView(bar, android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(30)))
+            top.addView(
+                bar,
+                android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
+            )
         }
         bar.setOnClickListener { XpWindows.quests(activity) }
         XpGame.startSession()
@@ -233,10 +236,10 @@ class XpReview private constructor(
 
     private fun pop(
         text: String,
-        color: Int = Color.rgb(0xff, 0xd7, 0x00),
+        color: Int = GOLD,
         sp: Float = 20f,
     ) {
-        val v = textView(text, color, sp)
+        val v = textView(text, color, sp).apply { if (color == GOLD) chipBackground(this, NAVY) }
         addOverlay(v, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, bottomOffset() + dp(50))
         v
             .animate()
@@ -255,23 +258,15 @@ class XpReview private constructor(
         fun chip(
             text: String,
             bg: Int,
-        ) = textView(text, Color.WHITE, 22f).apply {
-            setPadding(dp(8), dp(1), dp(8), dp(1))
-            background =
-                GradientDrawable().apply {
-                    setColor(bg)
-                    cornerRadius = dp(4).toFloat()
-                    setStroke(dp(2), Color.BLACK)
-                }
-        }
+        ) = textView(text, Color.WHITE, 22f).apply { chipBackground(this, bg) }
         val row =
             LinearLayout(activity).apply {
                 gravity = Gravity.CENTER
                 clipChildren = false
                 clipToPadding = false
             }
-        val c = chip("$points", Color.rgb(0x00, 0x9d, 0xff))
-        val x = chip("×${if (mult % 1.0 == 0.0) mult.toInt().toString() else "%.1f".format(mult)}", Color.rgb(0xfe, 0x5f, 0x55))
+        val c = chip("$points", Color.rgb(0x00, 0x70, 0xc0))
+        val x = chip("×${if (mult % 1.0 == 0.0) mult.toInt().toString() else "%.1f".format(mult)}", Color.rgb(0xc8, 0x32, 0x28))
         row.addView(c)
         row.addView(
             x,
@@ -287,15 +282,22 @@ class XpReview private constructor(
         x.animate().translationX(0f).setDuration(200)
         handler.postDelayed({
             row.removeAllViews()
-            val t = textView("+0 XP", Color.rgb(0xff, 0xd7, 0x00), 28f)
+            val t =
+                textView("+0 XP", GOLD, 28f).apply {
+                    chipBackground(this, NAVY)
+                    // as wide as the final number, so the count-up does not clip in the chip
+                    gravity = Gravity.CENTER
+                    minWidth = (paint.measureText("+$xp XP") + totalPaddingLeft + totalPaddingRight).toInt() + 1
+                }
             row.addView(t)
             ValueAnimator.ofFloat(0f, 1f).setDuration(300).apply {
                 addUpdateListener { t.text = "+${Math.round(xp * (1 - Math.pow(1.0 - it.animatedFraction, 3.0)))} XP" }
                 start()
             }
-            t.scaleX = 1.8f
-            t.scaleY = 1.8f
-            t
+            // scale the row, not the chip: the content frame clips the row to its bounds, which scale with it
+            row.scaleX = 1.8f
+            row.scaleY = 1.8f
+            row
                 .animate()
                 .scaleX(1f)
                 .scaleY(1f)
@@ -308,6 +310,20 @@ class XpReview private constructor(
         }, 950)
     }
 
+    /** a game chip: white-on-colour, 2dp black border, 4dp corners */
+    private fun chipBackground(
+        v: TextView,
+        bg: Int,
+    ) {
+        v.setPadding(dp(8), dp(1), dp(8), dp(1))
+        v.background =
+            GradientDrawable().apply {
+                setColor(bg)
+                cornerRadius = dp(4).toFloat()
+                setStroke(dp(2), Color.BLACK)
+            }
+    }
+
     /** an XP balloon tip, bottom right; several stack up */
     fun balloon(
         title: String,
@@ -316,6 +332,7 @@ class XpReview private constructor(
 
     /** window shake and a white flash, stronger at each multiplier step (s = 1..5) */
     private fun shake(s: Int) {
+        if (XpBar.calm(activity)) return
         val target = overlay.getChildAt(0) ?: return
         ValueAnimator.ofFloat(0f, 1f).setDuration(200L + 80L * s).apply {
             addUpdateListener {
@@ -348,6 +365,11 @@ class XpReview private constructor(
         )
 
     companion object {
+        private val GOLD = Color.rgb(0xff, 0xd7, 0x00)
+
+        /** behind gold text (the +XP totals): DESIGN.md title-shadow navy, 9:1 */
+        private val NAVY = Color.rgb(0x0f, 0x10, 0x89)
+
         /** null unless the Anki XP day theme is on */
         fun attach(activity: AnkiActivity): XpReview? {
             if (!XpChrome.isOn()) return null
@@ -377,8 +399,13 @@ class XpReview private constructor(
                     background = ResourcesCompat.getDrawable(resources, R.drawable.xp_tooltip, null)
                     elevation = 6 * d
                     maxWidth = (260 * d).toInt()
+                    accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE // TalkBack reads it as it appears
                 }
-            val stacked = (0 until overlay.childCount).count { overlay.getChildAt(it).tag == "xp-balloon" }
+            val stacked =
+                (0 until overlay.childCount)
+                    .map { overlay.getChildAt(it) }
+                    .filter { it.tag == "xp-balloon" }
+                    .sumOf { it.height + (6 * d).toInt() }
             b.tag = "xp-balloon"
             overlay.addView(
                 b,
@@ -388,7 +415,7 @@ class XpReview private constructor(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         Gravity.BOTTOM or Gravity.END,
                     ).apply {
-                        bottomMargin = bottom + (stacked * 68 * d).toInt()
+                        bottomMargin = bottom + stacked
                         marginEnd = (10 * d).toInt()
                     },
             )
@@ -434,6 +461,8 @@ class XpBar(
 
     init {
         background = ResourcesCompat.getDrawable(resources, R.drawable.xp_status, null)
+        // its description (reps, streak, level, combo) is read out when an answer changes it
+        accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_POLITE
     }
 
     fun setClock(
@@ -443,6 +472,15 @@ class XpBar(
         timeLeft = left
         clockRunning = running
         invalidate()
+    }
+
+    // at least the old 30dp; taller when a large font needs it (text, the 4dp clock and some air)
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int,
+    ) {
+        val need = (text.fontSpacing * 1.3f + 4 * d + 6 * d).toInt()
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), maxOf((30 * d).toInt(), need))
     }
 
     fun juice(big: Boolean) {
@@ -456,6 +494,12 @@ class XpBar(
         XpGame.newDay()
         val g = XpGame.g
         val w = width.toFloat()
+        val calm = calm(context)
+        // what TalkBack reads for the bar (it opens the quests)
+        val said =
+            "${g.reps} of ${g.goal} reps today, streak ${g.streak} days, level ${XpGame.level(g.xp) + 1}, combo ${XpGame.combo}. " +
+                "Opens the daily quests."
+        if (contentDescription != said) contentDescription = said
         // the combo clock along the bottom edge: blue while waiting for the word audio, green, red in the last 3 s
         val clockH = 4 * d
         val h = height.toFloat()
@@ -481,7 +525,7 @@ class XpBar(
         val ring = RectF(x, cy - r, x + 2 * r, cy + r)
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 4 * d
-        paint.color = if (over) Color.rgb(0x2e, 0xd3, 0x30) else Color.rgb(0xc9, 0xc6, 0xb8)
+        paint.color = if (over) Color.rgb(0x2e, 0xd3, 0x30) else Color.rgb(0x7a, 0x7a, 0x7a)
         canvas.drawArc(ring, 0f, 360f, false, paint)
         paint.color = if (over) Color.rgb(0xff, 0xb3, 0x00) else Color.rgb(0x2e, 0xd3, 0x30)
         canvas.drawArc(ring, -90f, 360f * p, false, paint)
@@ -497,7 +541,7 @@ class XpBar(
             x += pt.measureText(s) + 8 * d
         }
         word("${g.reps}/${g.goal}")
-        if (g.streak > 0) word("🔥${g.streak}")
+        word("🔥${g.streak}")
         val lv = XpGame.level(g.xp)
         word("Lv ${lv + 1}", bold)
         // combo, right aligned, with its juice bounce
@@ -508,9 +552,9 @@ class XpBar(
         val cp = Paint(if (combo >= 5) bold else text)
         cp.color =
             when {
-                combo >= 25 -> Color.rgb(0xd0, 0, 0)
-                combo >= 10 -> Color.rgb(0xe0, 0x70, 0)
-                combo >= 5 -> Color.rgb(0xc0, 0, 0)
+                combo >= 25 -> Color.rgb(0x80, 0, 0)
+                combo >= 10 -> Color.rgb(0x8f, 0x40, 0)
+                combo >= 5 -> Color.rgb(0xa0, 0, 0)
                 else -> Color.BLACK
             }
         cp.textSize *=
@@ -544,7 +588,7 @@ class XpBar(
         val cx = rx - 6 * d - cw
         val k = (SystemClock.uptimeMillis() - juiceAt) / (if (juiceBig) 600f else 450f)
         canvas.save()
-        if (k in 0f..1f) {
+        if (k in 0f..1f && !calm) {
             val amp = if (juiceBig) 0.8 else 0.35
             val s = (1 + amp * exp(-4.0 * k) * cos(k * 3 * PI)).toFloat()
             canvas.rotate((if (juiceBig) -10 else -6) * exp(-4.0 * k).toFloat() * cos(k * 3 * PI).toFloat(), cx + cw / 2, cy)
@@ -554,7 +598,8 @@ class XpBar(
         if (combo >= 10 && multText.isNotEmpty()) {
             // the ×N on fire, taller as the combo grows
             val mw = cp.measureText(multText.trim())
-            val h = (cp.textSize * (1.1f + min(1f, (combo - 10) / 40f) * 0.9f)) * (0.9f + Random.nextFloat() * 0.25f)
+            val flicker = if (calm) 1f else 0.9f + Random.nextFloat() * 0.25f
+            val h = (cp.textSize * (1.1f + min(1f, (combo - 10) / 40f) * 0.9f)) * flicker
             paint.shader =
                 LinearGradient(
                     0f,
@@ -571,7 +616,7 @@ class XpBar(
             white.setShadowLayer(3f, 1f, 1f, Color.rgb(0xa0, 0, 0))
             canvas.drawText(multText, cx, base, white)
             canvas.drawText(comboText, cx + cp.measureText(multText), base, cp)
-            postInvalidateDelayed(80)
+            if (!calm) postInvalidateDelayed(80)
         } else {
             canvas.drawText(multText + comboText, cx, base, cp)
         }
@@ -600,5 +645,15 @@ class XpBar(
             canvas.drawRect(x + d, top + d, x + d + (right - x - 2 * d) * frac, bottom - d, paint)
             paint.shader = null
         }
+    }
+
+    companion object {
+        /** the system's Remove animations (animator scale 0): the game stays still */
+        fun calm(context: Context) =
+            android.provider.Settings.Global.getFloat(
+                context.contentResolver,
+                android.provider.Settings.Global.ANIMATOR_DURATION_SCALE,
+                1f,
+            ) == 0f
     }
 }

@@ -32,6 +32,11 @@ colors:
   pop-gold: "#FFD700"
   combo-cyan: "#009DFF"
   multiplier-coral: "#FE5F55"
+  chip-cyan: "#0070C0"
+  chip-coral: "#C83228"
+  answer-again: "#8B0000"
+  answer-good: "#004A00"
+  answer-easy: "#0000B0"
 typography:
   title:
     fontFamily: "XP Tahoma Bold (Wine Tahoma), Tahoma, Roboto, sans-serif"
@@ -140,6 +145,7 @@ A Luna blue chrome over warm beige faces and white content, with classic Anki co
 
 ### Tertiary
 - **Pop Gold** (pop-gold), **Combo Cyan** (combo-cyan), **Multiplier Coral** (multiplier-coral): game pop-ups and chips only (+XP, combo count, ×multiplier). A broken combo flashes red.
+- **Chip Cyan / Chip Coral** (chip-cyan, chip-coral): the fills of the points and ×multiplier chips, dark enough for white text (4.5:1). Gold "+XP" totals sit on a Title Shadow navy chip (9:1); gold never sits on the white card alone.
 
 ### Neutral
 - **XP Face** (xp-face): window and dialog faces, page background, answer button faces.
@@ -203,7 +209,7 @@ Tactile and a little chunky, unmistakably XP.
 - **Shape:** gently rounded (3px), 1px Button Border.
 - **Push button:** vertical gradient white → #ECEBE6 → Button Shade, black Tahoma text; dialog buttons 88×38dp minimum.
 - **Pressed:** the gradient inverts (#CDCAC3 → #E3E3DB → #F2F2F1) with a faint Selection Blue ripple.
-- **Answer buttons:** one push-button look for all four; the label colour tells them apart (Again Count Learn red, Hard black, Good Count Due green, Easy Count New blue).
+- **Answer buttons:** one push-button look for all four; the label colour tells them apart (Again red, Hard black, Good green, Easy blue). The labels use darker shades of the count colours (answer-again, answer-good, answer-easy) so they reach 4.5:1 on the darkest stop of the button gradient.
 - **Caption buttons:** 32dp blue rounded squares with a white 1px edge and a light top-left gradient, behind every title-bar action.
 
 ### Tabs and Choice Groups
@@ -238,7 +244,7 @@ The quick answer at the top of Statistics: a group box of four read-only XP fiel
 Alerts are XP message boxes: title bar, a drawn XP icon (info, question, warning, error), centred push buttons. Snackbars are cream balloon tips with a black 1px border and Selection Blue actions.
 
 ### Game Layer (signature)
-The game bar sits under the title bar with level, combo clock and XP; pop-ups rise from the answer buttons: gold "+XP", a cyan combo chip and a coral multiplier chip (white text, 2px black border, 4px corners), a fire-gradient combo counter, a red "COMBO BROKEN". Fast, loud and over in about 350ms.
+The game bar sits under the title bar with the goal ring, reps, streak, level, XP bar, combo and the speed-bonus clock; it is at least 30dp and grows with the font size, and TalkBack reads its state (a polite live region). Pop-ups rise from the answer buttons: a points chip and a ×multiplier chip (white text, 2px black border, 4px corners), then the gold "+XP" total on a navy chip, a fire-gradient combo counter, a red "COMBO BROKEN" (only after 5 minutes idle). Fast, loud and over in about a second. With the system's Remove animations on, the shake, white flash, juice bounce and flame flicker stay still; game sounds stay silent when the ringer is on silent or vibrate. Balloons stack by their real heights and are read out as they appear.
 
 ## Do's and Don'ts
 

@@ -16,6 +16,10 @@
     <color name="xp_new">#0000FF</color>
     <color name="xp_learn">#C00000</color>
     <color name="xp_due">#008000</color>
+    <!-- answer button labels: the count colours, dark enough for 4.5:1 on the button's darkest gradient stop -->
+    <color name="xp_again_text">#8B0000</color>
+    <color name="xp_good_text">#004A00</color>
+    <color name="xp_easy_text">#0000B0</color>
 
     <style name="Base.Theme.Light.Xp" parent="Base.Theme.Light">
         <item name="colorPrimary">@color/xp_luna</item>
@@ -65,10 +69,10 @@
         <item name="goodButtonBackground">@color/xp_face</item>
         <item name="easyButtonBackground">@color/xp_face</item>
         <item name="answerButtonTextColor">@color/black</item>
-        <item name="againButtonTextColor">@color/xp_learn</item>
+        <item name="againButtonTextColor">@color/xp_again_text</item>
         <item name="hardButtonTextColor">@color/black</item>
-        <item name="goodButtonTextColor">@color/xp_due</item>
-        <item name="easyButtonTextColor">@color/xp_new</item>
+        <item name="goodButtonTextColor">@color/xp_good_text</item>
+        <item name="easyButtonTextColor">@color/xp_easy_text</item>
         <item name="againTextColor">@color/xp_learn</item>
         <item name="hardTextColor">@color/black</item>
         <item name="goodTextColor">@color/xp_due</item>

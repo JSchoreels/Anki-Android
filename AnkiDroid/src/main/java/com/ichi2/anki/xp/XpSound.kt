@@ -75,6 +75,11 @@ object XpSound {
     }
 
     private fun play(mix: DoubleArray) {
+        // silent or vibrate means silent: game sounds follow the ringer, not only the media volume
+        val audio =
+            com.ichi2.anki.AnkiDroidApp.instance
+                .getSystemService(android.media.AudioManager::class.java)
+        if (audio != null && audio.ringerMode != android.media.AudioManager.RINGER_MODE_NORMAL) return
         val pcm = ShortArray(mix.size) { (mix[it].coerceIn(-1.0, 1.0) * 12000).toInt().toShort() }
         player.execute {
             runCatching {

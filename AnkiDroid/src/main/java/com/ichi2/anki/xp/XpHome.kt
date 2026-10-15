@@ -50,6 +50,9 @@ object XpHome {
         // the "Studied … today" line and the RWKV forecast in the list, not a bar at the bottom under the + button
         val t = Today().also { today = it }
         picker.deckPickerBinding.reviewSummaryTextView.visibility = View.GONE
+        // rows jump to their new place: an animated change (a deck folding away, the summary updating) slid rows
+        // under the group-box labels and cross-faded two summaries over each other for half a second
+        picker.deckPickerBinding.decks.itemAnimator = null
         // footers come as Activity, RWKV recall, then the rest: what to act on first, the year of history last
         val rest = listOf("Today" to t, footers[1], footers[0]) + footers.drop(2)
         if (!XpChrome.isOn()) {

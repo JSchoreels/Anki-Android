@@ -19,6 +19,7 @@ colors:
   face-light: "#F1EFE2"
   button-shade: "#D6D0C5"
   groupbox-frame: "#D0D0BF"
+  groupbox-etch: "#B9B6A1"
   control-border: "#7F9DB9"
   button-border: "#003C74"
   balloon-cream: "#FFFFE1"
@@ -144,7 +145,8 @@ A Luna blue chrome over warm beige faces and white content, with classic Anki co
 - **XP Face** (xp-face): window and dialog faces, page background, answer button faces.
 - **Face Light** (face-light): surface containers a step lighter than the face.
 - **Button Shade** (button-shade): bottom of the push-button gradient; the Show Answer face.
-- **Group Box Frame** (groupbox-frame): the thin frame around home group boxes.
+- **Group Box Frame** (groupbox-frame): the thin frame around home group boxes (on white).
+- **Group Box Etch** (groupbox-etch): the darker frame of group boxes on the beige face (web pages), with a 1px white inner line so it survives the scanlines.
 - **Control Border** (control-border): text fields, lists, switches' edge; XP's blue-grey control line.
 - **Button Border** (button-border): the dark navy 1px border of push buttons; also the off-switch border.
 - **Balloon Cream** (balloon-cream): balloon tips (snackbars) and the web-page overlay surface.
@@ -210,7 +212,8 @@ Tactile and a little chunky, unmistakably XP.
 
 ### Cards / Containers
 - **Group box (home):** 1px Group Box Frame, label in Group Box Label Blue 13sp cut into the top edge.
-- **Window (web pages, dialogs):** XP Face body, 3px Window Frame Blue, 8px top corners.
+- **Group box (web pages, e.g. deck options):** an XP Properties sheet. Transparent on the face, 1px Group Box Etch with a white inset line, 3px corners, 20/12/10px padding; the section title (16px Tahoma, Group Box Label Blue) and the help badge sit in the top edge on a face-coloured patch.
+- **Window (dialogs, congrats):** XP Face body, 3px Window Frame Blue, 8px top corners.
 - **Explorer list:** white with a 1px Control Border edge.
 
 ### Inputs / Fields

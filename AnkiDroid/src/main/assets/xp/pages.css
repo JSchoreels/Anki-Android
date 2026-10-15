@@ -52,13 +52,51 @@ html, body {
     background: #ece9d8 !important;
 }
 
-/* Sections become XP windows: white body, Luna title strip on top */
-.container {
-    border: 1px solid #0831d9 !important;
-    border-top: 6px solid #0054e3 !important;
-    border-radius: 6px 6px 0 0 !important;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+/* Titled sections (TitledContainer: a .container whose first child holds the h1) become XP group boxes on the
+   window face, like an XP Properties sheet and the home screen: thin etched frame, the title set into the top
+   edge on the left, the help badge into it on the right. Only titled sections: the page's own layout
+   .container stays unframed. */
+.container:has(> .position-relative > h1) {
+    position: relative;
+    background: transparent !important;
+    border: 1px solid #b9b6a1 !important;
+    border-radius: 3px !important;
+    box-shadow: inset 1px 1px 0 #ffffff !important; /* etched: the white inner line of an XP group box */
+    padding: 20px 12px 10px !important;
 }
+
+.container:has(> .position-relative > h1) > .position-relative {
+    position: static !important;
+}
+
+.container > .position-relative > h1 {
+    position: absolute;
+    top: -0.75em;
+    left: 8px;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    border: 0 !important;
+    background: #ece9d8;
+    color: #0046d5 !important;
+    font-family: "XP Tahoma", Tahoma, Roboto, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: normal;
+    line-height: 1.5;
+}
+
+.container > .position-relative > .help-badge {
+    top: -15px !important;
+    right: 8px !important;
+    padding: 0 2px;
+    background: #ece9d8;
+}
+
+/* Scheduler's "Apply schedule to all presets" starts the first row under the title */
+.container > .inline-heading {
+    justify-content: flex-start !important;
+    margin-bottom: 8px !important;
+}
+
 
 button:not(.badge):not(.scheduler-help), .btn, select, input[type="number"], input[type="text"] {
     border-radius: 3px !important;
@@ -112,4 +150,10 @@ button.badge.p-1 {
 
 li > button[aria-pressed] {
     min-height: 32px;
+}
+
+/* the help modal's close button keeps Bootstrap's drawn × (last in the file: it must beat the push-button rule) */
+button.btn-close.btn-close {
+    background: transparent var(--bs-btn-close-bg) center / 1em auto no-repeat !important;
+    border: 0 !important;
 }

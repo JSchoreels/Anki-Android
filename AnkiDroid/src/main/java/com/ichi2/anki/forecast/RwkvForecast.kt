@@ -355,7 +355,22 @@ object RwkvForecast {
             for (t in cards.map { it.targetRetention }.distinct()) canvas.drawLine(x(t), 0f, x(t), base, paint)
             for (k in 0..4) {
                 val v = AXIS_MIN + (1 - AXIS_MIN) * k / 4
-                canvas.drawText("${Math.round(v * 100)}%", x(v), base + axis - 2 * dot / 5, text)
+                // the end labels sit inside the chart instead of centred on its edges (the first was cut to "ı0%")
+                text.textAlign =
+                    when (k) {
+                        0 -> Paint.Align.LEFT
+                        4 -> Paint.Align.RIGHT
+                        else -> Paint.Align.CENTER
+                    }
+                val at =
+                    if (k == 0) {
+                        0f
+                    } else if (k == 4) {
+                        width.toFloat()
+                    } else {
+                        x(v)
+                    }
+                canvas.drawText("${Math.round(v * 100)}%", at, base + axis - 2 * dot / 5, text)
             }
         }
 

@@ -344,13 +344,56 @@ object XpGame {
         return broke
     }
 
+    /** The game before one answer, so an undone answer gives back its rep, XP, quests and boss */
+    private class Before(
+        val cardId: Long,
+        val cardReps: Int,
+        val ease: Int,
+        val mine: String,
+        val bosses: String,
+        val combo: Int,
+    )
+
+    private val answers = ArrayDeque<Before>()
+
+    /**
+     * XpReview.question: the last answered card back with the review count it had before that answer means the
+     * answer was undone (after Again the card comes back with one more review, so it doesn't match).
+     */
+    fun undone(
+        cardId: Long,
+        cardReps: Int,
+    ) {
+        val last = answers.lastOrNull() ?: return
+        if (last.cardId != cardId || last.cardReps != cardReps) return
+        answers.removeLast()
+        mine = JSONObject(last.mine)
+        val b = JSONObject(last.bosses)
+        bosses
+            .keys()
+            .asSequence()
+            .toList()
+            .forEach { bosses.remove(it) }
+        b.keys().forEach { bosses.put(it, b.get(it)) }
+        prefs.edit { putString("bosses", bosses.toString()) }
+        combo = last.combo
+        session?.let {
+            it.reps--
+            if (last.ease == 1) it.again--
+        }
+        save()
+    }
+
     fun score(
         ease: Int,
         thinkMs: Long,
         deckId: Long,
         cardId: Long,
+        cardReps: Int,
     ): Result {
         newDay()
+        answers.addLast(Before(cardId, cardReps, ease, mine.toString(), bosses.toString(), combo))
+        if (answers.size > 50) answers.removeFirst()
         val fast = thinkMs < limit * 1000L
         val lv = level(g.xp)
         val m0 = mult()

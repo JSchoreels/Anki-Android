@@ -918,6 +918,12 @@ open class DeckPicker :
 
         fun onFocusedDeckChanged(deckId: DeckId?) {
             if (deckId != null) tryShowStudyOptionsPanel()
+            // kuma3: the Anki XP list is short and its positions differ (Player box, folded decks): stay at the top
+            if (com.ichi2.anki.xp.XpChrome
+                    .isOn()
+            ) {
+                return
+            }
             val position = deckId?.let { viewModel.findDeckPosition(it) } ?: 0
 
             // Skip centering if the deck is already on screen.

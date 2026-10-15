@@ -23,6 +23,7 @@ import com.ichi2.anki.snackbar.showSnackbar
 import com.ichi2.anki.withProgress
 import com.ichi2.anki.xp.XpGlance
 import dev.androidbroadcast.vbpd.viewBinding
+import org.json.JSONObject
 import timber.log.Timber
 
 class Statistics : PageFragment(R.layout.page_statistics) {
@@ -32,6 +33,9 @@ class Statistics : PageFragment(R.layout.page_statistics) {
     /** The PrintJob launched by this Fragment */
     // After killing the app, printManager.printJobs can still list active jobs
     private var pendingPrintJob: PrintJob? = null
+
+    // kuma3: the deck is applied once, when both the page and the deck name are ready
+    private var pageLoaded = false
 
     override fun onViewCreated(
         view: View,
@@ -62,7 +66,8 @@ class Statistics : PageFragment(R.layout.page_statistics) {
             withProgress {
                 val deckName =
                     savedInstanceState?.getString(KEY_DECK_NAME, null) ?: withCol { decks.current().name }
-                changeDeck(deckName)
+                binding.deckName.text = deckName
+                if (pageLoaded) changeDeck(deckName)
             }
         }
     }
@@ -93,11 +98,12 @@ class Statistics : PageFragment(R.layout.page_statistics) {
             )
     }
 
-    // kuma3: once the page has loaded, apply the deck again (the first call can come before the page) and draw
-    // Anki XP's "At a glance" box (xp/XpGlance.kt, from changeDeck)
+    // kuma3: once the page has loaded, apply the deck (unless it is still being read) and draw Anki XP's
+    // "At a glance" and Player boxes (xp/XpGlance.kt, from changeDeck)
     override fun onCreateWebViewClient(savedInstanceState: Bundle?) =
         super.onCreateWebViewClient(savedInstanceState).apply {
             onPageFinishedCallbacks.add {
+                pageLoaded = true
                 binding.deckName.text
                     .toString()
                     .takeIf { it.isNotEmpty() }
@@ -125,13 +131,15 @@ class Statistics : PageFragment(R.layout.page_statistics) {
      **/
     private fun changeDeck(selectedDeckName: String) {
         binding.deckName.text = selectedDeckName
+        // kuma3: escape the name for the search (\ " * _) and quote it for JavaScript
+        val search = JSONObject.quote("deck:\"" + selectedDeckName.replace(Regex("([\\\\\"*_])"), "\\\\$1") + "\"")
         val javascriptCode =
             """
             (function set(tries) {
                 var textBox = document.getElementById("statisticsSearchText");
                 // kuma3: the page draws the box after it loads; wait for it instead of failing on null
                 if (!textBox) { if (tries < 50) setTimeout(function () { set(tries + 1); }, 100); return; }
-                textBox.value = "deck:\"$selectedDeckName\"";
+                textBox.value = $search;
                 textBox.dispatchEvent(new Event("input", { bubbles: true }));
                 textBox.dispatchEvent(new Event("change"));
             })(0);

@@ -68,7 +68,7 @@ object XpGlance {
         var ms = 0L
         col.db
             .query(
-                "select count(), coalesce(sum(time), 0) from revlog where id > ? and cid in (select id from cards where did in ($ids))",
+                "select count(), coalesce(sum(time), 0) from revlog where id > ? and type not in (4, 5) and cid in (select id from cards where did in ($ids))",
                 start * 1000,
             ).use {
                 if (it.moveToNext()) {
@@ -136,7 +136,17 @@ object XpGlance {
             <div class="xp-glance">
             ${cell("Lv ${lv + 1}", "level", "${p.xp - XpGame.levelStart(lv)}/${100 * (lv + 1)} XP")}
             ${cell("+${p.today.xp}", "XP today", if (p.today.best > 0) "best combo ${p.today.best}" else "")}
-            ${cell("🔥 ${p.streak}", "day streak", if (longest > p.streak) "longest $longest" else "your longest")}
+            ${cell(
+                "🔥 ${p.streak}",
+                "day streak",
+                if (longest > p.streak) {
+                    "longest $longest"
+                } else if (p.streak > 0) {
+                    "your longest"
+                } else {
+                    ""
+                },
+            )}
             ${cell(
                 "${p.reps}/${p.goal}",
                 "daily goal",
@@ -145,7 +155,7 @@ object XpGlance {
             )}
             </div>
             <p class="xp-glance-deck">All decks, every device</p>"""
-        // The graphs render after the page loads, so wait for the first section; keep one box and refresh it.
+        // The graphs render after the page loads, so wait for the first section; keep the two boxes and refresh them.
         return """(function () {
             var boxes = [["xp-glance", ${JSONObject.quote(html)}], ["xp-player", ${JSONObject.quote(player)}]], tries = 0;
             (function place() { boxes.forEach(function (b) {
@@ -154,19 +164,11 @@ object XpGlance {
                     // the page's first section, not one of these boxes, so both go above it in order
                     var first = document.querySelector(".container:not([id^=xp-]) > .position-relative > h1");
                     if (!first) { if (b[0] === "xp-glance" && tries++ < 50) setTimeout(place, 200); return; }
-                    // the first section, or its .row wrapper where the page has one (deck options does, graphs don't)
                     var sec = first.closest(".container");
-                    var anchor = sec.parentElement.classList.contains("row") ? sec.parentElement : sec;
                     box = document.createElement("div");
                     box.id = b[0];
                     box.className = "container";
-                    var node = box;
-                    if (anchor !== sec) {
-                        node = document.createElement("div");
-                        node.className = anchor.className;
-                        node.appendChild(box);
-                    }
-                    anchor.parentNode.insertBefore(node, anchor);
+                    sec.parentNode.insertBefore(box, sec);
                 }
                 box.innerHTML = b[1];
             }); })();

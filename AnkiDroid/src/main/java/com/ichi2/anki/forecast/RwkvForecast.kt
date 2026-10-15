@@ -59,6 +59,22 @@ object RwkvForecast {
     private val SAFE = Color.rgb(0x43, 0xA0, 0x47)
     private val MINIMUM = Color.rgb(0x1E, 0x88, 0xE5)
 
+    /** Text in a category's colour: the XP look's white list needs the darker shade (4.5:1 or more) */
+    private fun ink(color: Int) =
+        if (!com.ichi2.anki.xp.XpChrome
+                .isOn()
+        ) {
+            color
+        } else {
+            when (color) {
+                DUE -> Color.rgb(0xC6, 0x28, 0x28)
+                NEAR -> Color.rgb(0xB4, 0x53, 0x09)
+                SAFE -> Color.rgb(0x2E, 0x7D, 0x32)
+                MINIMUM -> Color.rgb(0x15, 0x65, 0xC0)
+                else -> color
+            }
+        }
+
     private var forecast: RwkvOfflineForecastResponse? = null
     private var graph: GraphFooter? = null
 
@@ -133,7 +149,7 @@ object RwkvForecast {
         ) {
             val start = out.length
             out.append(label)
-            if (color != null) out.setSpan(ForegroundColorSpan(color), start, out.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            if (color != null) out.setSpan(ForegroundColorSpan(ink(color)), start, out.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             if (ids.isEmpty()) return
             val search = "cid:" + ids.joinToString(",")
             out.setSpan(
@@ -274,7 +290,14 @@ object RwkvForecast {
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val text =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.GRAY
+                color =
+                    if (com.ichi2.anki.xp.XpChrome
+                            .isOn()
+                    ) {
+                        Color.DKGRAY
+                    } else {
+                        Color.GRAY
+                    }
                 textSize = 10 * density
                 textAlign = Paint.Align.CENTER
             }

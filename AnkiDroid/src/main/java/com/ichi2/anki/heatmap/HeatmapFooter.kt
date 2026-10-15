@@ -195,7 +195,8 @@ class HeatmapFooter(
             line.append("$label: ".replace(' ', ' '))
             val start = line.length
             line.append(value.replace(' ', ' '))
-            line.setSpan(ForegroundColorSpan(color), start, line.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            val ink = if (XpChrome.isOn()) GREENS[3] else color
+            line.setSpan(ForegroundColorSpan(ink), start, line.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             line.setSpan(StyleSpan(android.graphics.Typeface.BOLD), start, line.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 

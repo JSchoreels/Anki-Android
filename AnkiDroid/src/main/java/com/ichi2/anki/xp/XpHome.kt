@@ -244,7 +244,7 @@ object XpHome {
             holder.frame.addView(
                 text(c, 14f).apply {
                     text = if (open) "▾ Hide $hidden decks done for today" else "▸ $hidden decks done for today"
-                    setTextColor(Color.rgb(0x80, 0x80, 0x80))
+                    setTextColor(Color.rgb(0x59, 0x59, 0x59)) // 7:1 on white
                     setPadding(px(c, 16f), px(c, 10f), px(c, 16f), px(c, 10f))
                     setOnClickListener {
                         open = !open

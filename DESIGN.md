@@ -218,6 +218,7 @@ Tactile and a little chunky, unmistakably XP.
 
 ### Check Boxes and Trackbars
 - **Check box:** every on/off setting (web switches included): 24px square, 1px #1C5180 edge, diagonal #DCDCD7 to white face, green (#21A121) tick when on; the label toggles it too.
+- **Option button (radio):** 18px circle, same edge and face as the check box, green (#21A121) dot when chosen; label rows 32px tall at 13px, wrapping between labels.
 - **Trackbar:** a 4px sunken groove (grey top-left, white bottom-right edges) with a 14x26px push-button thumb.
 
 ### Inputs / Fields
@@ -245,6 +246,7 @@ The game bar sits under the title bar with level, combo clock and XP; pop-ups ri
 - **Do** check contrast on a scanline row (about #E1E1E1 on white, #C4C2B4 on the face), not on plain white.
 - **Do** style backend web pages only through Anki's CSS variables and generic elements, and exclude Anki's small icon buttons (revert, help) from the push-button frame.
 - **Do** keep game colour and motion for answer feedback.
+- **Do** leave chart bar colours to Anki (d3 sets them in code); make chart text Tahoma, fully opaque, #444.
 
 ### Don't:
 - **Don't** use Material You shapes: pill toggles, M3 chips, tonal FABs, large rounded cards.

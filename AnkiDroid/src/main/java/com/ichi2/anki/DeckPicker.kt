@@ -553,7 +553,7 @@ open class DeckPicker :
         }
         setupBottomNavigation()
         setupEdgeToEdge()
-        title = resources.getString(R.string.app_name)
+        title = "kuma3" // kuma3: not the build's app name (AnkiDroid in debug builds)
 
         deckPickerBinding.deckPickerContent.visibility = View.GONE
         deckPickerBinding.noDecksPlaceholder.visibility = View.GONE
@@ -897,7 +897,6 @@ open class DeckPicker :
             }
 
             supportActionBar?.apply {
-                title = "kuma3" // kuma3: not the build's app name (AnkiDroid in debug builds)
                 subtitle = if (dueCount == 0) null else resources.getQuantityString(CommonPlurals.widget_cards_due, dueCount, dueCount)
                 val toolbar = findViewById<Toolbar>(R.id.toolbar)
                 TooltipCompat.setTooltipText(toolbar, toolbar.subtitle)
@@ -1565,7 +1564,6 @@ open class DeckPicker :
         val message = dialogHandler.popMessage()
         super.onResume()
         XpChrome.resume(this) // kuma3: Anki XP Player box
-        supportActionBar?.title = "kuma3" // kuma3: not the build's app name, also after another screen
         if (navDrawerIsReady() && hasCollectionStoragePermissions()) {
             refreshState()
         }
@@ -1583,7 +1581,7 @@ open class DeckPicker :
         } else {
             selectNavigationItem(R.id.nav_decks)
             updateDeckList()
-            title = resources.getString(R.string.app_name)
+            title = "kuma3"
         }
         // Update sync status (if we've come back from a screen)
         invalidateOptionsMenu()

@@ -62,7 +62,8 @@ object XpChrome {
     fun install(activity: AnkiActivity) {
         if (!isOn()) return
         XpGame.init(activity)
-        if (!watchWindows()) dressWindow(activity.window.decorView)
+        watchWindows()
+        dressWindow(activity.window.decorView)
         if (activity is DeckPicker) {
             if (!startupPlayed) {
                 startupPlayed = true
@@ -117,13 +118,18 @@ object XpChrome {
      * menu or dialog sits over one, so it gets only scanlines, only on its first solid background (not on its shadow
      * or the dimmed screen), in step with the screen's lines underneath.
      */
+    private val dressedWindows = WeakHashMap<View, Unit>()
+
     private fun dressWindow(root: View) {
+        if (dressedWindows.put(root, Unit) != null) return // from install and again from the window hook
         val dressed = WeakHashMap<View, Unit>()
-        root.viewTreeObserver.addOnGlobalLayoutListener { walk(root, dressed) }
-        val screen = (root.layoutParams as? WindowManager.LayoutParams)?.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
+        // a window opened under Anki XP keeps the look only while the theme is still Anki XP
+        root.viewTreeObserver.addOnGlobalLayoutListener { if (isOn()) walk(root, dressed) }
         var on: View? = null
-        val crt = Crt(root.context, rim = screen)
+        val crt = Crt(root.context)
         root.viewTreeObserver.addOnGlobalLayoutListener {
+            val screen = (root.layoutParams as? WindowManager.LayoutParams)?.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
+            crt.rim = screen
             val target = if (screen) root else solid(root) ?: return@addOnGlobalLayoutListener
             if (target !== on) {
                 on?.overlay?.remove(crt)
@@ -236,8 +242,8 @@ object XpChrome {
     /** The skin's CRT look: a dark line every 3dp and a darker [rim]. Drawn over the window, never blurs text. */
     private class Crt(
         context: android.content.Context,
-        val rim: Boolean,
     ) : Drawable() {
+        var rim = false
         private val period = px(context, 3f).coerceAtLeast(3)
         private val lines =
             Paint().apply {
@@ -273,7 +279,7 @@ object XpChrome {
         }
 
         override fun draw(canvas: Canvas) {
-            if (!XpGame.crt) return
+            if (!XpGame.crt || !isOn()) return
             canvas.drawRect(bounds, lines)
             if (rim) canvas.drawRect(bounds, edge)
         }

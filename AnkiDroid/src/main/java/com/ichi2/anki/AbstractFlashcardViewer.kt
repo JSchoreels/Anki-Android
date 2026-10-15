@@ -793,6 +793,11 @@ abstract class AbstractFlashcardViewer :
 
     open fun undo(): Job =
         launchCatchingTask {
+            // kuma3: choosing the deck happened before this review; undoing it here would silently switch decks
+            if (withCol { undoStatus().undo } == TR.browsingSelectDeck()) {
+                showSnackbar("Nothing left to undo in this review", Reviewer.ACTION_SNACKBAR_TIME)
+                return@launchCatchingTask
+            }
             undoAndShowSnackbar(duration = Reviewer.ACTION_SNACKBAR_TIME)
         }
 

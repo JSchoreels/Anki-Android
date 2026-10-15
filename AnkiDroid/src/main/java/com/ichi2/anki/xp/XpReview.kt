@@ -23,7 +23,6 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.widget.addTextChangedListener
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.R
@@ -76,13 +75,11 @@ class XpReview private constructor(
 
     init {
         // The game strip covers AnkiDroid's counts bar under the title (Anki XP "maximized" reviewer): it draws the
-        // live counts and the flag/mark icons of the views underneath, so the reviewer's own logic is untouched.
+        // flag/mark icons of the views underneath and its own cards-left count, so the reviewer's logic is untouched.
         activity.findViewById<android.widget.RelativeLayout>(R.id.top_bar)?.let { top ->
             top.setPadding(0, 0, 0, 0)
             top.background = ResourcesCompat.getDrawable(activity.resources, R.drawable.xp_status, null) // also under the side insets
-            bar.counts = listOf(R.id.new_number, R.id.learn_number, R.id.review_number).mapNotNull { activity.findViewById<TextView>(it) }
             bar.icons = listOf(R.id.flag_icon, R.id.mark_icon).mapNotNull { activity.findViewById<android.widget.ImageView>(it) }
-            bar.counts.forEach { tv -> tv.addTextChangedListener(afterTextChanged = { bar.invalidate() }) }
             top.addView(
                 bar,
                 android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
@@ -118,9 +115,18 @@ class XpReview private constructor(
         if (XpGame.firstClock()) {
             balloon(
                 "⏱ Speed bonus",
-                "Show the answer before the green line runs out (${XpGame.limit} s) for ${XpGame.FAST_POINTS} points instead of " +
-                    "${XpGame.POINTS}. Every grade counts the same, Again too: grade honestly.",
+                "Show the answer before the green line runs out (${XpGame.limit} s), then Good or Easy, for ${XpGame.FAST_POINTS} " +
+                    "points instead of ${XpGame.POINTS}. Again and Hard still count: grade honestly.",
             )
+        }
+        activity.launchCatchingTask {
+            // the deck list's number (its due tree), so both agree. ponytail: right after an undo the backend reports
+            // more for one card (9 for 5); the next card corrects it
+            bar.cardsLeft =
+                withCol {
+                    sched.deckDueTree().find(decks.selected())?.let { it.newCount + it.lrnCount + it.revCount } ?: -1
+                }
+            bar.invalidate()
         }
         if (XpGame.isBoss(deckId, cardId)) balloon("👑 BOSS CARD", "Failed ${card.lapses}×: ×3 XP on this card, whatever you press.")
     }
@@ -249,7 +255,7 @@ class XpReview private constructor(
             .withEndAction { overlay.removeView(v) }
     }
 
-    /** the skin's Points × Mult: a blue 10 and a red ×m slide in, slam into the total, which counts up and flies off */
+    /** the skin's Points × Mult: the blue points (10 or 15) and a red ×m slide in, slam into the total, count up, fly off */
     private fun pointsMult(
         points: Int,
         mult: Double,
@@ -330,10 +336,13 @@ class XpReview private constructor(
         msg: String,
     ) = Companion.balloon(activity, title, msg, bottomOffset())
 
-    /** window shake and a white flash, stronger at each multiplier step (s = 1..5) */
+    /**
+     * the game bar shakes and flashes white, stronger at each multiplier step (s = 1..5). Only the bar: shaking the
+     * whole screen moved the answer buttons under the thumb (a mis-grade).
+     */
     private fun shake(s: Int) {
         if (XpBar.calm(activity)) return
-        val target = overlay.getChildAt(0) ?: return
+        val target = bar
         ValueAnimator.ofFloat(0f, 1f).setDuration(200L + 80L * s).apply {
             addUpdateListener {
                 val k = it.animatedFraction
@@ -344,14 +353,19 @@ class XpReview private constructor(
             doOnEndReset(target)
             start()
         }
-        val flash = View(activity).apply { setBackgroundColor(Color.WHITE) }
-        overlay.addView(flash, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-        flash.alpha = 0.35f
-        flash
-            .animate()
-            .alpha(0f)
-            .setDuration(250)
-            .withEndAction { overlay.removeView(flash) }
+        val flash = android.graphics.drawable.ColorDrawable(Color.WHITE)
+        bar.foreground = flash
+        ValueAnimator.ofInt(160, 0).setDuration(250).apply {
+            addUpdateListener { flash.alpha = it.animatedValue as Int }
+            addListener(
+                object : android.animation.AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: android.animation.Animator) {
+                        bar.foreground = null
+                    }
+                },
+            )
+            start()
+        }
     }
 
     private fun ValueAnimator.doOnEndReset(v: View) =
@@ -448,9 +462,11 @@ class XpBar(
         }
     private val bold = Paint(text).apply { typeface = ResourcesCompat.getFont(context, R.font.xp_tahoma_bold) }
 
-    /** the reviewer's count views (new, learn, due) and flag/mark icons, drawn at the right */
-    var counts: List<TextView> = emptyList()
+    /** the reviewer's flag/mark icons, drawn at the right */
     var icons: List<android.widget.ImageView> = emptyList()
+
+    /** cards left today in this deck (new + learning + review), or < 0 until read */
+    var cardsLeft = -1
 
     /** fraction of the combo clock left, or < 0 when hidden */
     var timeLeft = -1f
@@ -496,9 +512,11 @@ class XpBar(
         val w = width.toFloat()
         val calm = calm(context)
         // what TalkBack reads for the bar (it opens the quests)
+        val toGoal = g.goal - g.reps
         val said =
-            "${g.reps} of ${g.goal} reps today, streak ${g.streak} days, level ${XpGame.level(g.xp) + 1}, combo ${XpGame.combo}. " +
-                "Opens the daily quests."
+            (if (toGoal > 0) "$toGoal reps to the daily goal" else "Daily goal met") +
+                (if (cardsLeft >= 0) ", $cardsLeft cards left" else "") +
+                ", streak ${g.streak} days, level ${XpGame.level(g.xp) + 1}, combo ${XpGame.combo}. Opens the daily quests."
         if (contentDescription != said) contentDescription = said
         // the combo clock along the bottom edge: blue while waiting for the word audio, green, red in the last 3 s
         val clockH = 4 * d
@@ -518,29 +536,19 @@ class XpBar(
         val cy = (h - clockH) / 2
         val base = cy - (text.ascent() + text.descent()) / 2
         var x = 8 * d
-        // goal ring
-        val over = g.reps >= g.goal
-        val p = if (over) min(1f, (g.reps - g.goal).toFloat() / g.goal) else g.reps.toFloat() / g.goal
-        val r = 9 * d
-        val ring = RectF(x, cy - r, x + 2 * r, cy + r)
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 4 * d
-        paint.color = if (over) Color.rgb(0x2e, 0xd3, 0x30) else Color.rgb(0x7a, 0x7a, 0x7a)
-        canvas.drawArc(ring, 0f, 360f, false, paint)
-        paint.color = if (over) Color.rgb(0xff, 0xb3, 0x00) else Color.rgb(0x2e, 0xd3, 0x30)
-        canvas.drawArc(ring, -90f, 360f * p, false, paint)
-        paint.style = Paint.Style.FILL
-        x += 2 * r + 6 * d
 
         fun word(
             s: String,
             pt: Paint = text,
+            color: Int = Color.BLACK,
         ) {
-            pt.color = Color.BLACK
+            pt.color = color
             canvas.drawText(s, x, base, pt)
             x += pt.measureText(s) + 8 * d
         }
-        word("${g.reps}/${g.goal}")
+        // the finish lines: reps to the daily goal (green once met) and cards left today
+        if (toGoal > 0) word("$toGoal to goal", bold) else word("goal ✓", bold, Color.rgb(0x00, 0x6b, 0x00))
+        if (cardsLeft >= 0) word("$cardsLeft left")
         word("🔥${g.streak}")
         val lv = XpGame.level(g.xp)
         word("Lv ${lv + 1}", bold)
@@ -565,16 +573,8 @@ class XpBar(
             } else {
                 1f
             }
-        // counts (and the flag/mark icons) at the right end
+        // the flag/mark icons at the right end
         var rx = w - 8 * d
-        for (tv in counts.asReversed()) {
-            val s = tv.text?.toString().orEmpty()
-            if (s.isEmpty() || tv.visibility == View.GONE) continue
-            val cpaint = Paint(text).apply { color = tv.currentTextColor }
-            rx -= cpaint.measureText(s)
-            canvas.drawText(s, rx, base, cpaint)
-            rx -= 6 * d
-        }
         for (icon in icons.asReversed()) {
             val dr = icon.drawable ?: continue
             if (icon.visibility != View.VISIBLE) continue

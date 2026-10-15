@@ -67,7 +67,7 @@ object XpGame {
         get() = prefs.getBoolean("crt", true)
         set(v) = prefs.edit { putBoolean("crt", v) }
 
-    /** The speed bonus time in seconds (the clock): faster flips earn [FAST_POINTS] instead of [POINTS] */
+    /** The speed bonus time in seconds (the clock): a flip within it, then Good or Easy, earns [FAST_POINTS] */
     var limit: Int
         get() = prefs.getInt("limit", 10)
         set(v) = prefs.edit { putInt("limit", v) }
@@ -395,8 +395,9 @@ object XpGame {
 
     /**
      * One answer. Honest grading never costs anything: every grade earns the same points and grows the combo, so
-     * pressing Hard instead of Again never pays (it would feed FSRS/RWKV a lie). Speed only adds (flipping within
-     * the clock earns [FAST_POINTS]); the combo breaks only when the reviewer closes or after [IDLE_MS] away.
+     * pressing Hard instead of Again never pays (it would feed FSRS/RWKV a lie). Speed only adds: a flip within the
+     * clock that you then pass with Good or Easy earns [FAST_POINTS], so flipping before recalling doesn't pay. The
+     * combo breaks only when the reviewer closes or after [IDLE_MS] away.
      */
     fun score(
         ease: Int,
@@ -408,7 +409,7 @@ object XpGame {
         newDay()
         answers.addLast(Before(ease, mine.toString(), bosses.toString(), combo))
         if (answers.size > 50) answers.removeFirst()
-        val fast = thinkMs < limit * 1000L
+        val fast = thinkMs < limit * 1000L && ease >= 3
         val lv = level(g.xp)
         val m0 = mult()
         val wasHit = g.goalHit

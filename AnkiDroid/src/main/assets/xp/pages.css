@@ -94,3 +94,22 @@ li.active > button[aria-pressed="true"] {
     border-color: #003c74 !important;
     color: #ffffff !important;
 }
+
+/* Accessibility (2026-10-15 check on the Pixel): the revert icon was #9a9a9a (2.8:1) on a ~20 px target next to
+   the field; the off switch nearly vanished on the scanlines; the Preset / This deck / Today only tabs were 20 px
+   tall. The revert badge is the only .badge with p-1 (RevertButton.svelte). */
+button.badge.p-1 {
+    color: #444444 !important;
+    opacity: 1 !important;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.form-switch .form-check-input:not(:checked) {
+    border-color: #003c74 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -4 8 8%27%3e%3ccircle r=%273%27 fill=%27%237f7f7f%27/%3e%3c/svg%3e") !important;
+}
+
+li > button[aria-pressed] {
+    min-height: 32px;
+}

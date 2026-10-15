@@ -48,6 +48,13 @@ class XpReview private constructor(
     private val bar = XpBar(activity)
     private val overlay = activity.findViewById<FrameLayout>(android.R.id.content)
     private val handler = Handler(Looper.getMainLooper())
+
+    /** what TalkBack says after each answer ("+15 XP, combo 6"): an all-but-invisible polite live region */
+    private val said =
+        TextView(activity).apply {
+            accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
+            alpha = 0.01f
+        }
     private var cardId = 0L
     private var deckId = 0L
     private var shown = true
@@ -86,6 +93,7 @@ class XpReview private constructor(
             )
         }
         bar.setOnClickListener { XpWindows.quests(activity) }
+        overlay.addView(said, FrameLayout.LayoutParams(1, 1))
         XpGame.startSession()
         activity.launchCatchingTask {
             withCol {
@@ -152,6 +160,7 @@ class XpReview private constructor(
         XpSound.buzz(activity, ease.toString())
         pointsMult(r.points, r.mult, r.xp)
         comboBroken(r.brokeCombo)
+        said.text = (if (r.brokeCombo >= 3) "Combo of ${r.brokeCombo} broken. " else "") + "+${r.xp} XP, combo ${XpGame.combo}"
         if (r.multUp) {
             XpSound.chime(listOf(660.0, 880.0))
             shake(XpGame.mult().toInt())
@@ -247,6 +256,11 @@ class XpReview private constructor(
     ) {
         val v = textView(text, color, sp).apply { if (color == GOLD) chipBackground(this, NAVY) }
         addOverlay(v, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, bottomOffset() + dp(50))
+        // with Remove animations the fade ends at once: hold it still for a second instead
+        if (XpBar.calm(activity)) {
+            handler.postDelayed({ overlay.removeView(v) }, 1000)
+            return
+        }
         v
             .animate()
             .translationY(-dp(50).toFloat())
@@ -313,7 +327,7 @@ class XpReview private constructor(
             row.animate().translationY(-overlay.height * 0.6f).scaleX(0.5f).scaleY(0.5f).alpha(0f).setDuration(350).withEndAction {
                 overlay.removeView(row)
             }
-        }, 950)
+        }, if (XpBar.calm(activity)) 1600 else 950) // still: the total stays readable
     }
 
     /** a game chip: white-on-colour, 2dp black border, 4dp corners */
@@ -477,8 +491,6 @@ class XpBar(
 
     init {
         background = ResourcesCompat.getDrawable(resources, R.drawable.xp_status, null)
-        // its description (reps, streak, level, combo) is read out when an answer changes it
-        accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_POLITE
     }
 
     fun setClock(
@@ -523,13 +535,13 @@ class XpBar(
         val h = height.toFloat()
         if (timeLeft >= 0) {
             paint.shader = null
-            paint.color = Color.rgb(0xc9, 0xc6, 0xb8)
+            paint.color = Color.rgb(0xd8, 0xd5, 0xc8) // the track: light, so the fill reads 3:1 on it
             canvas.drawRect(0f, h - clockH, w, h, paint)
             paint.color =
                 when {
-                    !clockRunning -> Color.rgb(0x9d, 0xb3, 0xd6)
-                    timeLeft * XpGame.limit <= 3 -> Color.rgb(0xe0, 0x20, 0x20)
-                    else -> Color.rgb(0x2e, 0xd3, 0x30)
+                    !clockRunning -> Color.rgb(0x3a, 0x5f, 0x9e)
+                    timeLeft * XpGame.limit <= 3 -> Color.rgb(0xb0, 0, 0)
+                    else -> Color.rgb(0x1e, 0x7b, 0x1e)
                 }
             canvas.drawRect(0f, h - clockH, w * (if (clockRunning) timeLeft else 1f), h, paint)
         }
@@ -612,9 +624,15 @@ class XpBar(
                 )
             canvas.drawRoundRect(RectF(cx - 3 * d, base + 4 * d - h, cx + mw + 3 * d, base + 4 * d), 4 * d, 4 * d, paint)
             paint.shader = null
-            val white = Paint(cp).apply { color = Color.WHITE }
-            white.setShadowLayer(3f, 1f, 1f, Color.rgb(0xa0, 0, 0))
-            canvas.drawText(multText, cx, base, white)
+            val outline =
+                Paint(cp).apply {
+                    color = Color.rgb(0x60, 0, 0)
+                    style = Paint.Style.STROKE
+                    strokeWidth = 3 * d
+                    strokeJoin = Paint.Join.ROUND
+                }
+            canvas.drawText(multText, cx, base, outline)
+            canvas.drawText(multText, cx, base, Paint(cp).apply { color = Color.WHITE })
             canvas.drawText(comboText, cx + cp.measureText(multText), base, cp)
             if (!calm) postInvalidateDelayed(80)
         } else {

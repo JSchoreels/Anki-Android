@@ -115,7 +115,7 @@ button:not(.badge):not(.scheduler-help):active, .btn:active {
 }
 
 h1, h2 {
-    font-family: "Trebuchet MS", Tahoma, Roboto, sans-serif;
+    font-family: "XP Tahoma", Tahoma, Roboto, sans-serif !important; /* Trebuchet is not on Android */
     color: #215dc6;
 }
 
@@ -134,7 +134,7 @@ li.active > button[aria-pressed="true"] {
 }
 
 /* Accessibility (2026-10-15 check on the Pixel): the revert icon was #9a9a9a (2.8:1) on a ~20 px target next to
-   the field; the off switch nearly vanished on the scanlines; the Preset / This deck / Today only tabs were 20 px
+   the field; the Preset / This deck / Today only tabs were 20 px
    tall. The revert badge is the only .badge with p-1 (RevertButton.svelte). */
 button.badge.p-1 {
     color: #444444 !important;
@@ -143,12 +143,71 @@ button.badge.p-1 {
     min-height: 32px;
 }
 
-.form-switch .form-check-input:not(:checked) {
-    border-color: #003c74 !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%27-4 -4 8 8%27%3e%3ccircle r=%273%27 fill=%27%237f7f7f%27/%3e%3c/svg%3e") !important;
-}
 
 li > button[aria-pressed] {
+    min-height: 32px;
+}
+
+/* Switches become XP check boxes (DESIGN.md: no Material pills): 24 px square, navy edge, the XP white-to-grey
+   diagonal face, green tick when on. The label still toggles it, so the target is the whole row. */
+.form-switch .form-check-input {
+    width: 24px !important;
+    height: 24px !important;
+    border: 1px solid #1c5180 !important;
+    border-radius: 0 !important;
+    background: linear-gradient(135deg, #dcdcd7, #ffffff 70%) !important;
+}
+
+.form-switch .form-check-input:checked {
+    background:
+        url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3e%3cpath d=%27M3 8.2l3.2 3.2L13 4.6%27 fill=%27none%27 stroke=%27%2321a121%27 stroke-width=%272.6%27/%3e%3c/svg%3e") center / 18px no-repeat,
+        linear-gradient(135deg, #dcdcd7, #ffffff 70%) !important;
+}
+
+.form-switch .form-check-input:focus-visible {
+    outline: 1px dotted #000000 !important;
+    outline-offset: 2px;
+    box-shadow: none !important;
+}
+
+/* Easy Days sliders become XP trackbars: a thin sunken groove and a push-button thumb */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 32px;
+    background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: #f0f0ea;
+    border: 1px solid;
+    border-color: #9d9da1 #ffffff #ffffff #9d9da1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 26px;
+    margin-top: -12px;
+    border: 1px solid #003c74;
+    border-radius: 2px;
+    background: linear-gradient(#ffffff, #ecebe6 86%, #d6d0c5);
+}
+
+/* Drop-downs are XP combo boxes: a white field (the arrow button keeps Anki's own) */
+.select-container {
+    background: #ffffff !important;
+}
+
+/* Section help: XP blue "?" instead of a dark grey disc, on a 32 px target centred on the frame line */
+.container > .position-relative > .help-badge {
+    top: -16px !important;
+    color: #215dc6 !important;
+}
+
+.container > .position-relative > .help-badge .badge {
+    min-width: 32px;
     min-height: 32px;
 }
 

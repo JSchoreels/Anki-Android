@@ -45,7 +45,7 @@ typography:
     fontSize: "13sp"
     fontWeight: 400
   page-heading:
-    fontFamily: "Trebuchet MS, Tahoma, Roboto, sans-serif"
+    fontFamily: "XP Tahoma (Wine Tahoma), Tahoma, Roboto, sans-serif"
     fontWeight: 700
 rounded:
   control: "3px"
@@ -164,7 +164,7 @@ A Luna blue chrome over warm beige faces and white content, with classic Anki co
 
 **Body Font:** XP Tahoma (Wine's free Tahoma, bundled), falling back to Tahoma, then Roboto.
 **Title Font:** XP Tahoma Bold.
-**Page Heading Font:** Trebuchet MS for headings in backend web pages (Android lacks it, so it currently falls back to Tahoma/Roboto).
+**Page Heading Font:** XP Tahoma (Trebuchet MS is not on Android).
 
 **Character:** Tahoma is the voice of XP: narrow, plain, slightly technical. Bold Tahoma with a hard navy drop shadow is the title-bar signature.
 
@@ -194,7 +194,7 @@ Depth is XP's, not Material's: drawn with gradients and hard 1px lines, not soft
 
 ## Shapes
 
-Small, square-ish XP corners: 3px on buttons, fields, caption buttons and selection fills; 4px on game chips; 8px on the top corners of windows and dialogs (square bottom corners); 8px all round on balloon tips. Borders are 1px hard lines (3px for window frames). Switches are the one remaining pill and are on the way out (see Don'ts).
+Small, square-ish XP corners: 3px on buttons, fields, caption buttons and selection fills; 4px on game chips; 8px on the top corners of windows and dialogs (square bottom corners); 8px all round on balloon tips. Borders are 1px hard lines (3px for window frames). On/off settings are XP check boxes (square, 0 corners), not pills.
 
 ## Components
 
@@ -212,13 +212,18 @@ Tactile and a little chunky, unmistakably XP.
 
 ### Cards / Containers
 - **Group box (home):** 1px Group Box Frame, label in Group Box Label Blue 13sp cut into the top edge.
-- **Group box (web pages, e.g. deck options):** an XP Properties sheet. Transparent on the face, 1px Group Box Etch with a white inset line, 3px corners, 20/12/10px padding; the section title (16px Tahoma, Group Box Label Blue) and the help badge sit in the top edge on a face-coloured patch.
+- **Group box (web pages, e.g. deck options):** an XP Properties sheet. Transparent on the face, 1px Group Box Etch with a white inset line, 3px corners, 20/12/10px padding; the section title (16px Tahoma, Group Box Label Blue) and the help badge (Heading Blue ?, 32px target) sit in the top edge on a face-coloured patch.
 - **Window (dialogs, congrats):** XP Face body, 3px Window Frame Blue, 8px top corners.
 - **Explorer list:** white with a 1px Control Border edge.
+
+### Check Boxes and Trackbars
+- **Check box:** every on/off setting (web switches included): 24px square, 1px #1C5180 edge, diagonal #DCDCD7 to white face, green (#21A121) tick when on; the label toggles it too.
+- **Trackbar:** a 4px sunken groove (grey top-left, white bottom-right edges) with a 14x26px push-button thumb.
 
 ### Inputs / Fields
 - **Style:** white field, 1px Control Border, 3px corners.
 - **Focus:** Selection Blue border.
+- **Combo box (drop-down):** a white field with Anki's arrow button.
 - **Revert icon (web):** Muted text colour on a 32px target.
 
 ### Navigation
@@ -242,7 +247,7 @@ The game bar sits under the title bar with level, combo clock and XP; pop-ups ri
 - **Do** keep game colour and motion for answer feedback.
 
 ### Don't:
-- **Don't** use Material You shapes: pill toggles, M3 chips, tonal FABs, large rounded cards. (Today's switches and Easy Days sliders are still Material and are the next to replace with XP checkboxes and trackbars.)
+- **Don't** use Material You shapes: pill toggles, M3 chips, tonal FABs, large rounded cards.
 - **Don't** mix in another Windows era: no 98 grey bevels, Vista/7 glass, or 10/11 flat styling.
 - **Don't** use soft blurred shadows or gradients outside the XP vocabulary above.
 - **Don't** show Roboto where Tahoma can load.

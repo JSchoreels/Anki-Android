@@ -21,6 +21,7 @@ import com.ichi2.anki.launchCatchingTask
 import com.ichi2.anki.model.SelectableDeck
 import com.ichi2.anki.snackbar.showSnackbar
 import com.ichi2.anki.withProgress
+import com.ichi2.anki.xp.XpGlance
 import dev.androidbroadcast.vbpd.viewBinding
 import timber.log.Timber
 
@@ -92,6 +93,12 @@ class Statistics : PageFragment(R.layout.page_statistics) {
             )
     }
 
+    // kuma3: Anki XP's "At a glance" box once the page has loaded (xp/XpGlance.kt)
+    override fun onCreateWebViewClient(savedInstanceState: Bundle?) =
+        super.onCreateWebViewClient(savedInstanceState).apply {
+            onPageFinishedCallbacks.add { XpGlance.show(this@Statistics, binding.deckName.text.toString()) }
+        }
+
     private fun onDeckSelected(deck: SelectableDeck?) {
         if (deck == null) return
         require(deck is SelectableDeck.Deck)
@@ -120,6 +127,7 @@ class Statistics : PageFragment(R.layout.page_statistics) {
             textBox.dispatchEvent(new Event("change"));
             """.trimIndent()
         webViewLayout.evaluateJavascript(javascriptCode, null)
+        XpGlance.show(this, selectedDeckName) // kuma3
     }
 
     companion object {

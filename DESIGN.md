@@ -231,6 +231,9 @@ Tactile and a little chunky, unmistakably XP.
 - **Title bar:** Luna gradient with highlight and deep edges, bold shadowed Tahoma, caption-button actions; system Back always works.
 - **Side menu:** the Start menu's white list with an XP header image; checked item in Heading Blue.
 
+### At a Glance (Statistics)
+The quick answer at the top of Statistics: a group box of four read-only XP fields (white, 1px Control Border), each a 24px bold number over a 13px label, 2 by 2. Retention is Count Learn red below the deck's target and Count Due green on it, with the target written out.
+
 ### Message Box and Balloon Tip (signature)
 Alerts are XP message boxes: title bar, a drawn XP icon (info, question, warning, error), centred push buttons. Snackbars are cream balloon tips with a black 1px border and Selection Blue actions.
 

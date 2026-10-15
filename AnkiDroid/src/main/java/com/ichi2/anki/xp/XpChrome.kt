@@ -202,7 +202,10 @@ object XpChrome {
                 if (v is TextView) TextViewCompat.setCompoundDrawableTintList(v, WHITE_ICONS)
                 if (v is ImageView) v.setColorFilter(Color.WHITE)
             }
+            // a title view of its own (Statistics deck name and its ▾): white like the toolbar title
             v is TextView && parent is Toolbar -> {
+                v.setTextColor(Color.WHITE)
+                TextViewCompat.setCompoundDrawableTintList(v, WHITE_ICONS)
                 v.typeface = ResourcesCompat.getFont(ctx, R.font.xp_tahoma_bold)
                 v.setShadowLayer(1f, 1.5f, 1.5f, Color.rgb(0x0f, 0x10, 0x89))
             }

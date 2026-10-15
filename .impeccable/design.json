@@ -1,0 +1,616 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T10:44:34+00:00",
+  "title": "Design System: kuma3 Anki XP",
+  "extensions": {
+    "colorMeta": {
+      "luna-blue": {
+        "role": "primary",
+        "displayName": "Luna Blue",
+        "canonical": "#0054E3",
+        "tonalRamp": [
+          "#001C4C",
+          "#002F80",
+          "#0042B2",
+          "#0055E6",
+          "#2978FF",
+          "#669FFF",
+          "#A8C8FF",
+          "#E5EFFF"
+        ]
+      },
+      "luna-deep": {
+        "role": "primary",
+        "displayName": "Luna Deep",
+        "canonical": "#003DD7",
+        "tonalRamp": [
+          "#00164C",
+          "#002480",
+          "#0033B2",
+          "#0041E6",
+          "#2966FF",
+          "#6691FF",
+          "#A8C1FF",
+          "#E5EDFF"
+        ]
+      },
+      "luna-highlight": {
+        "role": "primary",
+        "displayName": "Luna Highlight",
+        "canonical": "#0997FF",
+        "tonalRamp": [
+          "#002C4C",
+          "#004A80",
+          "#0067B2",
+          "#0084E6",
+          "#29A4FF",
+          "#66BEFF",
+          "#A8DAFF",
+          "#E5F4FF"
+        ]
+      },
+      "window-frame": {
+        "role": "primary",
+        "displayName": "Window Frame",
+        "canonical": "#0831D9",
+        "tonalRamp": [
+          "#03114A",
+          "#051C7B",
+          "#0627AC",
+          "#0832DD",
+          "#3057F7",
+          "#6B87FA",
+          "#ABBBFC",
+          "#E6EBFE"
+        ]
+      },
+      "selection-blue": {
+        "role": "primary",
+        "displayName": "Selection Blue",
+        "canonical": "#316AC5",
+        "tonalRamp": [
+          "#0F213D",
+          "#193766",
+          "#244D8F",
+          "#2E63B8",
+          "#5385D4",
+          "#84A8E1",
+          "#BACEEE",
+          "#EBF0FA"
+        ]
+      },
+      "hover-tint": {
+        "role": "primary",
+        "displayName": "Hover Tint",
+        "canonical": "#C1D2EE",
+        "tonalRamp": [
+          "#10213C",
+          "#1B3764",
+          "#264D8C",
+          "#3163B4",
+          "#5785D1",
+          "#87A8DE",
+          "#BBCEEC",
+          "#EBF0FA"
+        ]
+      },
+      "taskbar-blue": {
+        "role": "primary",
+        "displayName": "Taskbar Blue",
+        "canonical": "#245EDB",
+        "tonalRamp": [
+          "#0B1C42",
+          "#122F6E",
+          "#194299",
+          "#2055C5",
+          "#4778E1",
+          "#7C9EE9",
+          "#B5C8F3",
+          "#E9EFFB"
+        ]
+      },
+      "heading-blue": {
+        "role": "primary",
+        "displayName": "Heading Blue",
+        "canonical": "#215DC6",
+        "tonalRamp": [
+          "#0B1F42",
+          "#12336D",
+          "#194899",
+          "#215CC5",
+          "#477FE0",
+          "#7CA4E9",
+          "#B5CBF3",
+          "#E9F0FB"
+        ]
+      },
+      "link-blue": {
+        "role": "primary",
+        "displayName": "Link Blue",
+        "canonical": "#1D4FA8",
+        "tonalRamp": [
+          "#0B1F41",
+          "#13336D",
+          "#1A4898",
+          "#225CC4",
+          "#487FDF",
+          "#7DA3E8",
+          "#B5CBF2",
+          "#E9F0FB"
+        ]
+      },
+      "groupbox-label": {
+        "role": "primary",
+        "displayName": "Groupbox Label",
+        "canonical": "#0046D5",
+        "tonalRamp": [
+          "#00194C",
+          "#002A80",
+          "#003BB2",
+          "#004BE6",
+          "#296FFF",
+          "#6698FF",
+          "#A8C5FF",
+          "#E5EEFF"
+        ]
+      },
+      "title-shadow": {
+        "role": "primary",
+        "displayName": "Title Shadow",
+        "canonical": "#0F1089",
+        "tonalRamp": [
+          "#080845",
+          "#0D0D73",
+          "#1213A1",
+          "#1718CF",
+          "#3E3FEA",
+          "#7576F0",
+          "#B1B1F6",
+          "#E8E8FC"
+        ]
+      },
+      "start-green": {
+        "role": "secondary",
+        "displayName": "Start Green",
+        "canonical": "#3C9A3C",
+        "tonalRamp": [
+          "#153715",
+          "#245C24",
+          "#328032",
+          "#40A540",
+          "#65C365",
+          "#91D491",
+          "#C1E7C1",
+          "#EDF8ED"
+        ]
+      },
+      "progress-green": {
+        "role": "secondary",
+        "displayName": "Progress Green",
+        "canonical": "#2ED330",
+        "tonalRamp": [
+          "#0D3F0E",
+          "#166917",
+          "#1F9320",
+          "#28BE2A",
+          "#4EDA50",
+          "#81E482",
+          "#B7F0B8",
+          "#EAFBEA"
+        ]
+      },
+      "xp-face": {
+        "role": "neutral",
+        "displayName": "Xp Face",
+        "canonical": "#ECE9D8",
+        "tonalRamp": [
+          "#332F19",
+          "#564F2A",
+          "#786F3A",
+          "#9A8E4B",
+          "#B9AE6F",
+          "#CDC598",
+          "#E3DEC5",
+          "#F7F5EE"
+        ]
+      },
+      "face-light": {
+        "role": "neutral",
+        "displayName": "Face Light",
+        "canonical": "#F1EFE2",
+        "tonalRamp": [
+          "#343019",
+          "#56502A",
+          "#78703A",
+          "#9B904B",
+          "#B9AF6F",
+          "#CDC698",
+          "#E3DFC5",
+          "#F7F6EE"
+        ]
+      },
+      "button-shade": {
+        "role": "neutral",
+        "displayName": "Button Shade",
+        "canonical": "#D6D0C5",
+        "tonalRamp": [
+          "#2D2820",
+          "#4B4335",
+          "#695E4A",
+          "#86795F",
+          "#A69982",
+          "#C0B6A5",
+          "#DBD6CC",
+          "#F4F3F0"
+        ]
+      },
+      "groupbox-frame": {
+        "role": "neutral",
+        "displayName": "Groupbox Frame",
+        "canonical": "#D0D0BF",
+        "tonalRamp": [
+          "#2C2C20",
+          "#4A4A36",
+          "#67674C",
+          "#848461",
+          "#A4A483",
+          "#BEBEA7",
+          "#DADACD",
+          "#F4F4F0"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Control Border",
+        "canonical": "#7F9DB9",
+        "tonalRamp": [
+          "#1B2731",
+          "#2D4052",
+          "#3F5A73",
+          "#517494",
+          "#7595B3",
+          "#9CB3C9",
+          "#C7D4E0",
+          "#EFF2F6"
+        ]
+      },
+      "button-border": {
+        "role": "neutral",
+        "displayName": "Button Border",
+        "canonical": "#003C74",
+        "tonalRamp": [
+          "#00284C",
+          "#004280",
+          "#005CB2",
+          "#0077E6",
+          "#2998FF",
+          "#66B5FF",
+          "#A8D5FF",
+          "#E5F3FF"
+        ]
+      },
+      "balloon-cream": {
+        "role": "neutral",
+        "displayName": "Balloon Cream",
+        "canonical": "#FFFFE1",
+        "tonalRamp": [
+          "#4C4C00",
+          "#7F8000",
+          "#B2B200",
+          "#E5E600",
+          "#FFFF29",
+          "#FFFF66",
+          "#FFFFA8",
+          "#FFFFE5"
+        ]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#B2B2B2",
+          "#D4D4D4",
+          "#F2F2F2"
+        ]
+      },
+      "ink-black": {
+        "role": "neutral",
+        "displayName": "Ink Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#B2B2B2",
+          "#D4D4D4",
+          "#F2F2F2"
+        ]
+      },
+      "muted-text": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "#595959",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#B2B2B2",
+          "#D4D4D4",
+          "#F2F2F2"
+        ]
+      },
+      "count-new": {
+        "role": "neutral",
+        "displayName": "Count New",
+        "canonical": "#0000FF",
+        "tonalRamp": [
+          "#00004C",
+          "#000080",
+          "#0000B2",
+          "#0000E6",
+          "#2929FF",
+          "#6666FF",
+          "#A8A8FF",
+          "#E5E5FF"
+        ]
+      },
+      "count-learn": {
+        "role": "neutral",
+        "displayName": "Count Learn",
+        "canonical": "#C00000",
+        "tonalRamp": [
+          "#4C0000",
+          "#800000",
+          "#B20000",
+          "#E60000",
+          "#FF2929",
+          "#FF6666",
+          "#FFA8A8",
+          "#FFE5E5"
+        ]
+      },
+      "count-due": {
+        "role": "neutral",
+        "displayName": "Count Due",
+        "canonical": "#008000",
+        "tonalRamp": [
+          "#004C00",
+          "#008000",
+          "#00B200",
+          "#00E600",
+          "#29FF29",
+          "#66FF66",
+          "#A8FFA8",
+          "#E5FFE5"
+        ]
+      },
+      "pop-gold": {
+        "role": "tertiary",
+        "displayName": "Pop Gold",
+        "canonical": "#FFD700",
+        "tonalRamp": [
+          "#4C4000",
+          "#806C00",
+          "#B29600",
+          "#E6C200",
+          "#FFDD29",
+          "#FFE766",
+          "#FFF1A8",
+          "#FFFBE5"
+        ]
+      },
+      "combo-cyan": {
+        "role": "tertiary",
+        "displayName": "Combo Cyan",
+        "canonical": "#009DFF",
+        "tonalRamp": [
+          "#002F4C",
+          "#004E80",
+          "#006EB2",
+          "#008DE6",
+          "#29ADFF",
+          "#66C4FF",
+          "#A8DEFF",
+          "#E5F5FF"
+        ]
+      },
+      "multiplier-coral": {
+        "role": "tertiary",
+        "displayName": "Multiplier Coral",
+        "canonical": "#FE5F55",
+        "tonalRamp": [
+          "#4C0500",
+          "#7F0801",
+          "#B10B01",
+          "#E40F01",
+          "#FE372A",
+          "#FE7067",
+          "#FEAEA9",
+          "#FFE7E6"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "Luna title bar text, bold with navy shadow."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Lists, dialogs, buttons, deck names."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Group box labels, links, game bar."
+      },
+      "page-heading": {
+        "displayName": "Page heading",
+        "purpose": "Section titles in backend web pages."
+      }
+    },
+    "shadows": [
+      {
+        "name": "title-text",
+        "value": "2px 2px 1px #0F1089",
+        "purpose": "Luna title bar text (text-shadow)."
+      },
+      {
+        "name": "window-drop",
+        "value": "2px 2px 0 rgba(0,0,0,0.25)",
+        "purpose": "Web-page section windows."
+      },
+      {
+        "name": "crt-scanlines",
+        "value": "one row in three (3dp period) of rgba(0,0,0,0.12)",
+        "purpose": "CRT layer over every window, menu and dialog; optional."
+      }
+    ],
+    "motion": [
+      {
+        "name": "pop-rise",
+        "value": "350ms, translateY(-50dp) with fade",
+        "purpose": "Game +XP and chip pop-ups."
+      },
+      {
+        "name": "balloon-fade",
+        "value": "150ms fade in",
+        "purpose": "Game balloons."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "~412dp wide (1080px at DPR 2.625)"
+      },
+      {
+        "name": "tablet",
+        "value": "Tab S7+ class"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Push Button",
+      "kind": "button",
+      "refersTo": "button-push",
+      "description": "Every XP push button: dialogs, toolbar text buttons, web-page buttons.",
+      "html": "<button class=\"ds-btn-push\">OK</button>",
+      "css": ".ds-btn-push{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-size:15px;color:#000;min-width:88px;min-height:38px;padding:0 14px;border:1px solid #003C74;border-radius:3px;background:linear-gradient(#FFFFFF,#ECEBE6 86%,#D6D0C5);cursor:pointer}.ds-btn-push:active{background:linear-gradient(#CDCAC3,#E3E3DB 8%,#F2F2F1)}.ds-btn-push:focus-visible{outline:1px dotted #000;outline-offset:-5px}"
+    },
+    {
+      "name": "Answer Buttons",
+      "kind": "button",
+      "refersTo": "button-push",
+      "description": "One push-button look; the label colour tells Again / Hard / Good / Easy apart.",
+      "html": "<div class=\"ds-answers\"><button class=\"ds-ans\" style=\"color:#C00000\">Again</button><button class=\"ds-ans\">Hard</button><button class=\"ds-ans\" style=\"color:#008000\">Good</button><button class=\"ds-ans\" style=\"color:#0000FF\">Easy</button></div>",
+      "css": ".ds-answers{display:flex;gap:6px;background:#ECE9D8;padding:6px}.ds-ans{flex:1;font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-size:15px;color:#000;min-height:44px;border:1px solid #003C74;border-radius:3px;background:linear-gradient(#FFFFFF,#ECEBE6 86%,#D6D0C5);}.ds-ans:active{background:linear-gradient(#CDCAC3,#E3E3DB 8%,#F2F2F1)}"
+    },
+    {
+      "name": "Selected Choice",
+      "kind": "chip",
+      "refersTo": "choice-selected",
+      "description": "The One Selection Rule: active tab or chosen option in Selection Blue.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab ds-on\" aria-pressed=\"true\">Preset</button><button class=\"ds-tab\" aria-pressed=\"false\">This deck</button><button class=\"ds-tab\" aria-pressed=\"false\">Today only</button></div>",
+      "css": ".ds-tabs{display:flex;justify-content:space-between;gap:8px}.ds-tab{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-size:14px;min-height:32px;padding:0 10px;color:#000;border:1px solid #003C74;border-radius:3px;background:linear-gradient(#FFFFFF,#ECEBE6 86%,#D6D0C5);}.ds-tab.ds-on{background:#316AC5;color:#fff}"
+    },
+    {
+      "name": "Luna Title Bar",
+      "kind": "nav",
+      "refersTo": "title-bar",
+      "description": "App bar: Luna gradient, highlight and deep edges, bold shadowed Tahoma, caption-button actions.",
+      "html": "<div class=\"ds-title\"><span class=\"ds-title-text\">kuma3</span><span class=\"ds-cap\">&#8635;</span><span class=\"ds-cap\">&#8942;</span></div>",
+      "css": ".ds-title{display:flex;align-items:center;gap:8px;height:56px;padding:0 12px;border-top:2px solid #0997FF;border-bottom:2px solid #003DD7;background:linear-gradient(#0053EE,#0050EE 50%,#0066FF)}.ds-title-text{flex:1;font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-weight:700;font-size:20px;color:#fff;text-shadow:2px 2px 1px #0F1089}.ds-cap{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;color:#fff;border:1px solid #fff;border-radius:3px;background:linear-gradient(135deg,#6F93E6,#2A62DD 50%,#0047D6)}.ds-cap:active{background:linear-gradient(135deg,#3C6FD8,#1747B8 50%,#0A3399)}"
+    },
+    {
+      "name": "Group Box",
+      "kind": "card",
+      "refersTo": "groupbox-label",
+      "description": "Home screen sections: thin frame with the label cut into the top edge.",
+      "html": "<fieldset class=\"ds-group\"><legend>Player</legend>Lv 18 &middot; 809/1800 XP</fieldset>",
+      "css": ".ds-group{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-size:15px;color:#000;background:#fff;border:1px solid #D0D0BF;border-radius:3px;padding:8px;margin:0}.ds-group legend{color:#0046D5;font-size:13px;padding:0 4px}"
+    },
+    {
+      "name": "Message Box",
+      "kind": "custom",
+      "refersTo": "dialog-window",
+      "description": "Dialogs as XP message boxes: Luna frame, beige face, centred push buttons.",
+      "html": "<div class=\"ds-msg\"><div class=\"ds-msg-bar\">kuma3</div><p class=\"ds-msg-body\">Discard changes?</p><div class=\"ds-msg-btns\"><button class=\"ds-msg-btn\">OK</button><button class=\"ds-msg-btn\">Cancel</button></div></div>",
+      "css": ".ds-msg{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;width:280px;background:#ECE9D8;border:3px solid #0831D9;border-radius:8px 8px 0 0}.ds-msg-bar{color:#fff;font-weight:700;padding:6px 8px;background:linear-gradient(#0053EE,#0066FF);text-shadow:1px 1px 1px #0F1089}.ds-msg-body{margin:16px;font-size:15px}.ds-msg-btns{display:flex;justify-content:center;gap:10px;padding:0 0 12px}.ds-msg-btn{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-size:15px;min-width:88px;min-height:38px;border:1px solid #003C74;border-radius:3px;background:linear-gradient(#FFFFFF,#ECEBE6 86%,#D6D0C5);}.ds-msg-btn:active{background:linear-gradient(#CDCAC3,#E3E3DB 8%,#F2F2F1)}"
+    },
+    {
+      "name": "Balloon Tip",
+      "kind": "custom",
+      "refersTo": "balloon-tip",
+      "description": "Snackbars as XP balloon tips.",
+      "html": "<div class=\"ds-balloon\">Undone: Good <a href=\"#\">Redo</a></div>",
+      "css": ".ds-balloon{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-size:14px;color:#000;background:#FFFFE1;border:1px solid #000;border-radius:8px;padding:10px 12px;display:inline-flex;gap:16px}.ds-balloon a{color:#316AC5}"
+    },
+    {
+      "name": "Game Pop",
+      "kind": "custom",
+      "refersTo": "game-chip",
+      "description": "Answer feedback: gold +XP with combo and multiplier chips.",
+      "html": "<div class=\"ds-pop\"><span class=\"ds-chip\" style=\"background:#009DFF\">10</span><span class=\"ds-xp\">+24 XP</span><span class=\"ds-chip\" style=\"background:#FE5F55\">&times;2</span></div>",
+      "css": ".ds-pop{display:flex;align-items:center;gap:8px}.ds-chip{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-weight:700;color:#fff;padding:1px 8px;border:2px solid #000;border-radius:4px}.ds-xp{font-family:Tahoma,'XP Tahoma',Roboto,sans-serif;font-weight:700;font-size:28px;color:#FFD700;text-shadow:2px 2px 0 #000}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Arcade Desktop",
+    "overview": "Anki XP is a faithful Windows XP Luna desktop that hosts a loud little arcade. The frame is 2003 and taken seriously: Luna blue title bars with the light top edge and dark navy text shadow, beige window faces, white Explorer lists, push buttons with the white-to-beige gradient, message boxes with real XP icons, balloon tips, group boxes with their label set into the frame. Inside that calm frame, the reward moments are allowed to shout: gold \"+XP\" pops, cyan and coral combo chips, a fire-coloured combo counter, a boss card, 8-bit sounds. The contrast between the sober desktop and the bright arcade is the personality.\n\nIt is a phone app first. XP supplies the look; phone ergonomics supply the rules: touch targets, contrast measured against the scanlines, and Android Back all win over pixel-faithful XP when they conflict. Density is XP-normal (13-15sp Tahoma, tight 5-8dp gaps), never crammed below a usable target. A CRT scanline layer sits over every window, menu and dialog, in step across windows, and can be turned off.\n\nRejected outright: Material You shapes (pill toggles, M3 chips, tonal FABs, big rounded cards) and any other Windows era (98 grey, Vista/7 glass, 10/11 flat). If it does not look like it shipped with XP Luna, it does not belong.",
+    "keyCharacteristics": [
+      "Every screen is an XP object: window, message box, Explorer list, group box, Start menu, balloon tip.",
+      "One selection colour (XP selection blue) marks every chosen, active or pressed-on state.",
+      "Calm frame, loud rewards: saturated colour belongs to game moments, not to chrome.",
+      "Tahoma everywhere, bold with a navy shadow on title bars.",
+      "Small corners (3px controls, 8px window tops), 1px hard borders, no soft shadows on controls.",
+      "CRT scanlines over everything, optional."
+    ],
+    "rules": [
+      {
+        "name": "The One Selection Rule",
+        "body": "Anything chosen, active or toggled on uses Selection Blue fill with white text. Never a pale tint alone, never a second \"selected\" colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Arcade Is Earned Rule",
+        "body": "Gold, cyan, coral and fire colours appear only as feedback to a review answer. Chrome, settings and lists never use them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tahoma Only Rule",
+        "body": "Native and web surfaces use XP Tahoma; no Roboto, Inter or system fonts visible where Tahoma can load.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hard Edge Rule",
+        "body": "No blurred elevation on controls or cards. Depth is a gradient or a 1px line.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** build every new surface out of XP objects (window, group box, message box, Explorer list, balloon tip) before inventing anything.",
+      "**Do** mark every chosen or active state with Selection Blue fill and white text.",
+      "**Do** keep touch targets at 32dp+ for settings controls and 38dp+ for dialog buttons, even when real XP was smaller.",
+      "**Do** check contrast on a scanline row (about #E1E1E1 on white, #C4C2B4 on the face), not on plain white.",
+      "**Do** style backend web pages only through Anki's CSS variables and generic elements, and exclude Anki's small icon buttons (revert, help) from the push-button frame.",
+      "**Do** keep game colour and motion for answer feedback."
+    ],
+    "donts": [
+      "**Don't** use Material You shapes: pill toggles, M3 chips, tonal FABs, large rounded cards. (Today's switches and Easy Days sliders are still Material and are the next to replace with XP checkboxes and trackbars.)",
+      "**Don't** mix in another Windows era: no 98 grey bevels, Vista/7 glass, or 10/11 flat styling.",
+      "**Don't** use soft blurred shadows or gradients outside the XP vocabulary above.",
+      "**Don't** show Roboto where Tahoma can load.",
+      "**Don't** let XP styling hide state: an active tab, a chosen option or a modified value must stay visible."
+    ]
+  }
+}

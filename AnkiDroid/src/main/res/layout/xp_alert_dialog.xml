@@ -11,8 +11,10 @@
     android:gravity="start|top"
     android:orientation="vertical">
 
+    <!-- topPanel and title_template are both looked up by AlertController (it hides topPanel without a title) -->
     <LinearLayout
         android:id="@id/topPanel"
+        tools:ignore="UselessParent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">

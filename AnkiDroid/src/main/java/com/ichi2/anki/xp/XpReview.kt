@@ -2,6 +2,7 @@
 package com.ichi2.anki.xp
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -445,6 +446,7 @@ class XpBar(
         invalidate()
     }
 
+    @SuppressLint("DrawAllocation") // ponytail: small per-frame allocations; preallocate the Paints/RectFs if a profile shows GC jank
     override fun onDraw(canvas: Canvas) {
         XpGame.newDay()
         val g = XpGame.g

@@ -146,10 +146,14 @@ object XpSound {
         if (!XpGame.vibrate) return
         val timings = BUZZ[kind] ?: return
         runCatching {
-            context
-                .getSystemService(
-                    Vibrator::class.java,
-                )?.vibrate(VibrationEffect.createWaveform(longArrayOf(0) + timings, -1))
+            val vibrator = context.getSystemService(Vibrator::class.java) ?: return@runCatching
+            val pattern = longArrayOf(0) + timings
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(pattern, -1)
+            }
         }
     }
 }

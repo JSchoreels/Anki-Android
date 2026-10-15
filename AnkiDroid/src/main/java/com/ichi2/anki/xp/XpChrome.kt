@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package com.ichi2.anki.xp
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapShader
@@ -90,6 +91,7 @@ object XpChrome {
      * of their own. Swaps WindowManagerGlobal's list of root views for one that sees each new window (what Square's
      * curtains library does). False when the platform refuses, then only activities get them.
      */
+    @SuppressLint("PrivateApi") // on purpose: the one way to see every window; falls back to activities if refused
     private fun watchWindows(): Boolean {
         if (watching) return true
         watching =

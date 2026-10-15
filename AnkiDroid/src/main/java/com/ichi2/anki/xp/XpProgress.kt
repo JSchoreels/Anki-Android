@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package com.ichi2.anki.xp
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -162,6 +163,7 @@ object XpProgress {
                 invalidate()
             }
 
+        @SuppressLint("DrawAllocation") // ponytail: small per-frame allocations; preallocate the Paints/RectFs if a profile shows GC jank
         override fun onDraw(canvas: Canvas) {
             val w = width.toFloat()
             val h = height.toFloat()

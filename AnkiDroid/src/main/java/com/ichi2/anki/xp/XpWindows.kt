@@ -139,12 +139,7 @@ body{padding:10px 14px}
                     val r = g.days[k]?.reps ?: 0
                     "<i class='${if (g.hit(k)) "hit" else ""}${if (i == 29) " today" else ""}' style='height:${100 * r / top}%'></i>"
                 }.joinToString("")
-        var longest = 0
-        var run = 0
-        for (i in 400 downTo 0) {
-            run = if (g.studied(XpGame.dayKey(i))) run + 1 else 0
-            longest = max(longest, run)
-        }
+        val longest = XpGame.longestStreak
         val lv = XpGame.level(g.xp)
         val rows =
             listOf(

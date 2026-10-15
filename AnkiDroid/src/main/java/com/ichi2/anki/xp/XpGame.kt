@@ -165,14 +165,8 @@ object XpGame {
                 streak = 0,
                 days = days,
             )
-        // days in a row with a review, up to today (or yesterday: today still has time)
-        var streak = 0
-        var i = if (m.studied(day)) 0 else 1
-        while (m.studied(dayKey(i))) {
-            streak++
-            i++
-        }
-        return Merged(m.ach, m.bosses, m.xp, m.record, m.goal, m.day, m.today, streak, m.days)
+        // the review streak, as the heatmap counts it (read with the notes)
+        return Merged(m.ach, m.bosses, m.xp, m.record, m.goal, m.day, m.today, reviewStreak, m.days)
     }
 
     /** this device's part for today */
@@ -399,8 +393,9 @@ object XpGame {
             recordShown = true
         }
         if (firstToday) {
-            wins +=
-                "🔥 ${g.streak}-day streak" to (if (g.streak > 1) "Another day in a row. Keep it going!" else "Day 1. Come back tomorrow!")
+            // the streak was read before today's first review: it counts today now
+            val streak = g.streak + if (reviewedToday) 0 else 1
+            wins += "🔥 $streak-day streak" to (if (streak > 1) "Another day in a row. Keep it going!" else "Day 1. Come back tomorrow!")
         }
         if (g.goalHit && !wasHit) wins += "Daily goal done!" to "Overtime: every rep now gives 1.5× XP."
         for (q in quests()) {
@@ -421,8 +416,25 @@ object XpGame {
 
     // ---------------------------------------------------------------- the shared progress note
 
-    /** every other device's part (kuma3 Skins' and the other phones'/tablets') */
+    /** The one streak: days in a row with a review in the collection (the heatmap's Current streak). */
+    private var reviewStreak = 0
+    private var reviewedToday = false
+    var longestStreak = 0
+        private set
+
+    /** every other device's part (kuma3 Skins' and the other phones'/tablets'), and the review streak */
     fun readNotes(col: Collection) {
+        runCatching {
+            val past =
+                com.ichi2.anki.heatmap.HeatmapData
+                    .past(col)
+            val reviews =
+                com.ichi2.anki.heatmap
+                    .HeatmapData(java.time.LocalDate.now(), past, emptyMap())
+            reviewStreak = reviews.currentStreak
+            longestStreak = reviews.longestStreak
+            reviewedToday = (past[0] ?: 0) > 0
+        }.onFailure { Timber.w(it, "Anki XP: reading the review streak") }
         runCatching {
             val out = mutableMapOf<String, JSONObject>()
             for (nid in col.findNotes("\"note:$PROGRESS\"")) {

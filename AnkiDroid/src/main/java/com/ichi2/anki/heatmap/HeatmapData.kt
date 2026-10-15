@@ -3,6 +3,7 @@
 package com.ichi2.anki.heatmap
 
 import com.ichi2.anki.CollectionManager.withCol
+import com.ichi2.anki.libanki.Collection
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -65,14 +66,21 @@ class HeatmapData(
     fun sameAs(other: HeatmapData?) = other != null && other.today == today && other.past == past && other.future == future
 
     companion object {
+        /** Reviews per past Anki day, as offsets from today (0 = today). */
+        fun past(col: Collection): Map<Int, Int> {
+            val dayStart = col.sched.dayCutoff - 86_400 // start of today's Anki day
+            val shift = 86_400L * 100_000 // keeps the division flooring for past days
+            val past = HashMap<Int, Int>()
+            col.db.query("select (id / 1000 - ? + ?) / 86400, count() from revlog where ease > 0 group by 1", dayStart, shift).use {
+                while (it.moveToNext()) past[(it.getLong(0) - 100_000).toInt()] = it.getInt(1)
+            }
+            return past
+        }
+
         suspend fun load(): HeatmapData =
             withCol {
-                val dayStart = sched.dayCutoff - 86_400 // start of today's Anki day
-                val shift = 86_400L * 100_000 // keeps the division flooring for past days
-                val past = HashMap<Int, Int>()
-                db.query("select (id / 1000 - ? + ?) / 86400, count() from revlog where ease > 0 group by 1", dayStart, shift).use {
-                    while (it.moveToNext()) past[(it.getLong(0) - 100_000).toInt()] = it.getInt(1)
-                }
+                val dayStart = sched.dayCutoff - 86_400
+                val past = past(this)
                 val today = sched.today
                 val future = HashMap<Int, Int>()
                 // review and day-learning cards: due is a day number

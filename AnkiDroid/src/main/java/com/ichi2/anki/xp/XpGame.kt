@@ -514,7 +514,8 @@ object XpGame {
                 val note = col.getNote(nid)
                 if (note.fields[1] == data) return
                 note.setItem("Data", data)
-                // no undo entry: the reviewer's Undo stays on the answer
+                // no undo entry: the reviewer's Undo stays on the answer (so no changes to hand to the UI)
+                @Suppress("CheckResult")
                 col.updateNote(note, skipUndoEntry = true)
                 return
             }

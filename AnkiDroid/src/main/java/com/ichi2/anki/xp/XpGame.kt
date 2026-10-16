@@ -26,13 +26,12 @@ import kotlin.math.sqrt
  * Progress is shared with kuma3 Skins: every device keeps its own part `mine` = {xp, record, goal: [reps, set at ms],
  * days: {day: {reps, fast, best, xp, got, goal}}, ach: {id: ms}, bosses} in its own `🐻 Anki XP progress` note
  * (fields Device, Data; card suspended in the kumapie deck); [g] is every part merged. Between answers `mine` lives
- * in SharedPreferences; the note is written when the reviewer closes ([writeNote]: a raw write, which clears
- * Anki's undo history, so never during reviews).
+ * in SharedPreferences; the note is written after every answer and when the reviewer closes ([writeNote]: no undo
+ * entry, and Anki's undo stays since core 2466c29f2).
  */
 object XpGame {
     const val PROGRESS = "🐻 Anki XP progress"
     private const val DECK = "kumapie"
-    private const val SEP = "\u001f"
     const val QUEST_XP = 100
 
     /** points per answer, any grade; within the clock (speed bonus) */
@@ -512,9 +511,11 @@ object XpGame {
             val nt = col.notetypes.byName(PROGRESS)
             val nid = nt?.let { col.findNotes("\"note:$PROGRESS\"").firstOrNull { col.getNote(it).fields[0] == device } }
             if (nid != null) {
-                if (col.getNote(nid).fields[1] == data) return
-                // raw write: an undoable update would put "Update Note" on the reviewer's Undo
-                col.db.execute("update notes set flds = ?, mod = ?, usn = -1 where id = ?", device + SEP + data, now() / 1000, nid)
+                val note = col.getNote(nid)
+                if (note.fields[1] == data) return
+                note.setItem("Data", data)
+                // no undo entry: the reviewer's Undo stays on the answer
+                col.updateNote(note, skipUndoEntry = true)
                 return
             }
             val type =

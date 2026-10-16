@@ -173,6 +173,7 @@ class XpReview private constructor(
             handler.postDelayed({ win(title, msg, r.levelUp && title.startsWith("Level")) }, 250L * i)
         }
         bar.juice(r.multUp)
+        writeNote()
     }
 
     fun pause() {
@@ -188,13 +189,15 @@ class XpReview private constructor(
         pausedAt = 0
     }
 
-    /** the reviewer closes: the combo ends, the session report waits for the deck list, the note is written */
+    /** the reviewer closes: the combo ends, the session report waits for the deck list, the note is written again */
     fun finish() {
         handler.removeCallbacksAndMessages(null)
         XpGame.breakCombo()
         XpGame.session?.let { if (it.reps > 0) it.finished = true }
-        applicationScope.launch { runCatching { withCol { XpGame.writeNote(this) } } }
+        writeNote()
     }
+
+    private fun writeNote() = applicationScope.launch { runCatching { withCol { XpGame.writeNote(this) } } }
 
     // ---------------------------------------------------------------- effects
 

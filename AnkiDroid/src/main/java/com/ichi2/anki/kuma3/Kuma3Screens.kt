@@ -5,6 +5,9 @@ package com.ichi2.anki.kuma3
 import android.app.Activity
 import android.content.Intent
 import com.ichi2.anki.CollectionManager
+import com.ichi2.anki.browser.IdsFile
+import com.ichi2.anki.browser.PreviewerDestination
+import com.ichi2.anki.browser.toIntent
 import com.ichi2.anki.common.destinations.BrowserDestination
 import com.ichi2.anki.common.destinations.DeckOptionsDestination
 import com.ichi2.anki.common.destinations.NoteEditorDestination
@@ -19,7 +22,8 @@ import timber.log.Timber
  * `Intent("com.ichi2.anki.kuma3.OPEN_SCREEN").setPackage(<kuma3>).putExtra("screen", …)`, handled by [com.ichi2.anki.IntentHandler].
  *
  * screen = `stats` | `browser` (optional `search`, `deck_id`) | `add` (optional `deck_id`) | `edit` (`note_id` and the
- * card's template `ord`: the note editor on that card) | `deck_options` (optional
+ * card's template `ord`: the note editor on that card) | `preview` (`note_id`: its cards in the previewer, as kumapie
+ * shows a card it just mined) | `deck_options` (optional
  * `deck_id`, else the current deck) | `settings`. It only opens a screen: nothing
  * goes back to the caller, and Back returns to it.
  */
@@ -59,6 +63,10 @@ object Kuma3Screens {
                 } else {
                     Timber.w("kuma3: no card %d of note %d", ord, noteId)
                 }
+            }
+            "preview" -> {
+                val cards = CollectionManager.getColUnsafe().cardIdsOfNote(nid = intent.getLongExtra("note_id", 0))
+                if (cards.isNotEmpty()) startActivity(PreviewerDestination(0, IdsFile(cacheDir, cards)).toIntent(this))
             }
             "deck_options" -> {
                 val decks = CollectionManager.getColUnsafe().decks

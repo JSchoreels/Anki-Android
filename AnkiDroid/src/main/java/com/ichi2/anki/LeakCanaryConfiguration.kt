@@ -51,7 +51,7 @@ object LeakCanaryConfiguration {
         if (!isInstalled) {
             manualInstall(application)
         }
-        // Show 'Leaks' app launcher. It has been removed by default via constants.xml.
-        showLeakDisplayActivityLauncherIcon(true)
+        // kuma3: no 'Leaks' app tile (it was the only kuma3 entry on Google TV); leaks still show as notifications
+        showLeakDisplayActivityLauncherIcon(false)
     }
 }

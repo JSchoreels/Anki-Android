@@ -98,6 +98,7 @@
         android:dataExtractionRules="@xml/kuma3_data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:banner="@drawable/kuma3_tv_banner"
         android:windowSoftInputMode="adjustResize"
         android:usesCleartextTraffic="true"
         android:largeHeap="true"
@@ -126,6 +127,8 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
+                <!-- kuma3: listed on Android/Google TV too -->
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
             <!-- *.apkg matcher. NOTE: when pathPattern is used, host and scheme must also be specified -->
             <intent-filter>

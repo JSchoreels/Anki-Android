@@ -46,6 +46,26 @@ body{padding:10px 14px}
         val web =
             WebView(context).apply {
                 setBackgroundColor(Color.parseColor("#ece9d8"))
+                // a wrap_content WebView in a dialog can re-measure itself forever (the session report jumped up and
+                // down): once loaded, pin it to the page height, at most 70% of the screen (taller pages scroll)
+                @Suppress("SetJavaScriptEnabled") // our own HTML only
+                settings.javaScriptEnabled = true
+                webViewClient =
+                    object : android.webkit.WebViewClient() {
+                        override fun onPageFinished(
+                            view: WebView,
+                            url: String?,
+                        ) {
+                            view.evaluateJavascript("document.body.offsetHeight") { css ->
+                                val h = css.toFloatOrNull() ?: return@evaluateJavascript
+                                val dm = view.resources.displayMetrics
+                                view.layoutParams?.let {
+                                    it.height = minOf(h * dm.density, dm.heightPixels * 0.7f).toInt()
+                                    view.layoutParams = it
+                                }
+                            }
+                        }
+                    }
                 loadDataWithBaseURL(
                     "file:///android_asset/",
                     "<!doctype html><meta charset=utf-8><style>$CSS</style>$html",

@@ -264,10 +264,12 @@ object RwkvOffline {
     private fun toastEnabled(context: Context) = kuma3Prefs(context).getBoolean("kuma3_rwkv_toast", true)
 
     /**
-     * Settings > kuma3 > RWKV state precision (R.string.kuma3_rwkv_precision_key): "f32", "int8" or
-     * "int4"; empty (never set): the backend's default, int8 like the desktop fork.
+     * Settings > kuma3 > RWKV state precision (R.string.kuma3_rwkv_precision_key): "f32" or "int8";
+     * anything else: the backend's default, int8 like the desktop fork. An "int4" left from older
+     * builds is int8 too: int4 states blow up to NaN on long histories (3.5M reviews: 2 min into the
+     * replay), and the build then crashed and started over at every start.
      */
-    private fun statePrecision(context: Context) = kuma3Prefs(context).getString("kuma3_rwkv_precision", null) ?: ""
+    private fun statePrecision(context: Context) = kuma3Prefs(context).getString("kuma3_rwkv_precision", null)?.takeIf { it == "f32" } ?: ""
 
     private fun kuma3Prefs(context: Context) = context.getSharedPreferences(context.packageName + "_preferences", Context.MODE_PRIVATE)
 

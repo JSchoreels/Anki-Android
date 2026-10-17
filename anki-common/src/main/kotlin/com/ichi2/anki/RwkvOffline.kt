@@ -23,7 +23,9 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import net.ankiweb.rsdroid.Backend
 import timber.log.Timber
 import java.io.File
@@ -56,6 +58,9 @@ object RwkvOffline {
      * rebuild of a 200k-review history takes ~35 s on a Pixel 8a; 10 minutes covers slow phones.
      */
     private const val READY_POLL_MS = 500L
+
+    /** How long [prepareAfterOpen] leaves the collection to a first screen that isn't the deck list. */
+    private const val FIRST_SCREEN_MS = 10_000L
     private const val READY_POLLS = 1200
 
     /** The progress notification, also [RwkvRebuildService]'s. */
@@ -75,12 +80,26 @@ object RwkvOffline {
     /**
      * Queues [prepare] behind the open of the collection: whoever opened it (often the main
      * thread, e.g. BootService) doesn't wait for the backend's read of the review history, seconds
-     * on a big collection (4M reviews: ~7 s on a Pixel 8a).
+     * on a big collection (4M reviews: ~7 s on a Pixel 8a). It waits for the deck list's first
+     * load ([deckListShown], at most [FIRST_SCREEN_MS]), which would otherwise queue behind it
+     * ("Processing..." for 2-3 s at each start on a Tab S7+ with 3.8M reviews); [ready] redraws
+     * the list with RWKV's counts anyway. [now]: don't wait (a settings change).
      */
-    fun prepareAfterOpen(context: Context) {
+    fun prepareAfterOpen(
+        context: Context,
+        now: Boolean = false,
+    ) {
         scope.launch {
+            if (!now) withTimeoutOrNull(FIRST_SCREEN_MS) { deckListShownFlow.first() }
             CollectionManager.withOpenColOrNull { prepare(context, backend) }
         }
+    }
+
+    private val deckListShownFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    /** The deck list has drawn its counts: [prepareAfterOpen] may take the collection. */
+    fun deckListShown() {
+        deckListShownFlow.tryEmit(Unit)
     }
 
     /**

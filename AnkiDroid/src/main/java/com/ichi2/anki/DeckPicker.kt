@@ -2223,6 +2223,7 @@ open class DeckPicker :
     fun updateDeckList() {
         launchCatchingTask {
             withProgress { viewModel.updateDeckList().join() }
+            RwkvOffline.deckListShown()
         }
     }
 

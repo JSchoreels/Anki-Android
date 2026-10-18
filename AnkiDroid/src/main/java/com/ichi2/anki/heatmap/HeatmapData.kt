@@ -66,14 +66,60 @@ class HeatmapData(
     fun sameAs(other: HeatmapData?) = other != null && other.today == today && other.past == past && other.future == future
 
     companion object {
-        /** Reviews per past Anki day, as offsets from today (0 = today). */
+        /** The days before today counted by [past], and the reviews before today they counted. */
+        private class EarlierDays(
+            val dayStart: Long,
+            val reviews: Long,
+            val newest: Long,
+            val days: Map<Int, Int>,
+        )
+
+        private var earlierDays: EarlierDays? = null
+
+        /**
+         * Reviews per past Anki day, as offsets from today (0 = today). The days before today are
+         * counted once, and again only after the day rolls over or reviews before today come or go
+         * (a sync, a deletion); each call counts just today's. Counting every day each time took
+         * 1.3 s for a 3.8M-review history on a Tab S7+, after every review.
+         */
         fun past(col: Collection): Map<Int, Int> {
             val dayStart = col.sched.dayCutoff - 86_400 // start of today's Anki day
+            val (reviews, newest) =
+                col.db.query("select count(), coalesce(max(id), 0) from revlog where id < ?", dayStart * 1000).use {
+                    it.moveToFirst()
+                    it.getLong(0) to it.getLong(1)
+                }
+            val earlier =
+                synchronized(this) { earlierDays }
+                    ?.takeIf { it.dayStart == dayStart && it.reviews == reviews && it.newest == newest }
+                    ?.days
+                    ?: countEarlierDays(col, dayStart).also {
+                        synchronized(this) { earlierDays = EarlierDays(dayStart, reviews, newest, it) }
+                    }
+            val today =
+                col.db.queryScalar(
+                    "select count() from revlog where id >= ? and id < ? and ease > 0",
+                    dayStart * 1000,
+                    (dayStart + 86_400) * 1000,
+                )
+            return if (today > 0) earlier + (0 to today) else earlier
+        }
+
+        private fun countEarlierDays(
+            col: Collection,
+            dayStart: Long,
+        ): Map<Int, Int> {
             val shift = 86_400L * 100_000 // keeps the division flooring for past days
             val past = HashMap<Int, Int>()
-            col.db.query("select (id / 1000 - ? + ?) / 86400, count() from revlog where ease > 0 group by 1", dayStart, shift).use {
-                while (it.moveToNext()) past[(it.getLong(0) - 100_000).toInt()] = it.getInt(1)
-            }
+            col.db
+                .query(
+                    "select (id / 1000 - ? + ?) / 86400, count() from revlog where ease > 0 and id < ? group by 1",
+                    dayStart,
+                    shift,
+                    dayStart * 1000,
+                ).use {
+                    while (it.moveToNext()) past[(it.getLong(0) - 100_000).toInt()] = it.getInt(1)
+                }
             return past
         }
 

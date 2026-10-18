@@ -241,8 +241,15 @@ body{padding:10px 14px}
                         return
                     }
                     val now = android.os.SystemClock.uptimeMillis()
+                    // not in front (e.g. recreated after Settings): showing it now loses it with the old activity
+                    val paused =
+                        (activity as? androidx.lifecycle.LifecycleOwner)
+                            ?.lifecycle
+                            ?.currentState
+                            ?.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED) == false
                     val busy =
-                        com.ichi2.anki.AnkiDroidApp.instance.progressDialogShown ||
+                        paused ||
+                            com.ichi2.anki.AnkiDroidApp.instance.progressDialogShown ||
                             (activity.window.attributes.flags and android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0
                     if (busy) idleSince = now
                     if (now - idleSince < 1500) {

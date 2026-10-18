@@ -116,6 +116,7 @@ import com.ichi2.anki.dialogs.TtsPlaybackErrorDialog
 import com.ichi2.anki.dialogs.TtsVoicesDialogFragment
 import com.ichi2.anki.dialogs.tags.TagsDialogFactory
 import com.ichi2.anki.dialogs.tags.TagsDialogListener
+import com.ichi2.anki.kuma3.Kuma3Settings
 import com.ichi2.anki.libanki.Card
 import com.ichi2.anki.libanki.CardId
 import com.ichi2.anki.libanki.Collection
@@ -1611,7 +1612,7 @@ abstract class AbstractFlashcardViewer :
             val contentAt = if (classEnd < 0) -1 else content.indexOf(CONTENT_OPEN, classEnd)
             val endAt = content.lastIndexOf("</div>")
             val client = webViewClient
-            if (contentAt > 0 && endAt > contentAt && client != null && client.isLoaded &&
+            if (Kuma3Settings.cardSwap && contentAt > 0 && endAt > contentAt && client != null && client.isLoaded &&
                 loadedHead?.let { (view, head) -> view === card && head.length == bodyAt && content.startsWith(head) } == true
             ) {
                 val cls = content.substring(bodyAt + BODY_OPEN.length, classEnd)

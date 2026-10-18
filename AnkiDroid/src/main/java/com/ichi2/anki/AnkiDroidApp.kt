@@ -168,6 +168,13 @@ open class AnkiDroidApp :
      */
     @KotlinCleanup("analytics can be moved to attachBaseContext()")
     override fun onCreate() {
+        // kuma3 speed experiment (Settings > kuma3, debug builds): the backend's thread pool reads this when it starts
+        if (BuildConfig.DEBUG) {
+            sharedPrefs()
+                .getString(getString(R.string.kuma3_rwkv_threads_key), "")
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { Os.setenv("RAYON_NUM_THREADS", it, true) }
+        }
         initAnkiBackend(debugTraceSqlCalls = false)
         super.onCreate()
         if (!setupAnkiDroidApp()) {

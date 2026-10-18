@@ -51,4 +51,20 @@
             android:defaultValue="int8"
             android:summary="%s. How each card's RWKV memory is kept, as in the desktop fork: int8 uses about a third of f32's memory with the same accuracy; int4 cards / int8 notes a quarter less than int8, slightly less accurate. A change rebuilds the RWKV state from the review history" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:key="@string/kuma3_speed_key"
+        android:title="Speed experiments (debug builds)">
+        <SwitchPreferenceCompat
+            android:key="@string/kuma3_card_swap_key"
+            android:title="Card swap"
+            android:summary="Show the next card side by swapping the card body instead of reloading the page (same note type)"
+            android:defaultValue="true" />
+        <ListPreference
+            android:key="@string/kuma3_rwkv_threads_key"
+            android:title="RWKV threads"
+            android:entries="@array/kuma3_rwkv_threads_labels"
+            android:entryValues="@array/kuma3_rwkv_threads_values"
+            android:defaultValue=""
+            android:summary="%s. Takes effect after kuma3 is closed from recent apps and opened again" />
+    </PreferenceCategory>
 </PreferenceScreen>

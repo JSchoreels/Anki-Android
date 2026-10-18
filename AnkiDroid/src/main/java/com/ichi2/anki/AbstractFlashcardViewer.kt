@@ -168,6 +168,7 @@ import com.ichi2.utils.usesDangerousScheme
 import com.squareup.seismic.ShakeDetector
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
+import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
 import java.io.UnsupportedEncodingException
@@ -1593,12 +1594,43 @@ abstract class AbstractFlashcardViewer :
         }
     }
 
+    /** The page head (template, note type CSS, scripts) the card WebView has loaded, see [loadContentIntoCard]. */
+    private var loadedHead: Pair<WebView, String>? = null
+
     private fun loadContentIntoCard(
         card: WebView?,
         content: String,
     ) {
         if (card != null) {
             card.settings.mediaPlaybackRequiresUserGesture = cardMediaPlayer.config?.autoplay != true
+            // kuma3: same head as the page already loaded -> swap the body only (card.js kuma3Swap), as desktop
+            // Anki does. A full load parsed the note type's CSS and scripts again on every side of every card
+            // (~85 ms on a Tab S7+ with the Migaku pitch-accent script).
+            val bodyAt = content.indexOf(BODY_OPEN)
+            val classEnd = if (bodyAt < 0) -1 else content.indexOf('"', bodyAt + BODY_OPEN.length)
+            val contentAt = if (classEnd < 0) -1 else content.indexOf(CONTENT_OPEN, classEnd)
+            val endAt = content.lastIndexOf("</div>")
+            val client = webViewClient
+            if (contentAt > 0 && endAt > contentAt && client != null && client.isLoaded &&
+                loadedHead?.let { (view, head) -> view === card && head.length == bodyAt && content.startsWith(head) } == true
+            ) {
+                val cls = content.substring(bodyAt + BODY_OPEN.length, classEnd)
+                val body = content.substring(contentAt + CONTENT_OPEN.length, endAt)
+                client.swapStarted()
+                card.evaluateJavascript(
+                    "typeof kuma3Swap == 'function' ? kuma3Swap(${JSONObject.quote(cls)}, ${JSONObject.quote(body)}) : 'reload'",
+                ) { result ->
+                    if (result == "\"ok\"") {
+                        client.swapped(card)
+                    } else {
+                        Timber.w("card swap failed (%s): full load", result)
+                        loadedHead = null
+                        loadContentIntoCard(card, content)
+                    }
+                }
+                return
+            }
+            loadedHead = if (bodyAt > 0) card to content.take(bodyAt) else null
             card.loadDataWithBaseURL(
                 server.baseUrl(),
                 content,
@@ -2423,6 +2455,14 @@ abstract class AbstractFlashcardViewer :
         private var pageFinishedFired = true
         private val pageRenderStopwatch = Stopwatch.init("page render")
 
+        /** The last page load has finished (a body swap needs its card.js). */
+        val isLoaded get() = pageFinishedFired
+
+        fun swapStarted() = pageRenderStopwatch.reset()
+
+        /** A body swap is done: what a page load's end does ([onPageFinished]). */
+        fun swapped(view: WebView) = finished(view, "swap")
+
         @Deprecated("Deprecated in Java") // still needed for API 23
         override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
             Timber.d("Obtained URL from card: '%s'", url)
@@ -2691,6 +2731,13 @@ abstract class AbstractFlashcardViewer :
                 return
             }
             pageFinishedFired = true
+            finished(view, url)
+        }
+
+        private fun finished(
+            view: WebView,
+            url: String,
+        ) {
             pageRenderStopwatch.logElapsed()
             Timber.d("Java onPageFinished triggered: %s", url)
             // onPageFinished will be called multiple times if the WebView redirects by setting window.location.href
@@ -2797,6 +2844,9 @@ abstract class AbstractFlashcardViewer :
         } ?: throw IllegalArgumentException("unhandled request: $uri")
 
     companion object {
+        private const val BODY_OPEN = "<body class=\""
+        private const val CONTENT_OPEN = "<div id=\"content\" dir=\"auto\">"
+
         /**
          * Result codes that are returned when this activity finishes.
          */

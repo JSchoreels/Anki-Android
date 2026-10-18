@@ -260,3 +260,50 @@ function userAction(number) {
         alert(e);
     }
 }
+
+/* kuma3: show the next card side without reloading the page (AbstractFlashcardViewer.loadContentIntoCard; same
+ * head = same template, note type CSS and scripts). Like desktop Anki's reviewer: the hooks are emptied, the
+ * card's inline scripts run again. Answers "reload" (nothing changed) for external scripts, "error" if a card
+ * script threw (the app then loads the page in full). */
+function kuma3Swap(bodyClass, html) {
+    var box = document.getElementById("content");
+    var fresh = document.createElement("template");
+    fresh.innerHTML = html;
+    if (!box || fresh.content.querySelector("script[src]")) {
+        return "reload";
+    }
+    var failed = false;
+    var onError = function () {
+        failed = true;
+    };
+    window.addEventListener("error", onError);
+    try {
+        onUpdateHook.length = 0;
+        onShownHook.length = 0;
+        document.body.className = bodyClass;
+        box.replaceChildren(fresh.content);
+        box.querySelectorAll("script").forEach(function (old) {
+            var script = document.createElement("script");
+            for (var i = 0; i < old.attributes.length; i++) {
+                script.setAttribute(old.attributes[i].name, old.attributes[i].value);
+            }
+            script.text = old.text;
+            old.replaceWith(script);
+        });
+    } catch (e) {
+        failed = true;
+    }
+    window.removeEventListener("error", onError);
+    if (failed) {
+        return "error";
+    }
+    /* what window.onload does on a full load */
+    window.scrollTo(0, 0);
+    resizeDone = false;
+    resizeImages();
+    var answer = document.getElementById("answer");
+    if (answer) {
+        answer.scrollIntoView();
+    }
+    return "ok";
+}

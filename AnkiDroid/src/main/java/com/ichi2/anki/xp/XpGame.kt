@@ -26,7 +26,7 @@ import kotlin.math.sqrt
  * Progress is shared with kuma3 Skins: every device keeps its own part `mine` = {xp, record, goal: [reps, set at ms],
  * days: {day: {reps, fast, best, xp, got, goal}}, ach: {id: ms}, bosses} in its own `🐻 Anki XP progress` note
  * (fields Device, Data; card suspended in the kumapie deck); [g] is every part merged. Between answers `mine` lives
- * in SharedPreferences; the note is written after every answer and when the reviewer closes ([writeNote]: no undo
+ * in SharedPreferences; the note is written when the reviewer pauses or closes ([writeNote]: no undo
  * entry, and Anki's undo stays since core 2466c29f2).
  */
 object XpGame {

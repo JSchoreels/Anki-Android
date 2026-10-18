@@ -170,11 +170,13 @@ class XpReview private constructor(
             handler.postDelayed({ win(title, msg, r.levelUp && title.startsWith("Level")) }, 250L * i)
         }
         bar.juice(r.multUp)
-        writeNote()
     }
 
+    // The note is only for other devices and kuma3 Skins (`mine` is in SharedPreferences after every answer): written
+    // after each answer, its search and save held the collection while the next card loaded (~90 ms on a Tab S7+).
     fun pause() {
         if (pausedAt == 0L) pausedAt = SystemClock.uptimeMillis()
+        writeNote()
     }
 
     fun resume() {

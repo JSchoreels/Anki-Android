@@ -49,6 +49,6 @@
             android:entries="@array/kuma3_rwkv_precision_labels"
             android:entryValues="@array/kuma3_rwkv_precision_values"
             android:defaultValue="int8"
-            android:summary="%s. How each card's RWKV memory is kept, as in the desktop fork: int8 uses about a third of f32's memory with the same accuracy. A change rebuilds the RWKV state from the review history" />
+            android:summary="%s. How each card's RWKV memory is kept, as in the desktop fork: int8 uses about a third of f32's memory with the same accuracy; int4 cards / int8 notes a quarter less than int8, slightly less accurate. A change rebuilds the RWKV state from the review history" />
     </PreferenceCategory>
 </PreferenceScreen>

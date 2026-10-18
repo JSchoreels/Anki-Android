@@ -17,10 +17,12 @@
     <string-array name="kuma3_rwkv_precision_labels" translatable="false">
         <item>int8 (default)</item>
         <item>f32 (full precision)</item>
+        <item>int4 cards, int8 notes (less memory)</item>
     </string-array>
     <string-array name="kuma3_rwkv_precision_values" translatable="false">
         <item>int8</item>
         <item>f32</item>
+        <item>int4</item>
     </string-array>
 
     <string name="kuma3_leaderboard" translatable="false">Leaderboard</string>

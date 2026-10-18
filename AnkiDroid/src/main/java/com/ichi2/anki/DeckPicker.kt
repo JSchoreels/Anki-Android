@@ -986,8 +986,10 @@ open class DeckPicker :
         viewModel.flowOfFocusedDeck.launchCollectionInLifecycleScope(::onFocusedDeckChanged)
         viewModel.flowOfResizingDividerVisible.launchCollectionInLifecycleScope(::onResizingDividerVisibilityChanged)
         viewModel.flowOfDecksReloaded.launchCollectionInLifecycleScope(::onDecksReloaded)
-        // kuma3: counts drawn before the RWKV state was ready (paused: onResume redraws anyway)
-        RwkvOffline.ready.launchCollectionInLifecycleScope(Lifecycle.State.RESUMED) { updateDeckList() }
+        // kuma3: counts drawn before the RWKV state was ready (paused: onResume redraws anyway).
+        // No "Processing..." dialog: the list is already drawn, and this first RWKV scoring of a
+        // big deck takes a moment (10,870 cards: 0.6 s on a Tab S7+)
+        RwkvOffline.ready.launchCollectionInLifecycleScope(Lifecycle.State.RESUMED) { viewModel.updateDeckList() }
         viewModel.flowOfStartupResponse.filterNotNull().launchCollectionInLifecycleScope(::onStartupResponse)
         viewModel.flowOfShowContextMenu.launchCollectionInLifecycleScope(::showDeckPickerContextMenu)
         viewModel.flowOfShowRightClickContextMenu.launchCollectionInLifecycleScope(::showDeckPickerRightClickContextMenu)

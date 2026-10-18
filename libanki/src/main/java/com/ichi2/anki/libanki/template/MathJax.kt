@@ -22,7 +22,12 @@ object MathJax {
     // MathJax closing delimiters
     private val sMathJaxClosings = arrayOf("\\)", "\\]")
 
-    fun textContainsMathjax(txt: String): Boolean {
+    // MathJax never typesets inside these; a template's regexes (/\[\d*\]+/) looked like math and loaded
+    // MathJax on every card
+    private val scriptOrStyle = Regex("<(script|style)\\b.*?</\\1\\s*>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+
+    fun textContainsMathjax(html: String): Boolean {
+        val txt = html.replace(scriptOrStyle, "")
         // Do you have the first opening and then the first closing,
         // or the second opening and the second closing...?
 

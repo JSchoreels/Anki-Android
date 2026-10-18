@@ -38,5 +38,7 @@ class MathJaxClozeTest : InMemoryAnkiTest() {
         assertTrue(MathJax.textContainsMathjax("This is an block equation! \\[1 \\div 2 = 1 \\div 2 \\]"))
         assertFalse(MathJax.textContainsMathjax("This has mismatched brackets! \\[1 \\div 2 = 1 \\div 2 \\)"))
         assertFalse(MathJax.textContainsMathjax("This has mismatched brackets too! \\(1 \\div 2 = 1 \\div 2 \\]"))
+        assertFalse(MathJax.textContainsMathjax("word<script>var i=/\\[\\d*\\]+/g</script>"))
+        assertTrue(MathJax.textContainsMathjax("<style>a{}</style>\\(x\\)<script>f()</script>"))
     }
 }

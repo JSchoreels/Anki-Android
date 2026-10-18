@@ -36,7 +36,7 @@
             android:key="@string/kuma3_rwkv_forecast_graph_key"
             android:dependency="@string/kuma3_rwkv_forecast_key"
             android:title="RWKV forecast graph"
-            android:summary="Below the heatmap: a dot per review card at its recall now, coloured like the forecast's counts"
+            android:summary="Below the heatmap: a dot per review card at its recall now, coloured like the forecast's counts. Not shown above 3000 review cards either"
             android:defaultValue="true" />
         <SwitchPreferenceCompat
             android:key="@string/kuma3_rwkv_toast_key"

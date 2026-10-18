@@ -1169,6 +1169,10 @@ abstract class AbstractFlashcardViewer :
 
         // hide "Show Answer" button (it lies over the answer buttons, which are visible as it fades)
         if (animationDisabled() || !Kuma3Settings.answerFade) {
+            // a Show answer tapped while hideEaseButtons' fade-in still runs: its end action would hide the
+            // answer buttons just shown (with the fade, starting the fade-out cancels it)
+            flipCardLayout!!.animate().cancel()
+            flipCardLayout!!.alpha = 1f
             after.run()
         } else {
             flipCardLayout!!.alpha = 1f

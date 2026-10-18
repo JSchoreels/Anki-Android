@@ -507,7 +507,9 @@ class StudyOptionsFragment :
         changes: OpChanges,
         handler: Any?,
     ) {
-        if (activity != null) {
+        // hidden behind the reviewer (tablet layout) it refreshes in onResume: its due tree re-scored every RWKV
+        // card after each answer
+        if (isResumed) {
             refreshInterface()
         }
     }

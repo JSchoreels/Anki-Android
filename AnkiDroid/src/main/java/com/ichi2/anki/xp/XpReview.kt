@@ -128,12 +128,9 @@ class XpReview private constructor(
             )
         }
         activity.launchCatchingTask {
-            // the deck list's number (its due tree), so both agree. ponytail: right after an undo the backend reports
-            // more for one card (9 for 5); the next card corrects it
-            bar.cardsLeft =
-                withCol {
-                    sched.deckDueTree().find(decks.selected())?.let { it.newCount + it.lrnCount + it.revCount } ?: -1
-                }
+            // the queue's counts, as the reviewer shows them: the deck list's due tree re-scored every RWKV card
+            // after each answer in a deck outside the last scored scope (grammar: 2 s per card on a Tab S7+)
+            bar.cardsLeft = withCol { sched.counts().count() }
             bar.invalidate()
         }
         if (XpGame.isBoss(deckId, cardId)) balloon("👑 BOSS CARD", "Failed ${card.lapses}×: ×3 XP on this card, whatever you press.")

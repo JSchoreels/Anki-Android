@@ -1167,8 +1167,8 @@ abstract class AbstractFlashcardViewer :
         }
         val after = Runnable { flipCardLayout!!.visibility = View.GONE }
 
-        // hide "Show Answer" button
-        if (animationDisabled()) {
+        // hide "Show Answer" button (it lies over the answer buttons, which are visible as it fades)
+        if (animationDisabled() || !Kuma3Settings.answerFade) {
             after.run()
         } else {
             flipCardLayout!!.alpha = 1f

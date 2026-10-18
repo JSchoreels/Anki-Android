@@ -59,6 +59,11 @@
             android:title="Card swap"
             android:summary="Show the next card side by swapping the card body instead of reloading the page (same note type)"
             android:defaultValue="true" />
+        <SwitchPreferenceCompat
+            android:key="@string/kuma3_answer_fade_key"
+            android:title="Fade answer buttons"
+            android:summary="The Show answer bar fades out over the answer buttons (200 ms). Off: the buttons appear at once"
+            android:defaultValue="true" />
         <ListPreference
             android:key="@string/kuma3_rwkv_threads_key"
             android:title="RWKV threads"

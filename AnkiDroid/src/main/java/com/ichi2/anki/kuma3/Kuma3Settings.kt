@@ -46,6 +46,9 @@ object Kuma3Settings {
     /** Speed experiment: swap the card body instead of reloading the page (AbstractFlashcardViewer). */
     val cardSwap: Boolean get() = get(R.string.kuma3_card_swap_key, true)
 
+    /** Speed experiment: the Show answer bar fades out over the answer buttons (AbstractFlashcardViewer). */
+    val answerFade: Boolean get() = get(R.string.kuma3_answer_fade_key, true)
+
     // The "Rebuilding RWKV" switch (R.string.kuma3_rwkv_toast_key) and the RWKV state precision
     // (R.string.kuma3_rwkv_precision_key) are read by anki-common's RwkvOffline.
 }

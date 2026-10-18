@@ -17,6 +17,7 @@
     <!-- Speed experiments (debug builds only): A/B switches for timing tests on a device -->
     <string name="kuma3_speed_key" translatable="false">kuma3_speed</string>
     <string name="kuma3_card_swap_key" translatable="false">kuma3_card_swap</string>
+    <string name="kuma3_answer_fade_key" translatable="false">kuma3_answer_fade</string>
     <!-- also read by AnkiDroidApp.onCreate before the backend starts -->
     <string name="kuma3_rwkv_threads_key" translatable="false">kuma3_rwkv_threads</string>
     <string-array name="kuma3_rwkv_threads_labels" translatable="false">

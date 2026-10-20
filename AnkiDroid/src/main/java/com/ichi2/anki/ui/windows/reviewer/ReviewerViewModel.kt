@@ -75,9 +75,24 @@ class ReviewerViewModel(
     ChangeManager.Subscriber,
     BindingProcessor<ReviewerBinding, ViewerAction>,
     AutoAdvance.ActionListener {
+    /**
+     * kuma3: the card on screen, kept over process death. The queue is built again then, and RWKV or a
+     * retrievability sort may put another card first, which was shown with the restored answer side.
+     */
+    private val shownCardId = savedStateHandle.getMutableStateFlow<Long?>(KEY_SHOWN_CARD_ID, null)
+
     private var queueState: Deferred<CurrentQueueState?> =
         asyncIO {
-            withCol { sched.currentQueueState() }
+            withCol {
+                shownCardId.value?.let { cardId ->
+                    try {
+                        backend.rebuildQueuedCardsPreservingCurrentCard(cardId)
+                    } catch (e: Exception) {
+                        Timber.w(e, "shown card not kept first")
+                    }
+                }
+                sched.currentQueueState()
+            }
         }
     override var currentCard =
         asyncIO {
@@ -164,7 +179,8 @@ class ReviewerViewModel(
         if (isAfterRecreation) {
             launchCatchingIO {
                 // TODO handle "Don't keep activities"
-                if (showingAnswer.value) {
+                // kuma3: never the answer of another card than the one it was shown for
+                if (showingAnswer.value && currentCard.await().id == shownCardId.value) {
                     showAnswer()
                     // on configuration change: mutationSignal & queueState are retained
                     // on process death: a new queueState/mutationSignal exist. Call
@@ -173,6 +189,7 @@ class ReviewerViewModel(
                         runStateMutationHook()
                     }
                 } else {
+                    shownCardId.value = currentCard.await().id
                     showQuestion()
                 }
             }
@@ -599,6 +616,7 @@ class ReviewerViewModel(
 
         val card = state.topCard
         currentCard = CompletableDeferred(card)
+        shownCardId.value = card.id
         setupAnswerTimer(card)
         autoAdvance.onCardChange(card)
         onCardUpdatedFlow.emit(Unit) // must be before showQuestion()
@@ -841,5 +859,6 @@ class ReviewerViewModel(
     companion object {
         private const val KEY_PREVIOUS_CARD_ID = "key_previous_card_id"
         private const val KEY_COUNTS = "counts"
+        private const val KEY_SHOWN_CARD_ID = "kuma3_shown_card_id"
     }
 }

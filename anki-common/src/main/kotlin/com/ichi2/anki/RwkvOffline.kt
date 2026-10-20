@@ -42,10 +42,21 @@ import java.io.IOException
  * normally replays only the reviews since it was saved.
  */
 object RwkvOffline {
-    private const val MODEL_ASSET = "rwkv/model.bin"
+    /** A bundled model: the asset, the installed file's name and the asset's size. */
+    private class Model(
+        val asset: String,
+        val file: String,
+        val bytes: Long,
+    )
 
-    /** Size of the bundled model (the desktop fork's `RWKV_trained_on_5000_10000.bin`). */
-    private const val MODEL_BYTES = 11_082_637L
+    /** The desktop fork's 2.76M-parameter `RWKV_trained_on_5000_10000.bin` (the default). */
+    private val BIG_MODEL = Model("rwkv/model.bin", "model.bin", 11_082_637L)
+
+    /**
+     * JSchoreels' 331k-parameter model (anki-rwkv release small-model-sm40-2026-10-19,
+     * `weights.f32.bin`). The backend picks its engine by the file.
+     */
+    private val SMALL_MODEL = Model("rwkv/model-small.bin", "model-small.bin", 1_351_553L)
 
     /**
      * "Rebuilding RWKV" is shown only when this many reviews are replayed: a rebuild of the state
@@ -112,7 +123,7 @@ object RwkvOffline {
     ) {
         try {
             val started = SystemClock.elapsedRealtime()
-            val model = installModel(context)
+            val model = installModel(context, if (smallModel(context)) SMALL_MODEL else BIG_MODEL)
             val replayed =
                 backend.rwkvPrepareOffline(modelPath = model.absolutePath, statePrecision = statePrecision(context))
             Timber.i("RWKV prepare: replaying %s reviews in the background; %d ms", replayed, SystemClock.elapsedRealtime() - started)
@@ -290,19 +301,28 @@ object RwkvOffline {
     private fun statePrecision(context: Context) =
         kuma3Prefs(context).getString("kuma3_rwkv_precision", null)?.takeIf { it == "f32" || it == "int4" } ?: ""
 
+    /**
+     * Settings > kuma3 > RWKV model (R.string.kuma3_rwkv_model_key): "small" for the small model,
+     * anything else the big one. A change rebuilds the state: the backend keys it by the model file.
+     */
+    private fun smallModel(context: Context) = kuma3Prefs(context).getString("kuma3_rwkv_model", null) == "small"
+
     private fun kuma3Prefs(context: Context) = context.getSharedPreferences(context.packageName + "_preferences", Context.MODE_PRIVATE)
 
-    private fun installModel(context: Context): File {
+    private fun installModel(
+        context: Context,
+        bundled: Model,
+    ): File {
         val dir = File(context.noBackupFilesDir, "rwkv")
-        val model = File(dir, "model.bin")
-        if (model.length() == MODEL_BYTES) return model
+        val model = File(dir, bundled.file)
+        if (model.length() == bundled.bytes) return model
 
         dir.mkdirs()
-        val tmp = File(dir, "model.bin.tmp")
-        context.assets.open(MODEL_ASSET).use { input ->
+        val tmp = File(dir, "${bundled.file}.tmp")
+        context.assets.open(bundled.asset).use { input ->
             tmp.outputStream().use { output -> input.copyTo(output) }
         }
-        if (tmp.length() != MODEL_BYTES) throw IOException("unexpected RWKV model size: ${tmp.length()}")
+        if (tmp.length() != bundled.bytes) throw IOException("unexpected RWKV model size: ${tmp.length()}")
         model.delete()
         if (!tmp.renameTo(model)) throw IOException("could not install the RWKV model")
         return model

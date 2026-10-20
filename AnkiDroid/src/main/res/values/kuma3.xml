@@ -14,6 +14,7 @@
     <!-- also read by anki-common's RwkvOffline, which uses the literal value -->
     <string name="kuma3_rwkv_toast_key" translatable="false">kuma3_rwkv_toast</string>
     <string name="kuma3_rwkv_precision_key" translatable="false">kuma3_rwkv_precision</string>
+    <string name="kuma3_rwkv_model_key" translatable="false">kuma3_rwkv_model</string>
     <!-- Speed experiments (debug builds only): A/B switches for timing tests on a device -->
     <string name="kuma3_speed_key" translatable="false">kuma3_speed</string>
     <string name="kuma3_card_swap_key" translatable="false">kuma3_card_swap</string>
@@ -34,6 +35,14 @@
         <item>int8 (default)</item>
         <item>f32 (full precision)</item>
         <item>int4 cards, int8 notes (less memory)</item>
+    </string-array>
+    <string-array name="kuma3_rwkv_model_labels" translatable="false">
+        <item>Big (2.8M parameters, default)</item>
+        <item>Small (331k parameters, less memory)</item>
+    </string-array>
+    <string-array name="kuma3_rwkv_model_values" translatable="false">
+        <item>big</item>
+        <item>small</item>
     </string-array>
     <string-array name="kuma3_rwkv_precision_values" translatable="false">
         <item>int8</item>

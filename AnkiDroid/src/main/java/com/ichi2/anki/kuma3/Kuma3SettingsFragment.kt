@@ -33,10 +33,12 @@ class Kuma3SettingsFragment : SettingsFragment() {
                         "Sign in from the deck list menu."
                 }
         }
-        // the backend rebuilds the RWKV state in the new precision right away
-        requirePreference<Preference>(R.string.kuma3_rwkv_precision_key).setOnPreferenceChangeListener { _, _ ->
-            view?.post { RwkvOffline.prepareAfterOpen(requireContext().applicationContext, now = true) }
-            true
+        // the backend rebuilds the RWKV state for the new model or precision right away
+        for (key in listOf(R.string.kuma3_rwkv_model_key, R.string.kuma3_rwkv_precision_key)) {
+            requirePreference<Preference>(key).setOnPreferenceChangeListener { _, _ ->
+                view?.post { RwkvOffline.prepareAfterOpen(requireContext().applicationContext, now = true) }
+                true
+            }
         }
     }
 }

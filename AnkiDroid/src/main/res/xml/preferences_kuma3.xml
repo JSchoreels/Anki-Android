@@ -44,6 +44,13 @@
             android:summary="Shown when the RWKV state is rebuilt (first start, after an update), and a notification when it is ready"
             android:defaultValue="true" />
         <ListPreference
+            android:key="@string/kuma3_rwkv_model_key"
+            android:title="RWKV model"
+            android:entries="@array/kuma3_rwkv_model_labels"
+            android:entryValues="@array/kuma3_rwkv_model_values"
+            android:defaultValue="big"
+            android:summary="%s. Big: the desktop fork's model. Small: JSchoreels' 331k-parameter model, about 0.7%% less accurate (log loss, 1,000 held-out users), with about a quarter of the memory and rebuilds about 3x faster: a 4M-review, 100k-card collection rebuilds in under 1 GB, where the big model needs 2.6 GB. A change rebuilds the RWKV state from the review history" />
+        <ListPreference
             android:key="@string/kuma3_rwkv_precision_key"
             android:title="RWKV state precision"
             android:entries="@array/kuma3_rwkv_precision_labels"

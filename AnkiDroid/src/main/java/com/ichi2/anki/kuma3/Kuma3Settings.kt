@@ -49,6 +49,7 @@ object Kuma3Settings {
     /** The Show answer bar fades out over the answer buttons (AbstractFlashcardViewer); off, they appear at once. */
     val answerFade: Boolean get() = get(R.string.kuma3_answer_fade_key, true)
 
-    // The "Rebuilding RWKV" switch (R.string.kuma3_rwkv_toast_key) and the RWKV state precision
-    // (R.string.kuma3_rwkv_precision_key) are read by anki-common's RwkvOffline.
+    // The "Rebuilding RWKV" switch (R.string.kuma3_rwkv_toast_key), the RWKV model
+    // (R.string.kuma3_rwkv_model_key) and its state precision (R.string.kuma3_rwkv_precision_key)
+    // are read by anki-common's RwkvOffline.
 }

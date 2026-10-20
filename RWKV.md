@@ -48,6 +48,9 @@ Backend (`kuma3-anki-core`, checked out as `Anki-Android-Backend/anki`):
 | File | Role |
 |---|---|
 | `rslib/src/scheduler/rwkv/offline.rs` | The whole offline layer: runtime, history replay, scoring, the hooks' entry points |
+| `rslib/src/rwkv/` (engine), `shape_big.rs`, `shape_small.rs`, `rslib/src/rwkv_small.rs` | The RWKV engine, compiled twice: `crate::rwkv` for the fork's 2.76M-parameter model and `crate::rwkv_small` for JSchoreels' 331k-parameter SM40 (interleaved layers, 3-power-curve head) |
+| `rslib/src/scheduler/rwkv/offline_engine.rs` | Picks the engine by the model file the app passes (the small model's weights have `gru_w_weight`) |
+| `rslib/src/rwkv/small_model_tests.rs` | The small model against its package's golden vectors (`ANKI_RWKV_SMALL_MODEL`, `ANKI_RWKV_SMALL_VECTORS`) |
 | `rslib/src/scheduler/rwkv/offline_state.rs` | The state file `collection.rwkv-offline` next to the collection: a start loads it and replays only newer reviews |
 | `rslib/src/scheduler/queue/mod.rs`, `decks/tree.rs`, `scheduler/service/mod.rs`, `scheduler/answering/mod.rs` | One-line hooks that call into `offline.rs` |
 | `proto/anki/scheduler.proto` | `RwkvPrepareOffline`, `RwkvOfflineInstantPassStep` and their messages |
@@ -59,7 +62,7 @@ App (this repository):
 
 | File | Role |
 |---|---|
-| `anki-common/.../RwkvOffline.kt` | Installs `assets/rwkv/model.bin`, calls `rwkvPrepareOffline` when the collection opens |
+| `anki-common/.../RwkvOffline.kt` | Installs `assets/rwkv/model.bin` (big) or `model-small.bin` (Settings > kuma3 > RWKV model), calls `rwkvPrepareOffline` when the collection opens |
 | `AnkiDroid/.../heatmap/` | Review heatmap: `HeatmapData.kt` (counts from the collection), `HeatmapGrid.kt` (drawing, taps), `HeatmapFooter.kt` (its row below the decks: buttons, caption, stats line) |
 | `AnkiDroid/.../decktimes/DeckTimes.kt` | Time answered today per deck, shown on the deck rows |
 | `AnkiDroid/.../leaderboard/` | Leaderboard: `Leaderboard.kt` (account, upload, reading the board), `LeaderboardStats.kt` (the numbers, as the add-on's Stats.py), `LeaderboardServer.kt` (HTTP), `BoardTable.kt` (the table), `LeaderboardFooter.kt` (its row below the decks), `LeaderboardDialogs.kt` (sign-in, board, options) |
@@ -141,4 +144,6 @@ signed with a different key cannot be installed over an existing one: sync, then
 AnkiDroid is GPL-3.0-or-later; Anki and the fork are AGPL-3.0-or-later. These three repositories
 are the complete corresponding source for APKs built from them. The league shields and country
 flags under `assets/leaderboard` come from the Anki Leaderboard add-on, whose author marks them
-as free to reuse; `assets/rwkv/model.bin` is the fork's model file.
+as free to reuse; `assets/rwkv/model.bin` is the fork's model file, and `assets/rwkv/model-small.bin`
+JSchoreels' small model (release `small-model-sm40-2026-10-19` of JSchoreels/anki-rwkv,
+`weights.f32.bin`), shipped in kuma3 with his permission.

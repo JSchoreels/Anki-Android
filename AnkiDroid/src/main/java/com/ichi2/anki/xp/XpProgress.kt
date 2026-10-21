@@ -17,6 +17,8 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.ichi2.anki.R
+import com.ichi2.utils.dp
+import com.ichi2.utils.setPaddingRelative
 
 /**
  * kuma3: AnkiDroid's progress dialog ("Processing...") as an XP progress window: Luna title bar, the XP frame, the
@@ -35,18 +37,10 @@ object XpProgress {
         val spinner = dialog.findViewById<ProgressBar>(android.R.id.progress) ?: return
         val message = dialog.findViewById<TextView>(android.R.id.message)
         val row = spinner.parent as? LinearLayout ?: return
-        val d = dialog.context.resources.displayMetrics.density
         spinner.visibility = View.GONE
         row.orientation = LinearLayout.VERTICAL
-        message?.apply {
-            setTextColor(Color.BLACK)
-            setCompoundDrawablesRelativeWithIntrinsicBounds(ContextCompat.getDrawable(context, R.drawable.xp_flag), null, null, null)
-            compoundDrawablePadding = (10 * d).toInt()
-        }
-        row.addView(
-            Blocks(dialog.context),
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (20 * d).toInt()).apply { topMargin = (14 * d).toInt() },
-        )
+        message?.flagged()
+        row.addBlocks(14)
     }
 
     /** An AlertDialog builder (the media sync window) as an XP progress window: Luna title and the green blocks */
@@ -56,12 +50,11 @@ object XpProgress {
     ) {
         if (!XpChrome.isOn()) return
         val context = builder.context
-        val d = context.resources.displayMetrics.density
         builder.setCustomTitle(XpWindows.titleBar(context, title))
         builder.setView(
             LinearLayout(context).apply {
-                setPadding((20 * d).toInt(), (6 * d).toInt(), (20 * d).toInt(), (6 * d).toInt())
-                addView(Blocks(context), LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (20 * d).toInt()))
+                setPaddingRelative(20.dp, 6.dp, 20.dp, 6.dp)
+                addBlocks(0)
             },
         )
     }
@@ -72,36 +65,21 @@ object XpProgress {
         message: String,
         cancellable: Boolean,
     ): androidx.appcompat.app.AlertDialog {
-        val d = context.resources.displayMetrics.density
         val body =
             LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding((20 * d).toInt(), (18 * d).toInt(), (20 * d).toInt(), (18 * d).toInt())
+                setPaddingRelative(20.dp, 18.dp, 20.dp, 18.dp)
                 addView(
                     TextView(context).apply {
                         id = R.id.text
                         text = message
                         textSize = 16f
-                        setTextColor(Color.BLACK)
                         gravity = android.view.Gravity.CENTER_VERTICAL
-                        setCompoundDrawablesRelativeWithIntrinsicBounds(
-                            ContextCompat.getDrawable(context, R.drawable.xp_flag),
-                            null,
-                            null,
-                            null,
-                        )
-                        compoundDrawablePadding = (10 * d).toInt()
+                        flagged()
                     },
                 )
             }
-        val blocks = Blocks(context)
-        body.addView(
-            blocks,
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (20 * d).toInt()).apply {
-                topMargin =
-                    (14 * d).toInt()
-            },
-        )
+        val blocks = body.addBlocks(14)
         val remaining =
             TextView(context).apply {
                 textSize = 14f
@@ -112,7 +90,7 @@ object XpProgress {
             remaining,
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
                 topMargin =
-                    (8 * d).toInt()
+                    8.dp.toPx(context)
             },
         )
         // A message ending in "done/total" (ProgressManager amounts): fill the bar and estimate the time left
@@ -147,6 +125,25 @@ object XpProgress {
             .create()
             .apply { setCanceledOnTouchOutside(cancellable) }
     }
+
+    /** a progress message in black beside the XP flag */
+    private fun TextView.flagged() {
+        setTextColor(Color.BLACK)
+        setCompoundDrawablesRelativeWithIntrinsicBounds(ContextCompat.getDrawable(context, R.drawable.xp_flag), null, null, null)
+        compoundDrawablePadding = 10.dp.toPx(context)
+    }
+
+    /** the blocks bar, full width and 20 dp high, [top] dp below the view above it */
+    private fun LinearLayout.addBlocks(top: Int) =
+        Blocks(context).also {
+            addView(
+                it,
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20.dp.toPx(context)).apply {
+                    topMargin =
+                        top.dp.toPx(context)
+                },
+            )
+        }
 
     /** XP's "working" bar: a white sunken box with a run of green blocks sliding through it */
     private class Blocks(

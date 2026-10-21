@@ -5,8 +5,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.text.TextUtils.htmlEncode
+import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import com.ichi2.anki.common.time.TimeManager
 import java.text.DateFormat
 import java.util.Date
@@ -221,46 +224,27 @@ body{padding:10px 14px}
             }.show()
     }
 
-    private var reportWaiting = false
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var pending: Runnable? = null
 
     /**
-     * The deck report after a session, shown once on the deck list: when nothing has been loading for 1.5 s
-     * (the deck list reloads more than once after reviews, each time behind "Please wait...")
+     * The deck report after a session, shown once on the deck list. Called after every deck list reload (it reloads
+     * more than once after reviews, each time behind "Please wait..."): shown 1.5 s after the last one, once the deck
+     * list is in front (not when recreated after Settings: it would be lost with the old one) and nothing is loading.
      */
-    fun summary(activity: android.app.Activity) {
-        val s = XpGame.session ?: return
-        if (!s.finished || reportWaiting) return
-        reportWaiting = true
-        val handler = android.os.Handler(android.os.Looper.getMainLooper())
-        var idleSince = android.os.SystemClock.uptimeMillis()
-        val check =
-            object : Runnable {
-                override fun run() {
-                    if (activity.isFinishing || activity.isDestroyed) {
-                        reportWaiting = false
-                        return
-                    }
-                    val now = android.os.SystemClock.uptimeMillis()
-                    // not in front (e.g. recreated after Settings): showing it now loses it with the old activity
-                    val paused =
-                        (activity as? androidx.lifecycle.LifecycleOwner)
-                            ?.lifecycle
-                            ?.currentState
-                            ?.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED) == false
-                    val busy =
-                        paused ||
-                            com.ichi2.anki.AnkiDroidApp.instance.progressDialogShown ||
-                            (activity.window.attributes.flags and android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0
-                    if (busy) idleSince = now
-                    if (now - idleSince < 1500) {
-                        handler.postDelayed(this, 250)
-                        return
-                    }
-                    reportWaiting = false
-                    report(activity)
-                }
-            }
-        handler.postDelayed(check, 250)
+    fun summary(activity: AppCompatActivity) {
+        if (XpGame.session?.finished != true) return
+        pending?.let(handler::removeCallbacks)
+        pending =
+            Runnable {
+                pending = null
+                if (activity.isDestroyed) return@Runnable
+                val busy =
+                    !activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) ||
+                        com.ichi2.anki.AnkiDroidApp.instance.progressDialogShown ||
+                        (activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0
+                if (busy) summary(activity) else report(activity)
+            }.also { handler.postDelayed(it, 1500) }
     }
 
     private fun report(context: Context) {

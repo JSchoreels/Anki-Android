@@ -1616,7 +1616,7 @@ abstract class AbstractFlashcardViewer :
             val contentAt = if (classEnd < 0) -1 else content.indexOf(CONTENT_OPEN, classEnd)
             val endAt = content.lastIndexOf("</div>")
             val client = webViewClient
-            if (Kuma3Settings.cardSwap && contentAt > 0 && endAt > contentAt && client != null && client.isLoaded &&
+            if (contentAt > 0 && endAt > contentAt && client != null && client.isLoaded &&
                 loadedHead?.let { (view, head) -> view === card && head.length == bodyAt && content.startsWith(head) } == true
             ) {
                 val cls = content.substring(bodyAt + BODY_OPEN.length, classEnd)

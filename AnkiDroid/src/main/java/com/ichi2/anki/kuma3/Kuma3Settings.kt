@@ -43,9 +43,6 @@ object Kuma3Settings {
     /** The Lofi button in the deck list's and the reviewer's top bar (com.ichi2.anki.kuma3.lofi). */
     val lofi: Boolean get() = get(R.string.kuma3_lofi_key, true)
 
-    /** Speed experiment: swap the card body instead of reloading the page (AbstractFlashcardViewer). */
-    val cardSwap: Boolean get() = get(R.string.kuma3_card_swap_key, true)
-
     /** The Show answer bar fades out over the answer buttons (AbstractFlashcardViewer); off, they appear at once. */
     val answerFade: Boolean get() = get(R.string.kuma3_answer_fade_key, true)
 

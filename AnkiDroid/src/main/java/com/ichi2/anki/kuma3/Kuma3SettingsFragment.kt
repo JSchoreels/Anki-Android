@@ -4,7 +4,6 @@ package com.ichi2.anki.kuma3
 
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
-import com.ichi2.anki.BuildConfig
 import com.ichi2.anki.R
 import com.ichi2.anki.RwkvOffline
 import com.ichi2.anki.leaderboard.Leaderboard
@@ -19,8 +18,6 @@ class Kuma3SettingsFragment : SettingsFragment() {
         get() = "prefs.kuma3"
 
     override fun initSubscreen() {
-        // A/B switches for timing tests on a device: not for the released app
-        requirePreference<Preference>(R.string.kuma3_speed_key).isVisible = BuildConfig.DEBUG
         // the leaderboard's default depends on the sign-in: show the value in effect
         requirePreference<SwitchPreferenceCompat>(R.string.kuma3_leaderboard_key).apply {
             isChecked = Kuma3Settings.leaderboard

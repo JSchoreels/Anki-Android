@@ -65,20 +65,4 @@
             android:summary="After Show answer, the answer buttons fade in (200 ms). Off: they appear at once"
             android:defaultValue="true" />
     </PreferenceCategory>
-    <PreferenceCategory
-        android:key="@string/kuma3_speed_key"
-        android:title="Speed experiments (debug builds)">
-        <SwitchPreferenceCompat
-            android:key="@string/kuma3_card_swap_key"
-            android:title="Card swap"
-            android:summary="Show the next card side by swapping the card body instead of reloading the page (same note type)"
-            android:defaultValue="true" />
-        <ListPreference
-            android:key="@string/kuma3_rwkv_threads_key"
-            android:title="RWKV threads"
-            android:entries="@array/kuma3_rwkv_threads_labels"
-            android:entryValues="@array/kuma3_rwkv_threads_values"
-            android:defaultValue=""
-            android:summary="%s. Takes effect after kuma3 is closed from recent apps and opened again" />
-    </PreferenceCategory>
 </PreferenceScreen>

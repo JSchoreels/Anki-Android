@@ -2,17 +2,18 @@
 
 package com.ichi2.anki.leaderboard
 
+import com.ichi2.anki.web.HttpFetcher
+import okhttp3.FormBody
+import okhttp3.Request
 import org.json.JSONArray
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 import java.util.zip.InflaterInputStream
 
@@ -55,35 +56,28 @@ internal object LeaderboardServer {
             null
         }
 
+    private val client by lazy {
+        HttpFetcher
+            .getOkHttpBuilder(fakeUserAgent = false)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
     private fun request(
         endpoint: String,
         form: Map<String, String>?,
     ): Pair<Int, String> {
-        val connection = URL(API + endpoint).openConnection() as HttpURLConnection
-        try {
-            connection.connectTimeout = 15_000
-            connection.readTimeout = 30_000
-            if (form != null) {
-                connection.requestMethod = "POST"
-                connection.doOutput = true
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-                val body =
-                    form.entries.joinToString("&") { (key, value) ->
-                        URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value, "UTF-8")
-                    }
-                connection.outputStream.use { it.write(body.toByteArray()) }
-            }
-            val code = connection.responseCode
-            val stream = if (code in 200..299) connection.inputStream else connection.errorStream
-            return code to decode(stream?.use { it.readCapped() } ?: ByteArray(0))
-        } finally {
-            connection.disconnect()
+        val request = Request.Builder().url(API + endpoint)
+        if (form != null) request.post(FormBody.Builder().apply { form.forEach { (key, value) -> add(key, value) } }.build())
+        return client.newCall(request.build()).execute().use { response ->
+            response.code to decode(response.body.byteStream().use { it.readCapped() })
         }
     }
 
     /**
      * The server compresses the board (seen: a zlib stream, which the desktop's `requests` unpacks
-     * by itself and HttpURLConnection does not). Unpack by what the bytes are, not by the headers.
+     * by itself and OkHttp does not: it only undoes the gzip it asked for). Unpack by what the bytes are, not by the headers.
      */
     private fun decode(bytes: ByteArray): String {
         fun byte(index: Int) = bytes[index].toInt() and 0xff

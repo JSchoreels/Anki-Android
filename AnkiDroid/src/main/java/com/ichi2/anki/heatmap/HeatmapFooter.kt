@@ -9,15 +9,14 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
 import com.ichi2.anki.DeckPicker
+import com.ichi2.anki.kuma3.FrameAdapter
+import com.ichi2.anki.kuma3.Kuma3Cache
+import com.ichi2.anki.kuma3.quietly
 import com.ichi2.anki.utils.ext.launchCollectionInLifecycleScope
 import com.ichi2.anki.xp.XpChrome
-import kotlinx.coroutines.CancellationException
-import timber.log.Timber
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -30,11 +29,7 @@ import java.util.Locale
  */
 class HeatmapFooter(
     private val deckPicker: DeckPicker,
-) : RecyclerView.Adapter<HeatmapFooter.Holder>() {
-    class Holder(
-        val frame: FrameLayout,
-    ) : RecyclerView.ViewHolder(frame)
-
+) : FrameAdapter() {
     private var data: HeatmapData? = null
 
     private val prefs = deckPicker.getSharedPreferences("heatmap", Context.MODE_PRIVATE)
@@ -59,35 +54,19 @@ class HeatmapFooter(
             }
             return
         }
-        try {
-            val fresh =
-                com.ichi2.anki.kuma3.Kuma3Cache
-                    .get("heatmap") { HeatmapData.load() }
-            if (fresh.sameAs(data)) return
+        quietly("heatmap") {
+            val fresh = Kuma3Cache.get("heatmap") { HeatmapData.load() }
+            if (fresh.sameAs(data)) return@quietly
             data = fresh
             @Suppress("NotifyDataSetChanged") // a single row
             notifyDataSetChanged()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Timber.w(e, "heatmap unavailable")
         }
     }
 
     override fun getItemCount() = if (data == null) 0 else 1
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int,
-    ) = Holder(
-        FrameLayout(parent.context).apply {
-            layoutParams =
-                RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        },
-    )
-
     override fun onBindViewHolder(
-        holder: Holder,
+        holder: FrameAdapter.Holder,
         position: Int,
     ) {
         val data = data ?: return

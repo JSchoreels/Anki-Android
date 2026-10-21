@@ -10,7 +10,6 @@ import android.graphics.RectF
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
@@ -19,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ichi2.anki.DeckPicker
 import com.ichi2.anki.R
 import com.ichi2.anki.deckpicker.DisplayDeckNode
+import com.ichi2.anki.kuma3.FrameAdapter
 import com.ichi2.anki.widgets.DeckAdapter
 import com.ichi2.anki.xp.XpChrome.px
 
@@ -118,30 +118,14 @@ object XpHome {
         setOnClickListener { open() }
     }
 
-    private class Holder(
-        val frame: FrameLayout,
-    ) : RecyclerView.ViewHolder(frame)
-
-    private fun frame(parent: ViewGroup) =
-        Holder(
-            FrameLayout(parent.context).apply {
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            },
-        )
-
     /** Lv 4 [=====     ] 45/500 XP, then streak, goal, and the Quests and Trophies links */
     private class Player(
         val picker: DeckPicker,
-    ) : RecyclerView.Adapter<Holder>() {
+    ) : FrameAdapter() {
         override fun getItemCount() = 1
 
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int,
-        ) = frame(parent)
-
         override fun onBindViewHolder(
-            holder: Holder,
+            holder: FrameAdapter.Holder,
             position: Int,
         ) {
             val c = holder.frame.context
@@ -218,7 +202,7 @@ object XpHome {
     /** "▸ 5 decks done for today": shows or folds the decks with nothing due */
     private class Done(
         val decks: DeckAdapter,
-    ) : RecyclerView.Adapter<Holder>() {
+    ) : FrameAdapter() {
         var last: List<DisplayDeckNode> = emptyList()
         var hasSubDecks = false
         private var open = false
@@ -240,13 +224,8 @@ object XpHome {
 
         override fun getItemCount() = if (hidden > 0) 1 else 0
 
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int,
-        ) = frame(parent)
-
         override fun onBindViewHolder(
-            holder: Holder,
+            holder: FrameAdapter.Holder,
             position: Int,
         ) {
             val c = holder.frame.context
@@ -266,18 +245,13 @@ object XpHome {
     }
 
     /** the "Studied … today" line and the RWKV forecast */
-    private class Today : RecyclerView.Adapter<Holder>() {
+    private class Today : FrameAdapter() {
         var text: CharSequence = ""
 
         override fun getItemCount() = if (text.isEmpty()) 0 else 1
 
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int,
-        ) = frame(parent)
-
         override fun onBindViewHolder(
-            holder: Holder,
+            holder: FrameAdapter.Holder,
             position: Int,
         ) {
             val c = holder.frame.context

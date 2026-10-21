@@ -4,10 +4,11 @@ package com.ichi2.anki.decktimes
 
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.DeckPicker
+import com.ichi2.anki.kuma3.Kuma3Cache
+import com.ichi2.anki.kuma3.Kuma3Settings
+import com.ichi2.anki.kuma3.quietly
 import com.ichi2.anki.utils.ext.launchCollectionInLifecycleScope
 import com.ichi2.anki.widgets.DeckAdapter
-import kotlinx.coroutines.CancellationException
-import timber.log.Timber
 
 /**
  * Time spent answering cards today, per deck, shown on the deck list's rows (the `deck_time`
@@ -21,20 +22,10 @@ object DeckTimes {
     ) {
         with(deckPicker) {
             viewModel.flowOfDecksReloaded.launchCollectionInLifecycleScope {
-                try {
+                quietly("deck times") {
                     // Settings > kuma3 > Time per deck
                     adapter.timesToday =
-                        if (com.ichi2.anki.kuma3.Kuma3Settings.deckTimes) {
-                            com.ichi2.anki.kuma3.Kuma3Cache.get(
-                                "deckTimes",
-                            ) { load() }
-                        } else {
-                            emptyMap()
-                        }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Timber.w(e, "deck times unavailable")
+                        if (Kuma3Settings.deckTimes) Kuma3Cache.get("deckTimes") { load() } else emptyMap()
                 }
             }
         }

@@ -3,6 +3,8 @@ package com.ichi2.anki.kuma3
 
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.common.time.TimeManager
+import kotlinx.coroutines.CancellationException
+import timber.log.Timber
 
 /**
  * Keeps the deck list footers' results (forecast, time per deck, heatmap) until what they read
@@ -48,3 +50,17 @@ object Kuma3Cache {
         return value
     }
 }
+
+/** Runs one of the deck list's extras; a failure is logged and gives null, so the list still shows. */
+suspend fun <T> quietly(
+    what: String,
+    block: suspend () -> T,
+): T? =
+    try {
+        block()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Timber.w(e, "%s unavailable", what)
+        null
+    }

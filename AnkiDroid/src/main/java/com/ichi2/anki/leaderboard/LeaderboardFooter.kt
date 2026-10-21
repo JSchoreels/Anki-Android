@@ -11,9 +11,10 @@ import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.ichi2.anki.DeckPicker
+import com.ichi2.anki.kuma3.FrameAdapter
 import com.ichi2.anki.kuma3.Kuma3Settings
+import com.ichi2.anki.kuma3.quietly
 import com.ichi2.anki.utils.ext.launchCollectionInLifecycleScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -25,11 +26,7 @@ import java.lang.ref.WeakReference
  */
 class LeaderboardFooter(
     private val deckPicker: DeckPicker,
-) : RecyclerView.Adapter<LeaderboardFooter.Holder>() {
-    class Holder(
-        val frame: FrameLayout,
-    ) : RecyclerView.ViewHolder(frame)
-
+) : FrameAdapter() {
     companion object {
         private var current = WeakReference<LeaderboardFooter>(null)
 
@@ -81,14 +78,9 @@ class LeaderboardFooter(
 
     private suspend fun readBoard(redraw: Boolean = false) {
         val fresh =
-            try {
+            quietly("leaderboard") {
                 // Settings > kuma3 > Leaderboard
                 if (Leaderboard.isSignedIn && Kuma3Settings.leaderboard) Leaderboard.board() else null
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Timber.w(e, "leaderboard not read")
-                null
             }
         if (fresh == board && !redraw) return
         board = fresh
@@ -98,18 +90,8 @@ class LeaderboardFooter(
 
     override fun getItemCount() = if (board == null) 0 else 1
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int,
-    ) = Holder(
-        FrameLayout(parent.context).apply {
-            layoutParams =
-                RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        },
-    )
-
     override fun onBindViewHolder(
-        holder: Holder,
+        holder: FrameAdapter.Holder,
         position: Int,
     ) {
         val board = board ?: return

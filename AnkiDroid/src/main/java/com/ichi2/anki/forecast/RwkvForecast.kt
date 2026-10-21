@@ -25,9 +25,8 @@ import com.ichi2.anki.browser.toIntent
 import com.ichi2.anki.common.destinations.BrowserDestination
 import com.ichi2.anki.kuma3.Kuma3Cache
 import com.ichi2.anki.kuma3.Kuma3Settings
+import com.ichi2.anki.kuma3.quietly
 import com.ichi2.anki.utils.ext.launchCollectionInLifecycleScope
-import kotlinx.coroutines.CancellationException
-import timber.log.Timber
 
 /**
  * The desktop "RWKV forecast" add-on (anki-rwkv-forecast) on the deck list: under "Studied …
@@ -80,16 +79,12 @@ object RwkvForecast {
         deckPicker.deckPickerBinding.reviewSummaryTextView.movementMethod = LinkMovementMethod.getInstance()
         with(deckPicker) {
             viewModel.flowOfDecksReloaded.launchCollectionInLifecycleScope {
-                try {
-                    // Settings > kuma3 > RWKV forecast
-                    // recall moves with the clock, so at most a minute old
-                    forecast = if (Kuma3Settings.rwkvForecast) Kuma3Cache.get("forecast", 60_000) { load() } else null
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Timber.w(e, "RWKV forecast unavailable")
-                    forecast = null
-                }
+                // Settings > kuma3 > RWKV forecast
+                // recall moves with the clock, so at most a minute old
+                forecast =
+                    quietly("RWKV forecast") {
+                        if (Kuma3Settings.rwkvForecast) Kuma3Cache.get("forecast", 60_000) { load() } else null
+                    }
                 show(deckPicker, viewModel.flowOfStudiedTodayStats.value)
             }
         }

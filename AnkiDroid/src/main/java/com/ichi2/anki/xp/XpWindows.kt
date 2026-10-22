@@ -238,7 +238,7 @@ body{padding:10px 14px}
         pending =
             Runnable {
                 pending = null
-                if (activity.isDestroyed) return@Runnable
+                if (activity.isFinishing || activity.isDestroyed) return@Runnable
                 val busy =
                     !activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) ||
                         com.ichi2.anki.AnkiDroidApp.instance.progressDialogShown ||

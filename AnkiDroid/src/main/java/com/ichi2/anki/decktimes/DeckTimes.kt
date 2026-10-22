@@ -49,10 +49,18 @@ object DeckTimes {
                 }
             if (own.isEmpty()) return@withCol emptyMap()
 
+            // names only: libanki's Decks.parents looks parents up with Decks.id, which creates a missing one
+            val names = decks.allNamesAndIds(skipEmptyDefault = false, includeFiltered = true)
+            val idByName = names.associate { it.name to it.id }
+            val nameById = names.associate { it.id to it.name }
             val total = HashMap<Long, Long>()
             for ((deckId, millis) in own) {
-                decks.getLegacy(deckId) ?: continue // deleted since
-                for (id in listOf(deckId) + decks.parents(deckId).map { it.id }) total.merge(id, millis, Long::plus)
+                var name = nameById[deckId] ?: continue
+                while (true) {
+                    idByName[name]?.let { id -> total[id] = (total[id] ?: 0) + millis }
+                    if (!name.contains("::")) break
+                    name = name.substringBeforeLast("::")
+                }
             }
             total
         }

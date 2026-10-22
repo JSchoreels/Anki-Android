@@ -261,6 +261,17 @@ function userAction(number) {
     }
 }
 
+/* kuma3: every media element a card script plays, also ones never put in #content (the MvJ templates append
+ * a new Audio() to the body): kuma3Swap stops them, as a full page load did. */
+var kuma3Played = new Set();
+(function () {
+    var play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+        kuma3Played.add(this);
+        return play.apply(this, arguments);
+    };
+})();
+
 /* kuma3: show the next card side without reloading the page (AbstractFlashcardViewer.loadContentIntoCard; same
  * head = same template, note type CSS and scripts). Like desktop Anki's reviewer: the hooks are emptied, the
  * card's inline scripts run again. Answers "reload" (nothing changed) for external scripts, "error" if a card
@@ -278,6 +289,14 @@ function kuma3Swap(bodyClass, html) {
     };
     window.addEventListener("error", onError);
     try {
+        /* the side being left stops talking: the new side's scripts start their own audio */
+        kuma3Played.forEach(function (media) {
+            media.pause();
+        });
+        kuma3Played.clear();
+        document.querySelectorAll("audio, video").forEach(function (media) {
+            media.pause();
+        });
         onUpdateHook.length = 0;
         onShownHook.length = 0;
         document.body.className = bodyClass;

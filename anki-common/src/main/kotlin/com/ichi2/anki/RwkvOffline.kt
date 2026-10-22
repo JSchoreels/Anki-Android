@@ -42,7 +42,10 @@ import java.io.IOException
  * normally replays only the reviews since it was saved.
  */
 object RwkvOffline {
-    /** A bundled model: the asset, the installed file's name and the asset's size. */
+    /**
+     * A bundled model: the asset, the installed file's name and the asset's size. [installModel]
+     * checks only the size, so a new model of the same size needs a new [file] name.
+     */
     private class Model(
         val asset: String,
         val file: String,
@@ -53,10 +56,10 @@ object RwkvOffline {
     private val BIG_MODEL = Model("rwkv/model.bin", "model.bin", 11_082_637L)
 
     /**
-     * JSchoreels' 331k-parameter model (anki-rwkv release small-model-sm40-2026-10-19,
+     * JSchoreels' 331k-parameter model (anki-rwkv release small-model-sm55-2026-10-22,
      * `weights.f32.bin`). The backend picks its engine by the file.
      */
-    private val SMALL_MODEL = Model("rwkv/model-small.bin", "model-small.bin", 1_351_553L)
+    private val SMALL_MODEL = Model("rwkv/model-small.bin", "model-small-sm55.bin", 1_351_553L)
 
     /**
      * "Rebuilding RWKV" is shown only when this many reviews are replayed: a rebuild of the state
@@ -316,6 +319,7 @@ object RwkvOffline {
         val model = File(dir, bundled.file)
         if (model.length() == bundled.bytes) return model
 
+        File(dir, "model-small.bin").delete() // SM40, kuma3 v19-v20
         dir.mkdirs()
         val tmp = File(dir, "${bundled.file}.tmp")
         context.assets.open(bundled.asset).use { input ->

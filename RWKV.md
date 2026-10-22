@@ -48,7 +48,7 @@ Backend (`kuma3-anki-core`, checked out as `Anki-Android-Backend/anki`):
 | File | Role |
 |---|---|
 | `rslib/src/scheduler/rwkv/offline.rs` | The whole offline layer: runtime, history replay, scoring, the hooks' entry points |
-| `rslib/src/rwkv/` (engine), `shape_big.rs`, `shape_small.rs`, `rslib/src/rwkv_small.rs` | The RWKV engine, compiled twice: `crate::rwkv` for the fork's 2.76M-parameter model and `crate::rwkv_small` for JSchoreels' 331k-parameter SM40 (interleaved layers, 3-power-curve head) |
+| `rslib/src/rwkv/` (engine), `shape_big.rs`, `shape_small.rs`, `rslib/src/rwkv_small.rs` | The RWKV engine, compiled twice: `crate::rwkv` for the fork's 2.76M-parameter model and `crate::rwkv_small` for JSchoreels' 331k-parameter SM55 (interleaved layers, 3-power-curve head) |
 | `rslib/src/scheduler/rwkv/offline_engine.rs` | Picks the engine by the model file the app passes (the small model's weights have `gru_w_weight`) |
 | `rslib/src/rwkv/small_model_tests.rs` | The small model against its package's golden vectors (`ANKI_RWKV_SMALL_MODEL`, `ANKI_RWKV_SMALL_VECTORS`) |
 | `rslib/src/scheduler/rwkv/offline_state.rs` | The state file `collection.rwkv-offline` next to the collection: a start loads it and replays only newer reviews |
@@ -145,5 +145,5 @@ AnkiDroid is GPL-3.0-or-later; Anki and the fork are AGPL-3.0-or-later. These th
 are the complete corresponding source for APKs built from them. The league shields and country
 flags under `assets/leaderboard` come from the Anki Leaderboard add-on, whose author marks them
 as free to reuse; `assets/rwkv/model.bin` is the fork's model file, and `assets/rwkv/model-small.bin`
-JSchoreels' small model (release `small-model-sm40-2026-10-19` of JSchoreels/anki-rwkv,
+JSchoreels' small model (release `small-model-sm55-2026-10-22` of JSchoreels/anki-rwkv,
 `weights.f32.bin`), shipped in kuma3 with his permission.

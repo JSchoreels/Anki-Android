@@ -22,6 +22,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.animation.doOnEnd
 import androidx.core.content.res.ResourcesCompat
 import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.CollectionManager.withCol
@@ -373,26 +374,16 @@ class XpReview private constructor(
         bar.foreground = flash
         ValueAnimator.ofInt(160, 0).setDuration(250).apply {
             addUpdateListener { flash.alpha = it.animatedValue as Int }
-            addListener(
-                object : android.animation.AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: android.animation.Animator) {
-                        bar.foreground = null
-                    }
-                },
-            )
+            doOnEnd { bar.foreground = null }
             start()
         }
     }
 
     private fun ValueAnimator.doOnEndReset(v: View) =
-        addListener(
-            object : android.animation.AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: android.animation.Animator) {
-                    v.translationX = 0f
-                    v.translationY = 0f
-                }
-            },
-        )
+        doOnEnd {
+            v.translationX = 0f
+            v.translationY = 0f
+        }
 
     companion object {
         private val GOLD = Color.rgb(0xff, 0xd7, 0x00)

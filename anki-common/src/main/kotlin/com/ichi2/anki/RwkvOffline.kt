@@ -223,12 +223,11 @@ object RwkvOffline {
                     ""
                 }
             val notification =
-                NotificationCompat
-                    .Builder(context, PROGRESS_CHANNEL)
-                    .setSmallIcon(android.R.drawable.stat_notify_sync)
-                    .setContentTitle("Preparing RWKV: $percent%$left")
-                    .setContentText("First start with this history ($total reviews). Reviews use the standard order until it is done.")
-                    .setProgress(100, percent, false)
+                notification(
+                    context,
+                    "Preparing RWKV: $percent%$left",
+                    "First start with this history ($total reviews). Reviews use the standard order until it is done.",
+                ).setProgress(100, percent, false)
                     .setOngoing(true)
                     .setSilent(true)
                     .setOnlyAlertOnce(true)
@@ -243,13 +242,20 @@ object RwkvOffline {
         private fun canNotify() = canNotify(context, manager)
     }
 
+    /** A notification on the RWKV channel with the sync icon. */
+    private fun notification(
+        context: Context,
+        title: String,
+        text: String,
+    ) = NotificationCompat
+        .Builder(context, PROGRESS_CHANNEL)
+        .setSmallIcon(android.R.drawable.stat_notify_sync)
+        .setContentTitle(title)
+        .setContentText(text)
+
     /** [RwkvRebuildService]'s notification until [ReplayProgress] shows the first percentage. */
     fun preparingNotification(context: Context): Notification =
-        NotificationCompat
-            .Builder(context, PROGRESS_CHANNEL)
-            .setSmallIcon(android.R.drawable.stat_notify_sync)
-            .setContentTitle("Preparing RWKV")
-            .setContentText("Reviews use the standard order until it is done.")
+        notification(context, "Preparing RWKV", "Reviews use the standard order until it is done.")
             .setProgress(0, 0, true)
             .setOngoing(true)
             .setSilent(true)
@@ -266,14 +272,7 @@ object RwkvOffline {
     ) {
         val manager = NotificationManagerCompat.from(context)
         if (!canNotify(context, manager)) return showToast(context, "RWKV ready")
-        val notification =
-            NotificationCompat
-                .Builder(context, PROGRESS_CHANNEL)
-                .setSmallIcon(android.R.drawable.stat_notify_sync)
-                .setContentTitle("RWKV ready")
-                .setContentText(text)
-                .setAutoCancel(true)
-                .build()
+        val notification = notification(context, "RWKV ready", text).setAutoCancel(true).build()
         manager.notify(READY_NOTIFICATION_ID, notification)
     }
 

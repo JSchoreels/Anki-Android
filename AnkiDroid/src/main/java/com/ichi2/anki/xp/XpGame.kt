@@ -51,7 +51,7 @@ object XpGame {
     var combo = 0
     var recordShown = false
     var session: Session? = null
-    private val bosses = JSONObject()
+    private var bosses = JSONObject()
 
     lateinit var device: String
         private set
@@ -79,9 +79,7 @@ object XpGame {
                 ?: "kuma3-${Build.MODEL}-${(1..6).map { "abcdefghijklmnopqrstuvwxyz0123456789".random() }.joinToString("")}"
                     .also { prefs.edit { putString("device", it) } }
         mine = prefs.getString("mine", null)?.let { runCatching { JSONObject(it) }.getOrNull() } ?: JSONObject()
-        prefs.getString("bosses", null)?.let { s ->
-            runCatching { JSONObject(s) }.getOrNull()?.let { o -> o.keys().forEach { bosses.put(it, o.get(it)) } }
-        }
+        bosses = prefs.getString("bosses", null)?.let { runCatching { JSONObject(it) }.getOrNull() } ?: JSONObject()
         g = merge()
     }
 
@@ -125,8 +123,6 @@ object XpGame {
         val goalHit get() = hit(day)
 
         fun hit(k: String) = days[k]?.let { it.reps >= (if (it.goal > 0) it.goal else goal) } == true
-
-        fun studied(k: String) = (days[k]?.reps ?: 0) > 0
     }
 
     fun merge(): Merged {
@@ -160,22 +156,19 @@ object XpGame {
             val pa = p.optJSONObject("ach") ?: continue
             for (k in pa.keys()) ach[k] = min(ach[k] ?: Long.MAX_VALUE, pa.optLong(k))
         }
-        val m =
-            Merged(
-                ach = ach,
-                bosses = parts.sumOf { it.optInt("bosses") },
-                xp = parts.sumOf { it.optInt("xp") },
-                record = parts.maxOf { it.optInt("record") },
-                goal = goal,
-                day = day,
-                today = days[day] ?: Day(),
-                streak = 0,
-                days = days,
-            )
         // the review streak, as the heatmap counts it (read with the notes), plus today once reviewed here
         val repsHere = mine.optJSONObject("days")?.optJSONObject(day)?.optInt("reps") ?: 0
-        val streak = reviewStreak + if (!reviewedToday && repsHere > 0) 1 else 0
-        return Merged(m.ach, m.bosses, m.xp, m.record, m.goal, m.day, m.today, streak, m.days)
+        return Merged(
+            ach = ach,
+            bosses = parts.sumOf { it.optInt("bosses") },
+            xp = parts.sumOf { it.optInt("xp") },
+            record = parts.maxOf { it.optInt("record") },
+            goal = goal,
+            day = day,
+            today = days[day] ?: Day(),
+            streak = reviewStreak + if (!reviewedToday && repsHere > 0) 1 else 0,
+            days = days,
+        )
     }
 
     /** this device's part for today */
@@ -344,12 +337,10 @@ object XpGame {
     /** What an answer did, for the screen and the sounds */
     class Result(
         val xp: Int,
-        val ease: Int,
         val points: Int,
         val mult: Double,
         val brokeCombo: Int,
         val multUp: Boolean,
-        val boss: Boolean,
         val wins: List<Pair<String, String>>,
         val levelUp: Boolean,
     )
@@ -376,13 +367,7 @@ object XpGame {
         if (!::prefs.isInitialized) return
         val last = answers.removeLastOrNull() ?: return
         mine = JSONObject(last.mine)
-        val b = JSONObject(last.bosses)
-        bosses
-            .keys()
-            .asSequence()
-            .toList()
-            .forEach { bosses.remove(it) }
-        b.keys().forEach { bosses.put(it, b.get(it)) }
+        bosses = JSONObject(last.bosses)
         prefs.edit { putString("bosses", bosses.toString()) }
         combo = last.combo
         session?.let {
@@ -469,7 +454,7 @@ object XpGame {
         if (levelUp) wins += "Level ${level(g.xp) + 1}!" to "Keep the combo going."
         for (tr in checkTrophies()) wins += "🏆 ${tr.icon} ${tr.name}" to tr.desc
         save()
-        return Result(xp, ease, points, mult, broke, mult() > m0 && combo > 0, boss, wins, levelUp)
+        return Result(xp, points, mult, broke, mult() > m0 && combo > 0, wins, levelUp)
     }
 
     // ---------------------------------------------------------------- the shared progress note

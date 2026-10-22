@@ -183,5 +183,5 @@ object XpGlance {
     ) = """<div class="xp-glance-cell $state"><b>${esc(value)}</b><span>${esc(label)}</span>""" +
         (if (note.isEmpty()) "" else "<small>${esc(note)}</small>") + "</div>"
 
-    private fun esc(s: String) = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    private fun esc(s: String) = android.text.TextUtils.htmlEncode(s)
 }

@@ -28,7 +28,12 @@ the merges.
   backend does it: once the app hands it the bundled model, it replays the review history and
   scores review cards before a review queue or the deck counts are built. Presets with
   "Use RWKV-Instant to choose review cards" then pick cards by predicted recall, as on the desktop.
-  RWKV-Curve (answer intervals) and "reschedule" are not implemented on the phone.
+- **RWKV-Curve on the phone** (since v23). Presets set to RWKV-Curve, or Instant with Curve as its due-date
+  calculator, get Curve's answer intervals: the backend builds the query the desktop's reviewer builds
+  and asks the same engine (`rwkv_offline_curve` in `offline.rs`), then the usual short-interval, fuzz
+  and load-balance rules apply; an answer stores Curve's S90 as the card's stability. Host check:
+  `rwkv_offline_host <collection> <model> <out.csv> curve <deck id> [cards]`. "Reschedule with
+  RWKV-Curve" is not implemented on the phone.
 - **FSRS-7 state repair** comes from the fork itself (build 96): cards that pass through AnkiWeb
   come back without the fork's `s_int` and `s_fast`, and the backend recomputes them when the
   collection is opened and while merging synced reviews, without marking the cards as changed.

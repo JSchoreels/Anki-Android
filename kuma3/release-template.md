@@ -3,8 +3,9 @@
 - The older debug app (`com.ichi2.anki.debug`) is no longer published: move to kuma3 Anki (sync the debug app first, then sign in to AnkiWeb in kuma3 Anki and choose download).
 
 **What is in it**
-AnkiDroid 2.26.0alpha2 built against the JSchoreels FSRS-7 fork of Anki (26.09.3+fsrs7, build 100), with RWKV-Instant running on the device. Unofficial personal build: not from the AnkiDroid team, the Anki project or the fork's author.
-- RWKV-Instant: presets with "Use RWKV-Instant to choose review cards" pick review cards by predicted recall, as on the fork's desktop. RWKV-Curve and "reschedule" are not implemented.
+AnkiDroid 2.26.0alpha2 built against the JSchoreels FSRS-7 fork of Anki (26.09.3+fsrs7, build 100), with RWKV-Instant and RWKV-Curve running on the device. Unofficial personal build: not from the AnkiDroid team, the Anki project or the fork's author.
+- RWKV-Instant: presets with "Use RWKV-Instant to choose review cards" pick review cards by predicted recall, as on the fork's desktop.
+- RWKV-Curve: presets set to RWKV-Curve (or Instant with Curve as its due-date calculator) get Curve's answer intervals, as on the fork's desktop. "Reschedule with RWKV-Curve" is not implemented.
 - FSRS-7, with the fork's own repair of the state that AnkiWeb sync drops (`s_int`, `s_fast`).
 - Deck options page working on phones, with "Rebuild RWKV State" and a status line.
 - Deck list extras, each switchable in Settings > kuma3: review heatmap, time answered today per deck, leaderboard (the desktop Anki Leaderboard add-on's server; off until you turn it on).
@@ -24,8 +25,9 @@ AnkiDroid 2.26.0alpha2 built against the JSchoreels FSRS-7 fork of Anki (26.09.3
 - La app anterior (`com.ichi2.anki.debug`) ya no se publica: pásate a kuma3 Anki (sincroniza antes la app anterior, luego inicia sesión en AnkiWeb en kuma3 Anki y elige descargar).
 
 **Qué incluye**
-AnkiDroid 2.26.0alpha2 compilado con el fork FSRS-7 de Anki de JSchoreels (26.09.3+fsrs7, build 100), con RWKV-Instant funcionando en el dispositivo. Versión personal no oficial: no es del equipo de AnkiDroid, del proyecto Anki ni del autor del fork.
-- RWKV-Instant: los presets con "Use RWKV-Instant to choose review cards" eligen las tarjetas de repaso según el recuerdo previsto, como en el escritorio del fork. RWKV-Curve y "reschedule" no están implementados.
+AnkiDroid 2.26.0alpha2 compilado con el fork FSRS-7 de Anki de JSchoreels (26.09.3+fsrs7, build 100), con RWKV-Instant y RWKV-Curve funcionando en el dispositivo. Versión personal no oficial: no es del equipo de AnkiDroid, del proyecto Anki ni del autor del fork.
+- RWKV-Instant: los presets con "Use RWKV-Instant to choose review cards" eligen las tarjetas de repaso según el recuerdo previsto, como en el escritorio del fork.
+- RWKV-Curve: los presets con RWKV-Curve (o Instant con Curve como calculador de fechas) reciben los intervalos de respuesta de Curve, como en el escritorio del fork. "Reschedule with RWKV-Curve" no está implementado.
 - FSRS-7, con la reparación del propio fork para el estado que la sincronización con AnkiWeb pierde (`s_int`, `s_fast`).
 - La página de opciones del mazo funciona en móviles, con "Rebuild RWKV State" y una línea de estado.
 - Extras en la lista de mazos, cada uno se puede apagar en Ajustes > kuma3: mapa de calor de repasos, tiempo respondido hoy por mazo, leaderboard (el servidor del complemento Anki Leaderboard de escritorio; apagado hasta que lo actives).

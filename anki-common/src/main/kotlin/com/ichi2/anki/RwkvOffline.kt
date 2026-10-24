@@ -56,10 +56,10 @@ object RwkvOffline {
     private val BIG_MODEL = Model("rwkv/model.bin", "model.bin", 11_082_637L)
 
     /**
-     * JSchoreels' 331k-parameter model (anki-rwkv release small-model-sm55-2026-10-22,
-     * `weights.f32.bin`). The backend picks its engine by the file.
+     * JSchoreels' 331k-parameter model, SM56 (anki-rwkv release small-model-sm56-2026-10-24,
+     * `weights.f32.bin`; the fork's build 107). The backend picks its engine by the file.
      */
-    private val SMALL_MODEL = Model("rwkv/model-small.bin", "model-small-sm55.bin", 1_351_553L)
+    private val SMALL_MODEL = Model("rwkv/model-small.bin", "model-small-sm56.bin", 1_351_553L)
 
     /**
      * "Rebuilding RWKV" is shown only when this many reviews are replayed: a rebuild of the state
@@ -320,6 +320,7 @@ object RwkvOffline {
         if (model.length() == bundled.bytes) return model
 
         File(dir, "model-small.bin").delete() // SM40, kuma3 v19-v20
+        File(dir, "model-small-sm55.bin").delete() // SM55, kuma3 v21-v22
         dir.mkdirs()
         val tmp = File(dir, "${bundled.file}.tmp")
         context.assets.open(bundled.asset).use { input ->

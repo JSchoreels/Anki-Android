@@ -120,6 +120,7 @@ val collectionMethods =
         "evaluateParams" to { bytes -> evaluateParamsRaw(bytes) },
         "rwkvOfflineInstantPassStep" to { bytes -> backend.rwkvOfflineInstantPassStepRaw(input = bytes) },
         "rwkvOfflineForecast" to { bytes -> backend.rwkvOfflineForecastRaw(input = bytes) },
+        "rwkvOfflineCurveReschedule" to { bytes -> backend.rwkvOfflineCurveRescheduleRaw(input = bytes) },
         "getFsrsNewCardIntervals" to { bytes -> getFsrsNewCardIntervalsRaw(bytes) },
         // https://github.com/ankitects/anki/pull/4326 -> saveCustomColours should be no-op in mobile clients
         "saveCustomColours" to { bytes -> backendIdentity(bytes) },

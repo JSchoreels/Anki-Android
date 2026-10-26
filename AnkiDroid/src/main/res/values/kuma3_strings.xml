@@ -5,24 +5,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="DuplicateCrowdInStrings">
     <!-- Settings > kuma3 (preferences_kuma3.xml, Kuma3SettingsFragment) -->
     <string name="kuma3_settings_summary">Heatmap • Time per deck • Leaderboard • RWKV • Updates</string>
-    <string name="kuma3_pref_deck_list">Deck list</string>
-    <string name="kuma3_pref_heatmap">Review heatmap</string>
+    <string name="kuma3_pref_deck_list" maxLength="41">Deck list</string>
+    <string name="kuma3_pref_heatmap" maxLength="41">Review heatmap</string>
     <string name="kuma3_pref_heatmap_summary">A year or a month of reviews done and cards due, below the decks</string>
-    <string name="kuma3_pref_deck_times">Time per deck</string>
+    <string name="kuma3_pref_deck_times" maxLength="41">Time per deck</string>
     <string name="kuma3_pref_deck_times_summary">The time answered today on each deck row</string>
     <string name="kuma3_pref_leaderboard_signed_in">Signed in as %s. Off hides the board and stops the uploads; the sign-in is kept.</string>
     <string name="kuma3_pref_leaderboard_signed_out">The Anki Leaderboard add-on\'s board (an unofficial client of its server). Sign in from the deck list menu.</string>
-    <string name="kuma3_pref_lofi">Lofi button</string>
+    <string name="kuma3_pref_lofi" maxLength="41">Lofi button</string>
     <string name="kuma3_pref_lofi_summary">Lofi music while you study: tap the headphones in the deck list or the reviewer, long-press for tracks, volume and sources</string>
-    <string name="kuma3_pref_rwkv_forecast">RWKV forecast</string>
+    <string name="kuma3_pref_rwkv_forecast" maxLength="41">RWKV forecast</string>
     <string name="kuma3_pref_rwkv_forecast_summary">Under \'Studied today\': review cards due, added by the daily minimum, near the line and safe now, and how many more become due in 1 h, 3 h and by tomorrow. Not shown above 3000 review cards (too slow)</string>
-    <string name="kuma3_pref_rwkv_forecast_graph">RWKV forecast graph</string>
+    <string name="kuma3_pref_rwkv_forecast_graph" maxLength="41">RWKV forecast graph</string>
     <string name="kuma3_pref_rwkv_forecast_graph_summary">Below the heatmap: a dot per review card at its recall now, coloured like the forecast\'s counts. Not shown above 3000 review cards either</string>
-    <string name="kuma3_pref_rwkv_toast">\'Rebuilding RWKV\' message</string>
+    <string name="kuma3_pref_rwkv_toast" maxLength="41">\'Rebuilding RWKV\' message</string>
     <string name="kuma3_pref_rwkv_toast_summary">Shown when the RWKV state is rebuilt (first start, after an update), and a notification when it is ready</string>
-    <string name="kuma3_pref_rwkv_model">RWKV model</string>
+    <string name="kuma3_pref_rwkv_model" maxLength="41">RWKV model</string>
     <string name="kuma3_pref_rwkv_model_summary">%s. Big: the desktop fork\'s model. Small: JSchoreels\' 331k-parameter model, about 0.7%% less accurate (log loss, 1,000 held-out users), with about a quarter of the memory and rebuilds about 3x faster: a 4M-review, 100k-card collection rebuilds in under 1 GB, where the big model needs 2.6 GB. A change rebuilds the RWKV state from the review history</string>
-    <string name="kuma3_pref_rwkv_precision">RWKV state precision</string>
+    <string name="kuma3_pref_rwkv_precision" maxLength="41">RWKV state precision</string>
     <string name="kuma3_pref_rwkv_precision_summary">%s. How each card\'s RWKV memory is kept, as in the desktop fork: int8 uses about a third of f32\'s memory with the same accuracy; int4 cards / int8 notes a quarter less than int8, slightly less accurate. A change rebuilds the RWKV state from the review history</string>
     <string-array name="kuma3_rwkv_model_labels">
         <item>Big (2.8M parameters, default)</item>
@@ -33,18 +33,18 @@
         <item>f32 (full precision)</item>
         <item>int4 cards, int8 notes (less memory)</item>
     </string-array>
-    <string name="kuma3_pref_reviewer">Reviewer</string>
-    <string name="kuma3_pref_answer_fade">Fade answer buttons</string>
+    <string name="kuma3_pref_reviewer" maxLength="41">Reviewer</string>
+    <string name="kuma3_pref_answer_fade" maxLength="41">Fade answer buttons</string>
     <string name="kuma3_pref_answer_fade_summary">After Show answer, the answer buttons fade in (200 ms). Off: they appear at once</string>
 
-    <string name="kuma3_leaderboard">Leaderboard</string>
-    <string name="kuma3_custom_study">Custom study</string>
+    <string name="kuma3_leaderboard" maxLength="28">Leaderboard</string>
+    <string name="kuma3_custom_study" maxLength="28">Custom study</string>
 
     <!-- in-app updates (Kuma3Update) -->
-    <string name="kuma3_pref_updates">Updates</string>
-    <string name="kuma3_pref_update_check">Check for updates</string>
+    <string name="kuma3_pref_updates" maxLength="41">Updates</string>
+    <string name="kuma3_pref_update_check" maxLength="41">Check for updates</string>
     <string name="kuma3_pref_update_check_summary">Once a day, asks GitHub for a newer kuma3 Anki release and offers to install it</string>
-    <string name="kuma3_pref_update_now">Check now</string>
+    <string name="kuma3_pref_update_now" maxLength="41">Check now</string>
     <string name="kuma3_pref_update_now_summary">This build: %1$s, %2$s</string>
     <string name="kuma3_pref_update_debug">%s. Debug build: updates come from the PC (adb)</string>
     <string name="kuma3_update_check_failed">Couldn\'t check for updates: %s</string>
@@ -123,7 +123,6 @@
     <string name="kuma3_xp_trophies">Trophies</string>
     <string name="kuma3_xp_more">More</string>
     <string name="kuma3_xp_statistics">Statistics</string>
-    <string name="kuma3_xp_settings">Settings</string>
     <string name="kuma3_xp_trophies_title">Trophies · %1$d of %2$d</string>
     <string name="kuma3_xp_today">Today</string>
     <string name="kuma3_xp_reps_of_goal">%1$d/%2$d reps</string>

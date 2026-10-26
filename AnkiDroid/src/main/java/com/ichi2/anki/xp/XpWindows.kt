@@ -145,7 +145,7 @@ body{padding:10px 14px}
             .Builder(context)
             .setCustomTitle(titleBar(context, "Anki XP"))
             .setItems(
-                arrayOf(context.getString(R.string.kuma3_xp_statistics), context.getString(R.string.kuma3_xp_settings)),
+                arrayOf(context.getString(R.string.kuma3_xp_statistics), context.getString(R.string.settings)),
             ) { _, i -> if (i == 0) stats(context) else settings(context) }
             .show()
     }

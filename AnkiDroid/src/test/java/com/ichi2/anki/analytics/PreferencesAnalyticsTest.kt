@@ -34,6 +34,20 @@ class PreferencesAnalyticsTest : RobolectricTest() {
     /** Keys of preferences that shouldn't be reported */
     private val excludedPrefs: Set<String> =
         setOf(
+            // kuma3's own settings: never reported
+            R.string.kuma3_screen_key,
+            R.string.kuma3_heatmap_key,
+            R.string.kuma3_deck_times_key,
+            R.string.kuma3_leaderboard_key,
+            R.string.kuma3_lofi_key,
+            R.string.kuma3_rwkv_forecast_key,
+            R.string.kuma3_rwkv_forecast_graph_key,
+            R.string.kuma3_rwkv_toast_key,
+            R.string.kuma3_rwkv_model_key,
+            R.string.kuma3_rwkv_precision_key,
+            R.string.kuma3_answer_fade_key,
+            R.string.kuma3_update_check_key,
+            R.string.kuma3_update_now_key,
             // Share feature usage: analytics are only reported if this is enabled :)
             R.string.analytics_opt_in_key, // analytics_opt_in_v2
             // Screens: don't have a value

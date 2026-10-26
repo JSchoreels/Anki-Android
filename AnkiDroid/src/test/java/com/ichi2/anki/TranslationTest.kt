@@ -296,6 +296,7 @@ class TranslationTest : RobolectricTest() {
                 // TR.actionsSelect()
                 // TR.customStudySelect()
                 // TR.editingImageOcclusionSelectTool()
+                "Settings", // R.string.settings | TR.deckConfigCopySettings() (the FSRS-7 fork's build 107)
                 "Show remaining card count", // R.string.show_progress_summ | TR.preferencesShowRemainingCardCount()
                 "Study", // R.string.studyoptions_start | TR.decksStudy()
                 "Sync", // R.string.button_sync, R.string.pref_cat_sync

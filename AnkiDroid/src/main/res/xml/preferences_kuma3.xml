@@ -65,4 +65,14 @@
             android:summary="After Show answer, the answer buttons fade in (200 ms). Off: they appear at once"
             android:defaultValue="true" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="Updates">
+        <SwitchPreferenceCompat
+            android:key="@string/kuma3_update_check_key"
+            android:title="Check for updates"
+            android:summary="Once a day, asks GitHub for a newer kuma3 Anki release and offers to install it"
+            android:defaultValue="true" />
+        <Preference
+            android:key="@string/kuma3_update_now_key"
+            android:title="Check now" />
+    </PreferenceCategory>
 </PreferenceScreen>

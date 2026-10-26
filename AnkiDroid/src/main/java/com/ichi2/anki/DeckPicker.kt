@@ -2222,6 +2222,8 @@ open class DeckPicker :
         launchCatchingTask {
             withProgress { viewModel.updateDeckList().join() }
             RwkvOffline.deckListShown()
+            com.ichi2.anki.kuma3.Kuma3Update
+                .checkDaily(this@DeckPicker)
         }
     }
 

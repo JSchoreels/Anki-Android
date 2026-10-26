@@ -4,6 +4,7 @@ package com.ichi2.anki.kuma3
 
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
+import com.ichi2.anki.BuildConfig
 import com.ichi2.anki.R
 import com.ichi2.anki.RwkvOffline
 import com.ichi2.anki.leaderboard.Leaderboard
@@ -37,5 +38,22 @@ class Kuma3SettingsFragment : SettingsFragment() {
                 true
             }
         }
+        requirePreference<Preference>(R.string.kuma3_update_now_key).apply {
+            val built =
+                java.text.DateFormat
+                    .getDateInstance()
+                    .format(java.util.Date(BuildConfig.BUILD_TIME))
+            summary = "This build: ${BuildConfig.GIT_COMMIT_HASH.take(10)}, $built"
+            if (Kuma3Update.available) {
+                setOnPreferenceClickListener {
+                    Kuma3Update.check(requireActivity())
+                    true
+                }
+            } else {
+                summary = "$summary. Debug build: updates come from the PC (adb)"
+                isEnabled = false
+            }
+        }
+        requirePreference<SwitchPreferenceCompat>(R.string.kuma3_update_check_key).isEnabled = Kuma3Update.available
     }
 }

@@ -474,6 +474,8 @@ class ReviewerTest : RobolectricTest() {
             for (k in keys) {
                 putString(k, ActionButtonStatus.MENU_DISABLED.toString())
             }
+            // kuma3's lofi button has its own switch (Settings > kuma3)
+            putBoolean(targetContext.getString(R.string.kuma3_lofi_key), false)
         }
     }
 

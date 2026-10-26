@@ -38,6 +38,8 @@ class ExternalEntryPointsTest : RobolectricTest() {
                 EntryPoint.Activity("com.ichi2.anki.Reviewer"),
                 EntryPoint.ActivityAlias("com.ichi2.anki.AnkiCardContextMenuAction", "com.ichi2.anki.IntentHandler2"),
                 EntryPoint.ActivityAlias("com.ichi2.anki.CardBrowserDeepLink", "com.ichi2.anki.IntentHandler"),
+                // kuma3: screens opened by kuma3 Skins, behind the database permission
+                EntryPoint.ActivityAlias("com.ichi2.anki.kuma3.Kuma3ScreenEntry", "com.ichi2.anki.IntentHandler"),
                 EntryPoint.Activity("com.ichi2.anki.instantnoteeditor.InstantNoteEditorActivity"),
                 EntryPoint.Activity("com.ichi2.anki.ui.windows.managespace.ManageSpaceActivity"),
                 EntryPoint.Activity("com.ichi2.anki.ui.windows.permissions.AllPermissionsExplanationActivity"),
@@ -45,6 +47,8 @@ class ExternalEntryPointsTest : RobolectricTest() {
                 EntryPoint.WidgetConfig("com.ichi2.widget.cardanalysis.CardAnalysisWidgetConfig"),
                 // Headless: reachable with no UI (third-party API, system broadcasts, widget updates)
                 EntryPoint.Provider("com.ichi2.anki.provider.CardContentProvider"),
+                // kuma3: lofi music for Bluetooth and the system media controls (Media3)
+                EntryPoint.Service("com.ichi2.anki.kuma3.lofi.LofiService"),
                 EntryPoint.Receiver("com.ichi2.anki.receiver.SdCardReceiver"),
                 EntryPoint.Receiver("com.ichi2.widget.AddNoteWidget"),
                 EntryPoint.Receiver("com.ichi2.widget.AnkiDroidWidgetSmall"),

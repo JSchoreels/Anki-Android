@@ -110,7 +110,7 @@
         android:fragment="com.ichi2.anki.kuma3.Kuma3SettingsFragment"
         android:key="@string/kuma3_screen_key"
         android:title="kuma3"
-        android:summary="Heatmap • Time per deck • Leaderboard • RWKV"
+        android:summary="@string/kuma3_settings_summary"
         android:icon="@drawable/ic_bar_chart_black">
     </com.ichi2.preferences.HeaderPreference>
 

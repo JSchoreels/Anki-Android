@@ -4,75 +4,75 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="kuma3"
     android:key="@string/kuma3_screen_key">
-    <PreferenceCategory android:title="Deck list">
+    <PreferenceCategory android:title="@string/kuma3_pref_deck_list">
         <SwitchPreferenceCompat
             android:key="@string/kuma3_heatmap_key"
-            android:title="Review heatmap"
-            android:summary="A year or a month of reviews done and cards due, below the decks"
+            android:title="@string/kuma3_pref_heatmap"
+            android:summary="@string/kuma3_pref_heatmap_summary"
             android:defaultValue="true" />
         <SwitchPreferenceCompat
             android:key="@string/kuma3_deck_times_key"
-            android:title="Time per deck"
-            android:summary="The time answered today on each deck row"
+            android:title="@string/kuma3_pref_deck_times"
+            android:summary="@string/kuma3_pref_deck_times_summary"
             android:defaultValue="true" />
         <SwitchPreferenceCompat
             android:key="@string/kuma3_leaderboard_key"
-            android:title="Leaderboard" />
+            android:title="@string/kuma3_leaderboard" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Lofi">
         <SwitchPreferenceCompat
             android:key="@string/kuma3_lofi_key"
-            android:title="Lofi button"
-            android:summary="Lofi music while you study: tap the headphones in the deck list or the reviewer, long-press for tracks, volume and sources"
+            android:title="@string/kuma3_pref_lofi"
+            android:summary="@string/kuma3_pref_lofi_summary"
             android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory android:title="RWKV">
         <SwitchPreferenceCompat
             android:key="@string/kuma3_rwkv_forecast_key"
-            android:title="RWKV forecast"
-            android:summary="Under 'Studied today': review cards due, added by the daily minimum, near the line and safe now, and how many more become due in 1 h, 3 h and by tomorrow. Not shown above 3000 review cards (too slow)"
+            android:title="@string/kuma3_pref_rwkv_forecast"
+            android:summary="@string/kuma3_pref_rwkv_forecast_summary"
             android:defaultValue="true" />
         <SwitchPreferenceCompat
             android:key="@string/kuma3_rwkv_forecast_graph_key"
             android:dependency="@string/kuma3_rwkv_forecast_key"
-            android:title="RWKV forecast graph"
-            android:summary="Below the heatmap: a dot per review card at its recall now, coloured like the forecast's counts. Not shown above 3000 review cards either"
+            android:title="@string/kuma3_pref_rwkv_forecast_graph"
+            android:summary="@string/kuma3_pref_rwkv_forecast_graph_summary"
             android:defaultValue="true" />
         <SwitchPreferenceCompat
             android:key="@string/kuma3_rwkv_toast_key"
-            android:title="'Rebuilding RWKV' message"
-            android:summary="Shown when the RWKV state is rebuilt (first start, after an update), and a notification when it is ready"
+            android:title="@string/kuma3_pref_rwkv_toast"
+            android:summary="@string/kuma3_pref_rwkv_toast_summary"
             android:defaultValue="true" />
         <ListPreference
             android:key="@string/kuma3_rwkv_model_key"
-            android:title="RWKV model"
+            android:title="@string/kuma3_pref_rwkv_model"
             android:entries="@array/kuma3_rwkv_model_labels"
             android:entryValues="@array/kuma3_rwkv_model_values"
             android:defaultValue="big"
-            android:summary="%s. Big: the desktop fork's model. Small: JSchoreels' 331k-parameter model, about 0.7%% less accurate (log loss, 1,000 held-out users), with about a quarter of the memory and rebuilds about 3x faster: a 4M-review, 100k-card collection rebuilds in under 1 GB, where the big model needs 2.6 GB. A change rebuilds the RWKV state from the review history" />
+            android:summary="@string/kuma3_pref_rwkv_model_summary" />
         <ListPreference
             android:key="@string/kuma3_rwkv_precision_key"
-            android:title="RWKV state precision"
+            android:title="@string/kuma3_pref_rwkv_precision"
             android:entries="@array/kuma3_rwkv_precision_labels"
             android:entryValues="@array/kuma3_rwkv_precision_values"
             android:defaultValue="int8"
-            android:summary="%s. How each card's RWKV memory is kept, as in the desktop fork: int8 uses about a third of f32's memory with the same accuracy; int4 cards / int8 notes a quarter less than int8, slightly less accurate. A change rebuilds the RWKV state from the review history" />
+            android:summary="@string/kuma3_pref_rwkv_precision_summary" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Reviewer">
+    <PreferenceCategory android:title="@string/kuma3_pref_reviewer">
         <SwitchPreferenceCompat
             android:key="@string/kuma3_answer_fade_key"
-            android:title="Fade answer buttons"
-            android:summary="After Show answer, the answer buttons fade in (200 ms). Off: they appear at once"
+            android:title="@string/kuma3_pref_answer_fade"
+            android:summary="@string/kuma3_pref_answer_fade_summary"
             android:defaultValue="true" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="Updates">
+    <PreferenceCategory android:title="@string/kuma3_pref_updates">
         <SwitchPreferenceCompat
             android:key="@string/kuma3_update_check_key"
-            android:title="Check for updates"
-            android:summary="Once a day, asks GitHub for a newer kuma3 Anki release and offers to install it"
+            android:title="@string/kuma3_pref_update_check"
+            android:summary="@string/kuma3_pref_update_check_summary"
             android:defaultValue="true" />
         <Preference
             android:key="@string/kuma3_update_now_key"
-            android:title="Check now" />
+            android:title="@string/kuma3_pref_update_now" />
     </PreferenceCategory>
 </PreferenceScreen>

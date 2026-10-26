@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-<!-- kuma3: not translated (the kuma3 texts are English only for now) -->
+<!-- kuma3: keys and fixed values. The texts to translate are in kuma3_strings.xml -->
 <resources>
     <string name="kuma3_screen_key" translatable="false">kuma3Screen</string>
     <!-- Settings > kuma3 (com.ichi2.anki.kuma3.Kuma3Settings) -->
@@ -18,15 +18,6 @@
     <string name="kuma3_answer_fade_key" translatable="false">kuma3_answer_fade</string>
     <string name="kuma3_update_check_key" translatable="false">kuma3_update_check</string>
     <string name="kuma3_update_now_key" translatable="false">kuma3_update_now</string>
-    <string-array name="kuma3_rwkv_precision_labels" translatable="false">
-        <item>int8 (default)</item>
-        <item>f32 (full precision)</item>
-        <item>int4 cards, int8 notes (less memory)</item>
-    </string-array>
-    <string-array name="kuma3_rwkv_model_labels" translatable="false">
-        <item>Big (2.8M parameters, default)</item>
-        <item>Small (331k parameters, less memory)</item>
-    </string-array>
     <string-array name="kuma3_rwkv_model_values" translatable="false">
         <item>big</item>
         <item>small</item>
@@ -37,6 +28,4 @@
         <item>int4</item>
     </string-array>
 
-    <string name="kuma3_leaderboard" translatable="false">Leaderboard</string>
-    <string name="kuma3_custom_study" translatable="false">Custom study</string>
 </resources>

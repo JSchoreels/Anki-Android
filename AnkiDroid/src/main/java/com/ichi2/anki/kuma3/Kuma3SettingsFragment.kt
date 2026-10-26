@@ -24,11 +24,9 @@ class Kuma3SettingsFragment : SettingsFragment() {
             isChecked = Kuma3Settings.leaderboard
             summary =
                 if (Leaderboard.isSignedIn) {
-                    "Signed in as ${Leaderboard.username}. Off hides the board and stops the uploads; " +
-                        "the sign-in is kept."
+                    getString(R.string.kuma3_pref_leaderboard_signed_in, Leaderboard.username)
                 } else {
-                    "The Anki Leaderboard add-on's board (an unofficial client of its server). " +
-                        "Sign in from the deck list menu."
+                    getString(R.string.kuma3_pref_leaderboard_signed_out)
                 }
         }
         // the backend rebuilds the RWKV state for the new model or precision right away
@@ -43,14 +41,14 @@ class Kuma3SettingsFragment : SettingsFragment() {
                 java.text.DateFormat
                     .getDateInstance()
                     .format(java.util.Date(BuildConfig.BUILD_TIME))
-            summary = "This build: ${BuildConfig.GIT_COMMIT_HASH.take(10)}, $built"
+            summary = getString(R.string.kuma3_pref_update_now_summary, BuildConfig.GIT_COMMIT_HASH.take(10), built)
             if (Kuma3Update.available) {
                 setOnPreferenceClickListener {
                     Kuma3Update.check(requireActivity())
                     true
                 }
             } else {
-                summary = "$summary. Debug build: updates come from the PC (adb)"
+                summary = getString(R.string.kuma3_pref_update_debug, summary)
                 isEnabled = false
             }
         }

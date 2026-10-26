@@ -27,6 +27,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -47,6 +48,7 @@ object Kuma3Update {
     class Release(
         val name: String,
         val tag: String,
+        /** The whole release body: [notesFor] picks this release's own notes from it. */
         val notes: String,
         val apkUrl: String,
         /** The release's SHA256SUMS.txt, if it has one. */
@@ -97,16 +99,7 @@ object Kuma3Update {
         return Release(
             name = latest.optString("name", tag),
             tag = tag,
-            // this release's own English notes: the Spanish follows <!-- es -->, and the workflow's
-            // template ("Which file?", ...) follows the notes; shown as plain text
-            notes =
-                latest
-                    .optString("body")
-                    .substringBefore("<!-- es -->")
-                    .substringBefore("**Which file?**")
-                    .replace("**", "")
-                    .replace("`", "")
-                    .trim(),
+            notes = latest.optString("body"),
             apkUrl = apk.getString("browser_download_url"),
             sumsUrl = files.firstOrNull { it.getString("name") == "SHA256SUMS.txt" }?.getString("browser_download_url"),
         )
@@ -136,20 +129,20 @@ object Kuma3Update {
                     withContext(Dispatchers.IO) { newerRelease() }
                 } catch (e: Exception) {
                     Timber.w(e, "kuma3 update check")
-                    if (!quiet) toast(activity, "Couldn't check for updates: ${e.message}")
+                    if (!quiet) toast(activity, activity.getString(R.string.kuma3_update_check_failed, e.message))
                     return@launch
                 }
             if (release == null) {
-                if (!quiet) toast(activity, "kuma3 Anki is up to date")
+                if (!quiet) toast(activity, activity.getString(R.string.kuma3_update_up_to_date))
                 return@launch
             }
             if (activity.isFinishing) return@launch
             AlertDialog
                 .Builder(activity)
-                .setTitle("${release.name} is available")
-                .setMessage(release.notes.take(700))
-                .setPositiveButton("Update") { _, _ -> download(activity, release) }
-                .setNegativeButton("Later", null)
+                .setTitle(activity.getString(R.string.kuma3_update_available, release.name))
+                .setMessage(notesFor(release.notes, Locale.getDefault().language == "es").take(700))
+                .setPositiveButton(R.string.kuma3_update_install) { _, _ -> download(activity, release) }
+                .setNegativeButton(R.string.kuma3_update_later, null)
                 .show()
         }
     }
@@ -162,7 +155,7 @@ object Kuma3Update {
         if (!activity.packageManager.canRequestPackageInstalls()) {
             // offered again when the deck list is next shown, not only tomorrow
             activity.getSharedPreferences("kuma3_update", Context.MODE_PRIVATE).edit { remove(LAST_CHECK) }
-            toast(activity, "Allow kuma3 Anki to install updates, then come back: the update is offered again")
+            toast(activity, activity.getString(R.string.kuma3_update_allow_installs))
             activity.startActivity(
                 Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${activity.packageName}")),
             )
@@ -172,7 +165,7 @@ object Kuma3Update {
         val dialog =
             AlertDialog
                 .Builder(activity)
-                .setTitle("Downloading ${release.name}")
+                .setTitle(activity.getString(R.string.kuma3_update_downloading, release.name))
                 .setView(bar)
                 .setCancelable(false)
                 .show()
@@ -205,7 +198,8 @@ object Kuma3Update {
                 Timber.w(e, "kuma3 update download")
                 dialog.dismiss()
                 file.delete()
-                toast(activity, "Download failed: ${e.message}")
+                val reason = if (e is DamagedDownload) activity.getString(R.string.kuma3_update_damaged) else e.message
+                toast(activity, activity.getString(R.string.kuma3_update_download_failed, reason))
                 return@launch
             }
             dialog.dismiss()
@@ -216,6 +210,27 @@ object Kuma3Update {
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK),
             )
         }
+    }
+
+    private class DamagedDownload : IOException("SHA-256 differs")
+
+    /**
+     * This release's own notes from a release body, as plain text: English, or the Spanish after the
+     * workflow's `---` line; the template (Which file? / ¿Qué archivo?) that follows each is left out.
+     */
+    internal fun notesFor(
+        body: String,
+        spanish: Boolean,
+    ): String {
+        val text = body.replace("\r\n", "\n")
+        val separator = "\n---\n"
+        val half = if (spanish && separator in text) text.substringAfter(separator) else text.substringBefore(separator)
+        return half
+            .substringBefore("**Which file?**")
+            .substringBefore("**¿Qué archivo?**")
+            .replace("**", "")
+            .replace("`", "")
+            .trim()
     }
 
     /** The SHA-256 that a SHA256SUMS.txt (`<hash>  <name>` lines) lists for [APK]. */
@@ -247,7 +262,7 @@ object Kuma3Update {
             }
         }
         val actual = digest.digest().joinToString("") { "%02x".format(it) }
-        if (!actual.equals(expected, ignoreCase = true)) throw IOException("the download is damaged (SHA-256 differs)")
+        if (!actual.equals(expected, ignoreCase = true)) throw DamagedDownload()
     }
 
     private fun toast(

@@ -120,7 +120,7 @@ class LeaderboardFooter(
                         orientation = LinearLayout.VERTICAL
                         addView(
                             TextView(context).apply {
-                                text = boardTitle(board)
+                                text = boardTitle(context, board)
                                 textSize = 13f
                                 alpha = 0.7f
                                 setPadding((8 * density).toInt(), 0, 0, 0)

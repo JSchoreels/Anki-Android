@@ -210,4 +210,35 @@
         <item quantity="other">Quedan %d minutos</item>
         <item quantity="many">Quedan %d minutos</item>
     </plurals>
+
+    <!-- leaderboard (com.ichi2.anki.leaderboard) -->
+    <string name="kuma3_lb_rank">Puesto</string>
+    <string name="kuma3_lb_username">Usuario</string>
+    <string name="kuma3_lb_reviews_today">Repasos hoy</string>
+    <string name="kuma3_lb_reviews">Repasos</string>
+    <string name="kuma3_lb_minutes_today">Minutos hoy</string>
+    <string name="kuma3_lb_time">Tiempo</string>
+    <string name="kuma3_lb_streak">Racha</string>
+    <string name="kuma3_lb_past_31_days">Últimos 31 días</string>
+    <string name="kuma3_lb_retention">Retención %</string>
+    <string name="kuma3_lb_retention_short">Ret. %</string>
+    <string name="kuma3_lb_country">País</string>
+    <string name="kuma3_lb_loading">Clasificación…</string>
+    <string name="kuma3_lb_username_hint">Usuario de Leaderboard</string>
+    <string name="kuma3_lb_password_hint">Contraseña</string>
+    <string name="kuma3_lb_sign_in_message">Inicia sesión con la cuenta del complemento Leaderboard. Tus repasos se suben después de cada sincronización y al salir del repaso.</string>
+    <string name="kuma3_lb_sign_in">Iniciar sesión</string>
+    <string name="kuma3_lb_signing_in">Iniciando sesión…</string>
+    <string name="kuma3_lb_group_to_show">Grupo que mostrar</string>
+    <string name="kuma3_lb_refresh">Actualizar</string>
+    <string name="kuma3_lb_options">Opciones</string>
+    <string name="kuma3_lb_change_group">Cambiar de grupo</string>
+    <string name="kuma3_lb_users_home">Usuarios en la pantalla principal: %d</string>
+    <string name="kuma3_lb_focus">Centrar en mí: %s</string>
+    <string name="kuma3_lb_medals">Medallas de liga junto a los nombres: %s</string>
+    <string name="kuma3_lb_upload">Subir al salir del repaso: %s</string>
+    <string name="kuma3_lb_sign_out">Cerrar sesión</string>
+    <string name="kuma3_lb_signed_in_as">Sesión iniciada como %s</string>
+    <string name="kuma3_lb_users_home_title">Usuarios en la pantalla principal</string>
+    <string name="kuma3_lb_users_home_message">Cuántas filas muestra la tabla debajo de los mazos (de 1 a %d).</string>
 </resources>

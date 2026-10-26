@@ -20,6 +20,7 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ichi2.anki.R
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,14 +31,17 @@ import java.util.Locale
  * over a thousand members: only the rows on screen are drawn).
  */
 
-internal fun boardTitle(board: Leaderboard.Board): String {
+internal fun boardTitle(
+    context: Context,
+    board: Leaderboard.Board,
+): String {
     val updated =
         if (board.updatedMillis > 0) {
             " · " + DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(board.updatedMillis))
         } else {
             ""
         }
-    return board.group.ifEmpty { "Leaderboard" } + updated
+    return board.group.ifEmpty { context.getString(R.string.kuma3_leaderboard) } + updated
 }
 
 /**
@@ -227,14 +231,24 @@ private fun cells(
     val showTime = level <= 3
     if (row == null) {
         return listOfNotNull(
-            text("Rank"),
-            text("Username", start = true),
-            text(if (level < 2) "Reviews today" else "Reviews"),
-            text(if (level < 2) "Minutes today" else "Time").takeIf { showTime },
-            text("Streak"),
-            text("Past 31 days").takeIf { showMonth },
-            text(if (level == 0) "Retention %" else "Ret. %").takeIf { showRetention },
-            text(if (showCountryName) "Country" else "", start = true),
+            text(context.getString(R.string.kuma3_lb_rank)),
+            text(context.getString(R.string.kuma3_lb_username), start = true),
+            text(context.getString(if (level < 2) R.string.kuma3_lb_reviews_today else R.string.kuma3_lb_reviews)),
+            text(context.getString(if (level < 2) R.string.kuma3_lb_minutes_today else R.string.kuma3_lb_time)).takeIf { showTime },
+            text(context.getString(R.string.kuma3_lb_streak)),
+            text(context.getString(R.string.kuma3_lb_past_31_days)).takeIf { showMonth },
+            text(
+                context.getString(
+                    if (level ==
+                        0
+                    ) {
+                        R.string.kuma3_lb_retention
+                    } else {
+                        R.string.kuma3_lb_retention_short
+                    },
+                ),
+            ).takeIf { showRetention },
+            text(if (showCountryName) context.getString(R.string.kuma3_lb_country) else "", start = true),
         )
     }
     val (band, letter) = grade(row.rank, total)

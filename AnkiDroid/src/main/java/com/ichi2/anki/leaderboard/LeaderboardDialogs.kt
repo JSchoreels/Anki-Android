@@ -8,6 +8,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import com.ichi2.anki.DeckPicker
+import com.ichi2.anki.R
 import com.ichi2.anki.launchCatchingTask
 import com.ichi2.anki.withProgress
 
@@ -27,7 +28,7 @@ private fun DeckPicker.openLeaderboard() {
 
 private fun DeckPicker.refreshLeaderboard() {
     launchCatchingTask {
-        val board = withProgress("Leaderboard…") { Leaderboard.sync() }
+        val board = withProgress(getString(R.string.kuma3_lb_loading)) { Leaderboard.sync() }
         LeaderboardFooter.refresh()
         showBoard(board)
     }
@@ -35,10 +36,10 @@ private fun DeckPicker.refreshLeaderboard() {
 
 private fun DeckPicker.showLeaderboardSignIn() {
     val padding = (20 * resources.displayMetrics.density).toInt()
-    val username = EditText(this).apply { hint = "Leaderboard username" }
+    val username = EditText(this).apply { hint = getString(R.string.kuma3_lb_username_hint) }
     val password =
         EditText(this).apply {
-            hint = "Password"
+            hint = getString(R.string.kuma3_lb_password_hint)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         }
     val form =
@@ -51,13 +52,11 @@ private fun DeckPicker.showLeaderboardSignIn() {
     AlertDialog
         .Builder(this)
         .setTitle("Anki Leaderboard")
-        .setMessage(
-            "Sign in with the account of the Leaderboard add-on. Your review counts are then " +
-                "uploaded after each sync and when you leave the reviewer.",
-        ).setView(form)
-        .setPositiveButton("Sign in") { _, _ ->
+        .setMessage(R.string.kuma3_lb_sign_in_message)
+        .setView(form)
+        .setPositiveButton(R.string.kuma3_lb_sign_in) { _, _ ->
             launchCatchingTask {
-                withProgress("Signing in…") {
+                withProgress(getString(R.string.kuma3_lb_signing_in)) {
                     Leaderboard.signIn(username.text.toString().trim(), password.text.toString())
                 }
                 if (Leaderboard.groups.size > 1) chooseLeaderboardGroup() else refreshLeaderboard()
@@ -74,7 +73,7 @@ private fun DeckPicker.chooseLeaderboardGroup() {
     }
     AlertDialog
         .Builder(this)
-        .setTitle("Group to show")
+        .setTitle(R.string.kuma3_lb_group_to_show)
         .setItems(groups.toTypedArray()) { _, which ->
             Leaderboard.group = groups[which]
             LeaderboardFooter.refresh()
@@ -87,34 +86,34 @@ private fun DeckPicker.showBoard(board: Leaderboard.Board) {
     val padding = (8 * metrics.density).toInt()
     AlertDialog
         .Builder(this)
-        .setTitle(boardTitle(board))
+        .setTitle(boardTitle(this, board))
         .setView(
             FrameLayout(this).apply {
                 setPadding(padding, padding, padding, 0)
                 // dialogs are about four fifths of the screen wide; the list scrolls inside
                 addView(boardList(context, board, maxWidth = metrics.widthPixels * 3 / 4, maxHeight = metrics.heightPixels * 3 / 5))
             },
-        ).setPositiveButton("Refresh") { _, _ -> refreshLeaderboard() }
+        ).setPositiveButton(R.string.kuma3_lb_refresh) { _, _ -> refreshLeaderboard() }
         .setNegativeButton(android.R.string.cancel, null)
-        .setNeutralButton("Options") { _, _ -> showLeaderboardOptions() }
+        .setNeutralButton(R.string.kuma3_lb_options) { _, _ -> showLeaderboardOptions() }
         .show()
 }
 
 /** The account and the add-on's options (Leaderboard > Config on the desktop). */
 private fun DeckPicker.showLeaderboardOptions() {
-    fun onOff(value: Boolean) = if (value) "on" else "off"
+    fun onOff(value: Boolean) = getString(if (value) R.string.kuma3_xp_on else R.string.kuma3_xp_off)
     val items =
         arrayOf(
-            "Change group",
-            "Users on the home screen: ${Leaderboard.maxUsers}",
-            "Focus on me: ${onOff(Leaderboard.focusOnUser)}",
-            "League medals next to names: ${onOff(Leaderboard.showMedals)}",
-            "Upload when leaving reviews: ${onOff(Leaderboard.uploadAfterReviews)}",
-            "Sign out",
+            getString(R.string.kuma3_lb_change_group),
+            getString(R.string.kuma3_lb_users_home, Leaderboard.maxUsers),
+            getString(R.string.kuma3_lb_focus, onOff(Leaderboard.focusOnUser)),
+            getString(R.string.kuma3_lb_medals, onOff(Leaderboard.showMedals)),
+            getString(R.string.kuma3_lb_upload, onOff(Leaderboard.uploadAfterReviews)),
+            getString(R.string.kuma3_lb_sign_out),
         )
     AlertDialog
         .Builder(this)
-        .setTitle("Signed in as ${Leaderboard.username}")
+        .setTitle(getString(R.string.kuma3_lb_signed_in_as, Leaderboard.username))
         .setItems(items) { _, which ->
             when (which) {
                 0 -> chooseLeaderboardGroup()
@@ -140,8 +139,8 @@ private fun DeckPicker.askLeaderboardMaxUsers() {
         }
     AlertDialog
         .Builder(this)
-        .setTitle("Users on the home screen")
-        .setMessage("How many rows the board below the decks shows (1 to ${Leaderboard.MAX_HOME_USERS}).")
+        .setTitle(R.string.kuma3_lb_users_home_title)
+        .setMessage(getString(R.string.kuma3_lb_users_home_message, Leaderboard.MAX_HOME_USERS))
         .setView(
             FrameLayout(this).apply {
                 setPadding(padding, 0, padding, 0)

@@ -204,4 +204,35 @@
         <item quantity="one">%d Minute Remaining</item>
         <item quantity="other">%d Minutes Remaining</item>
     </plurals>
+
+    <!-- leaderboard (com.ichi2.anki.leaderboard) -->
+    <string name="kuma3_lb_rank">Rank</string>
+    <string name="kuma3_lb_username">Username</string>
+    <string name="kuma3_lb_reviews_today">Reviews today</string>
+    <string name="kuma3_lb_reviews">Reviews</string>
+    <string name="kuma3_lb_minutes_today">Minutes today</string>
+    <string name="kuma3_lb_time">Time</string>
+    <string name="kuma3_lb_streak">Streak</string>
+    <string name="kuma3_lb_past_31_days">Past 31 days</string>
+    <string name="kuma3_lb_retention">Retention %</string>
+    <string name="kuma3_lb_retention_short">Ret. %</string>
+    <string name="kuma3_lb_country">Country</string>
+    <string name="kuma3_lb_loading">Leaderboard…</string>
+    <string name="kuma3_lb_username_hint">Leaderboard username</string>
+    <string name="kuma3_lb_password_hint">Password</string>
+    <string name="kuma3_lb_sign_in_message">Sign in with the account of the Leaderboard add-on. Your review counts are then uploaded after each sync and when you leave the reviewer.</string>
+    <string name="kuma3_lb_sign_in">Sign in</string>
+    <string name="kuma3_lb_signing_in">Signing in…</string>
+    <string name="kuma3_lb_group_to_show">Group to show</string>
+    <string name="kuma3_lb_refresh">Refresh</string>
+    <string name="kuma3_lb_options">Options</string>
+    <string name="kuma3_lb_change_group">Change group</string>
+    <string name="kuma3_lb_users_home">Users on the home screen: %d</string>
+    <string name="kuma3_lb_focus">Focus on me: %s</string>
+    <string name="kuma3_lb_medals">League medals next to names: %s</string>
+    <string name="kuma3_lb_upload">Upload when leaving reviews: %s</string>
+    <string name="kuma3_lb_sign_out">Sign out</string>
+    <string name="kuma3_lb_signed_in_as">Signed in as %s</string>
+    <string name="kuma3_lb_users_home_title">Users on the home screen</string>
+    <string name="kuma3_lb_users_home_message">How many rows the board below the decks shows (1 to %d).</string>
 </resources>

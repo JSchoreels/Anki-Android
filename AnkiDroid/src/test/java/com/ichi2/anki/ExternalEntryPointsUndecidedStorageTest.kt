@@ -59,7 +59,12 @@ class ExternalEntryPointsUndecidedStorageTest : RobolectricTest() {
             is EntryPoint.WidgetConfigAlias -> launchActivity(entryPoint.targetActivity)
             is EntryPoint.Receiver -> sendBroadcast(entryPoint.className)
             is EntryPoint.Provider -> queryContentProvider(entryPoint.className)
-            is EntryPoint.Service -> fail("define how to drive a Service entry point: $entryPoint")
+            // created and destroyed, as when a media controller binds to it and lets go
+            is EntryPoint.Service ->
+                Robolectric
+                    .buildService(Class.forName(entryPoint.className).asSubclass(android.app.Service::class.java))
+                    .create()
+                    .destroy()
         }
         advanceRobolectricLooper()
     }
@@ -80,6 +85,8 @@ class ExternalEntryPointsUndecidedStorageTest : RobolectricTest() {
             "com.ichi2.anki.AnkiCardContextMenuAction" ->
                 Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain").putExtra(Intent.EXTRA_PROCESS_TEXT, "dog")
             "com.ichi2.anki.CardBrowserDeepLink" -> Intent(Intent.ACTION_VIEW, "anki://x-callback-url/browser?search=dog".toUri())
+            // kuma3 Skins opens a kuma3 screen
+            "com.ichi2.anki.kuma3.Kuma3ScreenEntry" -> Intent("com.ichi2.anki.kuma3.OPEN_SCREEN").putExtra("screen", "stats")
             // launched by the system's 'Manage space' settings button, with no action or extras
             "com.ichi2.anki.ui.windows.managespace.ManageSpaceActivity" -> Intent()
             // 'more info' button in the OS permission settings

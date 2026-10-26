@@ -58,7 +58,8 @@ class ReviewerViewModelTest : RobolectricTest() {
     fun `restored answer can be graded after process death`() =
         runTest {
             val card = addBasicNote().firstCard()
-            val savedStateHandle = SavedStateHandle(mapOf("showingAnswer" to true))
+            // kuma3: the answer side is restored only for the card it was shown for
+            val savedStateHandle = SavedStateHandle(mapOf("showingAnswer" to true, "kuma3_shown_card_id" to card.id))
             val viewModel = ReviewerViewModel(savedStateHandle).also { viewModelStore.put("reviewer", it) }
 
             viewModel.onPageFinished(true)
@@ -75,7 +76,8 @@ class ReviewerViewModelTest : RobolectricTest() {
         runTest {
             val card = addBasicNote().firstCard()
             col.cardStateCustomizer = "await new Promise(resolve => setTimeout(resolve, 5000));"
-            val savedStateHandle = SavedStateHandle(mapOf("showingAnswer" to true))
+            // kuma3: the answer side is restored only for the card it was shown for
+            val savedStateHandle = SavedStateHandle(mapOf("showingAnswer" to true, "kuma3_shown_card_id" to card.id))
             val viewModel = ReviewerViewModel(savedStateHandle).also { viewModelStore.put("reviewer", it) }
 
             viewModel.statesMutationEvalFlow.test {

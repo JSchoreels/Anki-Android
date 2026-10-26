@@ -26,6 +26,7 @@ import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
+import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 /**
@@ -41,12 +42,15 @@ object Kuma3Update {
     private const val APK = "kuma3-anki-arm64.apk"
     private const val DAY_MS = 24 * 60 * 60 * 1000L
     private const val LAST_CHECK = "kuma3_update_last_check"
+    private const val DOWNLOADS = "kuma3-update"
 
     class Release(
         val name: String,
         val tag: String,
         val notes: String,
         val apkUrl: String,
+        /** The release's SHA256SUMS.txt, if it has one. */
+        val sumsUrl: String?,
     )
 
     /** Debug builds have another app id and key: a release can't install over them. */
@@ -88,10 +92,8 @@ object Kuma3Update {
         val status = getJson("https://api.github.com/repos/$REPO/compare/$builtFrom...$tag").getString("status")
         if (status != "ahead") return null
         val assets = latest.getJSONArray("assets")
-        val apk =
-            (0 until assets.length())
-                .map { assets.getJSONObject(it) }
-                .firstOrNull { it.getString("name") == APK } ?: return null
+        val files = (0 until assets.length()).map { assets.getJSONObject(it) }
+        val apk = files.firstOrNull { it.getString("name") == APK } ?: return null
         return Release(
             name = latest.optString("name", tag),
             tag = tag,
@@ -106,11 +108,14 @@ object Kuma3Update {
                     .replace("`", "")
                     .trim(),
             apkUrl = apk.getString("browser_download_url"),
+            sumsUrl = files.firstOrNull { it.getString("name") == "SHA256SUMS.txt" }?.getString("browser_download_url"),
         )
     }
 
     /** From the deck list: at most once a day, quietly unless there is an update. */
     fun checkDaily(activity: Activity) {
+        // a downloaded update is no longer needed once the deck list is back
+        File(activity.cacheDir, DOWNLOADS).deleteRecursively()
         if (!available || !autoCheck) return
         val prefs = activity.getSharedPreferences("kuma3_update", Context.MODE_PRIVATE)
         val now = System.currentTimeMillis()
@@ -173,7 +178,7 @@ object Kuma3Update {
                 .show()
         val owner = activity as LifecycleOwner
         owner.lifecycleScope.launch {
-            val file = File(activity.cacheDir, "kuma3-update/$APK")
+            val file = File(activity.cacheDir, "$DOWNLOADS/$APK")
             try {
                 withContext(Dispatchers.IO) {
                     file.parentFile!!.mkdirs()
@@ -194,6 +199,7 @@ object Kuma3Update {
                             }
                         }
                     }
+                    release.sumsUrl?.let { verify(file, it) }
                 }
             } catch (e: Exception) {
                 Timber.w(e, "kuma3 update download")
@@ -210,6 +216,38 @@ object Kuma3Update {
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK),
             )
         }
+    }
+
+    /** The SHA-256 that a SHA256SUMS.txt (`<hash>  <name>` lines) lists for [APK]. */
+    internal fun expectedSha256(sums: String): String? =
+        sums
+            .lineSequence()
+            .map { it.trim().split(Regex("\\s+")) }
+            .firstOrNull { it.size == 2 && it[1] == APK && it[0].length == 64 }
+            ?.get(0)
+
+    /** Throws unless [file] has the SHA-256 that the release's SHA256SUMS.txt lists for [APK]. */
+    private fun verify(
+        file: File,
+        sumsUrl: String,
+    ) {
+        val sums =
+            client.newCall(Request.Builder().url(sumsUrl).build()).execute().use {
+                if (!it.isSuccessful) throw IOException("SHA256SUMS.txt: HTTP ${it.code}")
+                it.body.string()
+            }
+        val expected = expectedSha256(sums) ?: throw IOException("$APK is not in SHA256SUMS.txt")
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(64 * 1024)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        val actual = digest.digest().joinToString("") { "%02x".format(it) }
+        if (!actual.equals(expected, ignoreCase = true)) throw IOException("the download is damaged (SHA-256 differs)")
     }
 
     private fun toast(

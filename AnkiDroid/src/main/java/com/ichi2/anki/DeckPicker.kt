@@ -675,7 +675,8 @@ open class DeckPicker :
 
     /** Raises the FAB by half the 'Studied X cards' line, so it clears the line's text */
     private fun raiseFabAboveSummary(summaryHeight: Int) {
-        val fabBottomMargin = summaryHeight / 2
+        // kuma3: the line is hidden (shown in the deck list instead): nothing to clear
+        val fabBottomMargin = if (deckPickerBinding.reviewSummaryTextView.isVisible) summaryHeight / 2 else 0
         val layoutParams = floatingActionButtonBinding.fabLinearLayout.layoutParams as MarginLayoutParams
         if (layoutParams.bottomMargin != fabBottomMargin) {
             layoutParams.bottomMargin = fabBottomMargin

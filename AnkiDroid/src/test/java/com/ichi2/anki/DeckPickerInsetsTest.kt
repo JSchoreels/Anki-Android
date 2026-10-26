@@ -89,38 +89,33 @@ class DeckPickerInsetsTest : RobolectricTest() {
             deckPicker.viewModel.flowOfStudiedTodayStats.value = "Studied 3 cards in 3 minutes today"
             deckPicker.layoutForTest()
 
-            val summary = deckPicker.deckPickerBinding.reviewSummaryTextView
-            val summaryTextHeight = summary.height - summary.paddingBottom
+            // kuma3: the summary line is hidden (the deck list shows it), so nothing raises the FAB
             val fabColumnPadding = 12.dp.toPx(targetContext)
             val fabMargin = 16.dp.toPx(targetContext)
             assertThat(
                 "the FAB is unchanged compared to its pre-edge-to-edge position",
                 deckPicker.fabDistanceToWindowBottom,
-                equalTo(navBarBottom + fabColumnPadding + fabMargin + summaryTextHeight / 2),
+                equalTo(navBarBottom + fabColumnPadding + fabMargin),
             )
         }
 
     @Test
-    fun `the FAB follows the summary line's layout passes`() =
+    fun `a re-wrapped hidden summary line does not move the FAB`() =
         withDeckPicker(deckCount = 2) { deckPicker ->
-            // note: the summary layout can be updated without the text event firing
-            // (e.g. screen width change)
             val navBarBottom = 48.dp.toPx(targetContext)
             deckPicker.dispatchInsets(navBarBottom = 48.dp)
             deckPicker.viewModel.flowOfStudiedTodayStats.value = "Studied 3 cards in 3 minutes today"
             deckPicker.layoutForTest()
 
-            val summary = deckPicker.deckPickerBinding.reviewSummaryTextView
-            summary.text = "Studied 3 cards in 3 minutes today\n(0.05s/card)"
+            deckPicker.deckPickerBinding.reviewSummaryTextView.text = "Studied 3 cards in 3 minutes today\n(0.05s/card)"
             deckPicker.layoutForTest()
 
-            val summaryTextHeight = summary.height - summary.paddingBottom
             val fabColumnPadding = 12.dp.toPx(targetContext)
             val fabMargin = 16.dp.toPx(targetContext)
             assertThat(
-                "the FAB rests half the re-wrapped summary line above its padded position",
+                "the FAB rests at its padded position",
                 deckPicker.fabDistanceToWindowBottom,
-                equalTo(navBarBottom + fabColumnPadding + fabMargin + summaryTextHeight / 2),
+                equalTo(navBarBottom + fabColumnPadding + fabMargin),
             )
         }
 
@@ -176,15 +171,15 @@ class DeckPickerInsetsTest : RobolectricTest() {
             marginBeforeLoad,
             equalTo(deckPicker.fabBottomMargin),
         )
-        assertThat("the FAB should be above the summary line", deckPicker.fabBottomMargin, greaterThan(0))
+        assertThat("kuma3: no summary line under the FAB to clear", deckPicker.fabBottomMargin, equalTo(0))
     }
 
     @Test
-    fun `the FAB is raised again after leaving the initial state`() =
+    fun `the FAB rests at the same place before and after the initial state`() =
         withDeckPicker(deckCount = 2) { deckPicker ->
             deckPicker.layoutForTest()
+            // kuma3: 0, the summary line is hidden
             val raisedMargin = deckPicker.fabBottomMargin
-            check(raisedMargin > 0) { "the FAB should start raised above the summary line" }
 
             // delete every deck: the deck picker enters the initial state
             col.decks.remove(listOf("Test Deck 0", "Test Deck 1").map { col.decks.id(it) })
@@ -199,7 +194,7 @@ class DeckPickerInsetsTest : RobolectricTest() {
             deckPicker.layoutForTest()
 
             assertThat(
-                "the FAB should be raised above the summary line again",
+                "the FAB should be back where it started",
                 deckPicker.fabBottomMargin,
                 equalTo(raisedMargin),
             )

@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
 import com.ichi2.anki.DeckPicker
 import com.ichi2.anki.R
@@ -48,11 +49,19 @@ object XpHome {
     ): RecyclerView.Adapter<*> {
         val d = Done(decks).also { done = it }
         // the "Studied … today" line and the RWKV forecast in the list, not a bar at the bottom under the + button
+        // (the bottom line itself is gone in include_deck_picker.xml)
         val t = Today().also { today = it }
-        picker.deckPickerBinding.reviewSummaryTextView.visibility = View.GONE
         // rows jump to their new place: an animated change (a deck folding away, the summary updating) slid rows
-        // under the group-box labels and cross-faded two summaries over each other for half a second
-        picker.deckPickerBinding.decks.itemAnimator = null
+        // under the group-box labels and cross-faded two summaries over each other for half a second.
+        // Zero durations, not no animator: a selection change still gets a fresh row, so a pressed row's ripple
+        // isn't restarted by its new background (DeckAdapter's getChangePayload)
+        picker.deckPickerBinding.decks.itemAnimator =
+            DefaultItemAnimator().apply {
+                addDuration = 0
+                removeDuration = 0
+                moveDuration = 0
+                changeDuration = 0
+            }
         // footers come as Activity, RWKV recall, then the rest: what to act on first, the year of history last
         val rest = listOf(picker.getString(R.string.kuma3_xp_today) to t, footers[1], footers[0]) + footers.drop(2)
         if (!XpChrome.isOn()) {

@@ -75,11 +75,22 @@ class PostRequestHandlerTest : RobolectricTest() {
 
     private val unsupportedRouteFunctions = experimentalEditorFunctions + editorAndPreferencesFunctions
 
+    // The fork's pages also call some methods by name, `postProto("graphs", ...)`, which ts_funcs.txt (built from
+    // imports) doesn't list: the statistics page (graphs) and kuma3's phone RWKV calls in deck options. Its
+    // desktop-only calls (rescheduleRwkvReviewCards, startRwkvWorkload, ...) stay unmapped: phones hide them.
+    private val calledByName =
+        setOf(
+            "graphs",
+            "rwkvOfflineInstantPassStep",
+            "rwkvOfflineForecast",
+            "rwkvOfflineCurveReschedule",
+        )
+
     @Test
     fun `All backend typescript functions should be handled`() {
         assertThat(
             "Mapping exists for every TS backend function call",
-            typescriptFunctionsUsedByBackend - unsupportedRouteFunctions,
+            typescriptFunctionsUsedByBackend - unsupportedRouteFunctions + calledByName,
             // this matcher asserts equality in everything but order, no extras, nothing missing
             containsInAnyOrder((collectionMethods + uiMethods).keys),
         )

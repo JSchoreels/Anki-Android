@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ichi2.anki.CrashReportData.Companion.isDeckNotFoundInLimitsMapException
 import com.ichi2.testutils.EmptyApplication
 import com.ichi2.testutils.ext.triggerDeckNotFoundInLimitsMap
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
@@ -17,6 +18,7 @@ import kotlin.test.assertTrue
 class CrashReportDataTest : RobolectricTest() {
     /** #15195: corrupt deck hierarchy raises 'deck not found in limits map' */
     @Test
+    @Ignore("kuma3: the FSRS-7 fork's backend counts a deck whose parent is missing instead of failing with 'deck not found in limits map'")
     fun `deck not found in limits map regression test`() {
         triggerDeckNotFoundInLimitsMap()
 

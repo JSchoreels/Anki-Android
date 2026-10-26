@@ -15,6 +15,7 @@ import com.ichi2.utils.neutralButton
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.shadows.ShadowDialog
@@ -31,6 +32,7 @@ import kotlin.test.assertTrue
 class StudyOptionsFragmentTest : RobolectricTest() {
     /** Issue 21981: a refresh must offer recovery when the deck hierarchy is corrupt. */
     @Test
+    @Ignore("kuma3: the FSRS-7 fork's backend counts a deck whose parent is missing instead of failing with 'deck not found in limits map'")
     fun `corrupt deck hierarchy offers Check database instead of crashing`() =
         runTest {
             triggerDeckNotFoundInLimitsMap()

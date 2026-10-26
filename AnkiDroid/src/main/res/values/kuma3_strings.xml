@@ -3,6 +3,9 @@
 <!-- kuma3's own texts. Spanish: values-es/kuma3_strings.xml (keep both in step). Keys and fixed values: kuma3.xml -->
 <!-- not on Crowdin: DuplicateCrowdInStrings is for AnkiDroid's own files -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="DuplicateCrowdInStrings">
+    <!-- Statistics: Search Stats Extended's RWKV graphs (pages/SearchStatsExtended.kt) -->
+    <string name="kuma3_sse_rwkv_computing">RWKV is working out its predictions for the calibration graphs (%d%%). Reviews use the standard order until it is done; then open the statistics again.</string>
+    <string name="kuma3_sse_rwkv_off">RWKV isn\'t loaded, so the graphs show FSRS only.</string>
     <!-- Settings > kuma3 (preferences_kuma3.xml, Kuma3SettingsFragment) -->
     <string name="kuma3_settings_summary">Heatmap • Time per deck • Leaderboard • RWKV • Updates</string>
     <string name="kuma3_pref_deck_list" maxLength="41">Deck list</string>

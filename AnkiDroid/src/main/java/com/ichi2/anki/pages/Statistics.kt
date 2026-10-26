@@ -102,12 +102,16 @@ class Statistics : PageFragment(R.layout.page_statistics) {
     // "At a glance" and Player boxes (xp/XpGlance.kt, from changeDeck)
     override fun onCreateWebViewClient(savedInstanceState: Bundle?) =
         super.onCreateWebViewClient(savedInstanceState).apply {
-            onPageFinishedCallbacks.add {
-                pageLoaded = true
-                binding.deckName.text
-                    .toString()
-                    .takeIf { it.isNotEmpty() }
-                    ?.let(::changeDeck)
+            onPageFinishedCallbacks.add { webView ->
+                // kuma3: Search Stats Extended first, so it sees the deck's graphs request
+                requireActivity().launchCatchingTask {
+                    SearchStatsExtended.inject(webView)
+                    pageLoaded = true
+                    binding.deckName.text
+                        .toString()
+                        .takeIf { it.isNotEmpty() }
+                        ?.let(::changeDeck)
+                }
             }
         }
 

@@ -78,13 +78,14 @@ class PostRequestHandlerTest : RobolectricTest() {
     // The fork's pages also call some methods by name, `postProto("graphs", ...)`, which ts_funcs.txt (built from
     // imports) doesn't list: the statistics page (graphs) and kuma3's phone RWKV calls in deck options. Its
     // desktop-only calls (rescheduleRwkvReviewCards, startRwkvWorkload, ...) stay unmapped: phones hide them.
+    // Plus Search Stats Extended's endpoints (assets/sse, not a backend page).
     private val calledByName =
         setOf(
             "graphs",
             "rwkvOfflineInstantPassStep",
             "rwkvOfflineForecast",
             "rwkvOfflineCurveReschedule",
-        )
+        ) + SearchStatsExtended.methods.keys
 
     @Test
     fun `All backend typescript functions should be handled`() {

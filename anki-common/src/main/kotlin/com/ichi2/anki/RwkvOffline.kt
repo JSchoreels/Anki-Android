@@ -143,6 +143,15 @@ object RwkvOffline {
     }
 
     /**
+     * A rebuild started elsewhere (the statistics' RWKV calibration, `pages/SearchStatsExtended.kt`): the
+     * same progress notification and deck list redraw as one from [prepare].
+     */
+    fun watchRebuild(
+        context: Context,
+        replaying: Long,
+    ) = refreshWhenReady(context, replaying, announced = true)
+
+    /**
      * The deck list was drawn with the standard counts while the backend built the model state on its
      * own thread: once that is done, the status call installs it, and [ready] redraws the deck list
      * with RWKV's counts. Not a ChangeManager change: an open reviewer would swap its current card (its

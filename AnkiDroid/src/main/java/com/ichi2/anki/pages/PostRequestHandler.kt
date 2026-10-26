@@ -125,7 +125,7 @@ val collectionMethods =
         // https://github.com/ankitects/anki/pull/4326 -> saveCustomColours should be no-op in mobile clients
         "saveCustomColours" to { bytes -> backendIdentity(bytes) },
         "getCustomColours" to { bytes -> getCustomColoursRaw(bytes) },
-    )
+    ).apply { putAll(SearchStatsExtended.methods) } // kuma3: the statistics page's Search Stats Extended
 
 suspend fun handleCollectionPostRequest(
     methodName: String,

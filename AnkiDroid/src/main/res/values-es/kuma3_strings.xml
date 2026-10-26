@@ -2,6 +2,9 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- kuma3's own texts in Spanish (any Spanish locale). English: values/kuma3_strings.xml -->
 <resources>
+    <!-- Statistics: Search Stats Extended's RWKV graphs -->
+    <string name="kuma3_sse_rwkv_computing">RWKV está calculando sus predicciones para los gráficos de calibración (%d%%). Los repasos usan el orden normal hasta que termine; luego abre las estadísticas otra vez.</string>
+    <string name="kuma3_sse_rwkv_off">RWKV no está cargado, así que los gráficos muestran solo FSRS.</string>
     <!-- Settings > kuma3 -->
     <string name="kuma3_settings_summary">Mapa de calor • Tiempo por mazo • Clasificación • RWKV • Actualizaciones</string>
     <string name="kuma3_pref_deck_list">Lista de mazos</string>

@@ -20,7 +20,9 @@ import com.ichi2.anki.common.time.TimeManager
 import com.ichi2.anki.common.utils.android.showThemedToast
 import com.ichi2.anki.settings.Prefs
 import com.ichi2.anki.web.HttpFetcher
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -44,7 +46,10 @@ object Kuma3Update {
     private const val REPO = "Pedrubik2000/kuma3-anki-app"
     private const val APK = "kuma3-anki-arm64.apk"
     private const val DAY_MS = 24 * 60 * 60 * 1000L
+    private const val HOUR_MS = 60 * 60 * 1000L
     private const val LAST_CHECK = "kuma3_update_last_check"
+    private const val LAST_TRY = "kuma3_update_last_try"
+    private const val NOTES_MAX = 900
     private const val DOWNLOADS = "kuma3-update"
 
     class Release(
@@ -62,6 +67,10 @@ object Kuma3Update {
 
     /** The commit this APK was built from. */
     private val builtFrom = BuildConfig.GIT_COMMIT_HASH
+
+    /** An update is being downloaded: its file must stay */
+    @Volatile
+    private var downloading = false
 
     /** The automatic daily check (Settings > kuma3 > Updates). */
     val autoCheck by Prefs.booleanPref(R.string.kuma3_update_check_key, true)
@@ -107,28 +116,34 @@ object Kuma3Update {
         )
     }
 
-    /** From the deck list: at most once a day, quietly unless there is an update. */
+    /**
+     * From the deck list (it refreshes after every sync too): once a day after a successful check, quietly unless
+     * there is an update; offline or refused (GitHub allows 60 calls an hour per address), tried again an hour later.
+     */
     fun checkDaily(activity: Activity) {
         // a downloaded update is no longer needed once the deck list is back
-        File(activity.cacheDir, DOWNLOADS).deleteRecursively()
+        if (!downloading) File(activity.cacheDir, DOWNLOADS).deleteRecursively()
         if (!available || !autoCheck) return
         val prefs = activity.getSharedPreferences("kuma3_update", Context.MODE_PRIVATE)
         val now = TimeManager.time.intTimeMS()
-        if (now - prefs.getLong(LAST_CHECK, 0) < DAY_MS) return
-        prefs.edit { putLong(LAST_CHECK, now) }
-        check(activity, quiet = true)
+        if (now - prefs.getLong(LAST_CHECK, 0) < DAY_MS || now - prefs.getLong(LAST_TRY, 0) < HOUR_MS) return
+        prefs.edit { putLong(LAST_TRY, now) }
+        check(activity, quiet = true) { prefs.edit { putLong(LAST_CHECK, now) } }
     }
 
     /** Checks now and offers the update; [quiet] says nothing when there is none or on errors. */
     fun check(
         activity: Activity,
         quiet: Boolean = false,
+        onChecked: () -> Unit = {},
     ) {
         val owner = activity as? LifecycleOwner ?: return
         owner.lifecycleScope.launch {
             val release =
                 try {
-                    withContext(Dispatchers.IO) { newerRelease() }
+                    withContext(Dispatchers.IO) { newerRelease() }.also { onChecked() }
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     Timber.w(e, "kuma3 update check")
                     if (!quiet) toast(activity, activity.getString(R.string.kuma3_update_check_failed, e.message))
@@ -138,11 +153,11 @@ object Kuma3Update {
                 if (!quiet) toast(activity, activity.getString(R.string.kuma3_update_up_to_date))
                 return@launch
             }
-            if (activity.isFinishing) return@launch
+            if (activity.isFinishing || activity.isDestroyed) return@launch
             AlertDialog
                 .Builder(activity)
                 .setTitle(activity.getString(R.string.kuma3_update_available, release.name))
-                .setMessage(notesFor(release.notes, Locale.getDefault().language == "es").take(700))
+                .setMessage(shortened(notesFor(release.notes, Locale.getDefault().language == "es")))
                 .setPositiveButton(R.string.kuma3_update_install) { _, _ -> download(activity, release) }
                 .setNegativeButton(R.string.kuma3_update_later, null)
                 .show()
@@ -175,6 +190,7 @@ object Kuma3Update {
         val owner = activity as LifecycleOwner
         owner.lifecycleScope.launch {
             val file = File(activity.cacheDir, "$DOWNLOADS/$APK")
+            downloading = true
             try {
                 withContext(Dispatchers.IO) {
                     file.parentFile!!.mkdirs()
@@ -186,6 +202,7 @@ object Kuma3Update {
                                 val buffer = ByteArray(64 * 1024)
                                 var done = 0L
                                 while (true) {
+                                    ensureActive()
                                     val read = input.read(buffer)
                                     if (read < 0) break
                                     output.write(buffer, 0, read)
@@ -197,6 +214,10 @@ object Kuma3Update {
                     }
                     release.sumsUrl?.let { verify(file, it) }
                 }
+            } catch (e: CancellationException) {
+                // the activity is gone (left, recreated): nothing to show
+                file.delete()
+                throw e
             } catch (e: Exception) {
                 Timber.w(e, "kuma3 update download")
                 dialog.dismiss()
@@ -204,6 +225,8 @@ object Kuma3Update {
                 val reason = if (e is DamagedDownload) activity.getString(R.string.kuma3_update_damaged) else e.message
                 toast(activity, activity.getString(R.string.kuma3_update_download_failed, reason))
                 return@launch
+            } finally {
+                downloading = false
             }
             dialog.dismiss()
             val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.apkgfileprovider", file)
@@ -227,13 +250,25 @@ object Kuma3Update {
     ): String {
         val text = body.replace("\r\n", "\n")
         val separator = "\n---\n"
-        val half = if (spanish && separator in text) text.substringAfter(separator) else text.substringBefore(separator)
-        return half
-            .substringBefore("**Which file?**")
-            .substringBefore("**¿Qué archivo?**")
-            .replace("**", "")
-            .replace("`", "")
-            .trim()
+
+        fun clean(half: String) =
+            half
+                .substringBefore("**Which file?**")
+                .substringBefore("**¿Qué archivo?**")
+                .replace("**", "")
+                .replace("`", "")
+                .trim()
+        val english = clean(text.substringBefore(separator))
+        // a release without Spanish notes: the English ones
+        return if (spanish && separator in text) clean(text.substringAfter(separator)).ifEmpty { english } else english
+    }
+
+    /** At most [NOTES_MAX] characters, cut after a sentence or a line, with "…" when cut. */
+    private fun shortened(notes: String): String {
+        if (notes.length <= NOTES_MAX) return notes
+        val head = notes.take(NOTES_MAX)
+        val end = maxOf(head.lastIndexOf(". "), head.lastIndexOf('\n'))
+        return (if (end > NOTES_MAX / 2) head.take(end + 1) else head).trimEnd() + " …"
     }
 
     /** The SHA-256 that a SHA256SUMS.txt (`<hash>  <name>` lines) lists for [APK]. */

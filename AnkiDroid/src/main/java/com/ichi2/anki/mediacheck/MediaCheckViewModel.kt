@@ -20,10 +20,12 @@ package com.ichi2.anki.mediacheck
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import anki.media.CheckMediaResponse
+import com.ichi2.anki.CollectionManager.TR
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.ProgressContext
 import com.ichi2.anki.common.annotations.NeedsTest
 import com.ichi2.anki.libanki.Collection
+import com.ichi2.anki.libanki.withoutUnicodeIsolation
 import com.ichi2.anki.observability.undoableOp
 import com.ichi2.anki.progress.HasProgress
 import com.ichi2.anki.progress.ProgressManager
@@ -120,6 +122,10 @@ class MediaCheckViewModel :
 
     companion object {
         private const val DELETE_BATCH = 100
+
+        /** A report line: the backend drops the bidi isolation marks around values */
+        private fun line(s: String) = withoutUnicodeIsolation(s)
+
         private val AUDIO_TAG = Regex("""\[audio:\s*([^\]]+?)\s*]""")
 
         /**
@@ -134,12 +140,14 @@ class MediaCheckViewModel :
                     .flatMapTo(HashSet()) { flds -> AUDIO_TAG.findAll(flds).map { it.groupValues[1] } }
             if (used.isEmpty() || result.unusedList.none { it in used }) return result
             val unused = result.unusedList.filter { it !in used }
+            // the report's lines as the backend writes them, in the app's language
+            val keptLines = result.unusedList.filter { it in used }.mapTo(HashSet()) { line(TR.mediaCheckUnusedFile(it)) }
+            val countLine = line(TR.mediaCheckUnusedCount(result.unusedList.size))
             val report =
                 result.report
                     .lines()
-                    // by the file name after the label: the backend writes the report in the app's language
-                    .filterNot { line -> line.substringAfter(": ", "") in used }
-                    .map { line -> if (line.startsWith("Unused files:")) line.replace(Regex("""\d+"""), unused.size.toString()) else line }
+                    .filterNot { line(it) in keptLines }
+                    .map { if (line(it) == countLine) line(TR.mediaCheckUnusedCount(unused.size)) else it }
                     .joinToString("\n")
             return result
                 .toBuilder()

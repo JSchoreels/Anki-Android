@@ -89,7 +89,7 @@
     <string name="kuma3_xp_win_boss_defeated">👑 ¡Jefe derrotado!</string>
     <string name="kuma3_xp_win_boss_defeated_msg">XP triple: +%d.</string>
     <string name="kuma3_xp_win_boss_won">👑 El jefe ganó esta ronda</string>
-    <string name="kuma3_xp_win_boss_won_msg">XP triple de todos modos: +%d. Vuelve más tarde hoy.</string>
+    <string name="kuma3_xp_win_boss_won_msg">XP triple de todos modos: +%d. Volverá más tarde hoy.</string>
     <string name="kuma3_xp_win_combo">¡Combo de %d!</string>
     <string name="kuma3_xp_win_combo_msg">%d seguidas. ¡Sigue así!</string>
     <string name="kuma3_xp_win_record">¡Nuevo récord!</string>

@@ -125,8 +125,17 @@ class XpDialogIcon(
     }
 
     private companion object {
-        val ERROR = Regex("error|fail|could ?n.t|unable|delete|remove|corrupt|invalid|not a valid")
-        val WARNING = Regex("warning|may take|cannot be undone|can't be undone|lose|overwrite|reset|forget|full sync|one-way")
+        // English, then Spanish (AnkiDroid's own dialogs follow the phone's language)
+        val ERROR =
+            Regex(
+                "error|fail|could ?n.t|unable|delete|remove|corrupt|invalid|not a valid|" +
+                    "fall[óo]|no se pud|imposible|eliminar|borrar|quitar|dañad|inválid|no es válid",
+            )
+        val WARNING =
+            Regex(
+                "warning|may take|cannot be undone|can't be undone|lose|overwrite|reset|forget|full sync|one-way|" +
+                    "advertencia|puede tardar|no se puede deshacer|perder|sobrescrib|restablec|olvidar|sincronización completa",
+            )
     }
 }
 

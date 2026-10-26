@@ -123,9 +123,8 @@ class XpReview private constructor(
         if (hasAudio) handler.postDelayed({ if (t == token) audioDone() }, 5000)
         if (XpGame.firstClock()) {
             balloon(
-                "⏱ Speed bonus",
-                "Show the answer before the green line runs out (${XpGame.limit} s), then Good or Easy, for ${XpGame.FAST_POINTS} " +
-                    "points instead of ${XpGame.POINTS}. Again and Hard still count: grade honestly.",
+                activity.getString(R.string.kuma3_xp_speed_bonus),
+                activity.getString(R.string.kuma3_xp_speed_bonus_msg, XpGame.limit, XpGame.FAST_POINTS, XpGame.POINTS),
             )
         }
         activity.launchCatchingTask {
@@ -134,7 +133,9 @@ class XpReview private constructor(
             bar.cardsLeft = withCol { sched.counts().count() }
             bar.invalidate()
         }
-        if (XpGame.isBoss(deckId, cardId)) balloon("👑 BOSS CARD", "Failed ${card.lapses}×: ×3 XP on this card, whatever you press.")
+        if (XpGame.isBoss(deckId, cardId)) {
+            balloon(activity.getString(R.string.kuma3_xp_boss_card), activity.getString(R.string.kuma3_xp_boss_card_msg, card.lapses))
+        }
     }
 
     fun audioDone() {
@@ -158,18 +159,18 @@ class XpReview private constructor(
         XpSound.buzz(activity, ease.toString())
         pointsMult(r.points, r.mult, r.xp)
         comboBroken(r.brokeCombo)
-        said.text = (if (r.brokeCombo >= 3) "Combo of ${r.brokeCombo} broken. " else "") + "+${r.xp} XP, combo ${XpGame.combo}"
+        said.text =
+            if (r.brokeCombo >= 3) {
+                activity.getString(R.string.kuma3_xp_said_broken, r.brokeCombo, r.xp, XpGame.combo)
+            } else {
+                activity.getString(R.string.kuma3_xp_said, r.xp, XpGame.combo)
+            }
         if (r.multUp) {
             XpSound.chime(listOf(660.0, 880.0))
             shake(XpGame.mult().toInt())
         }
         if (XpGame.combo in XpGame.MILESTONES) XpSound.buzz(activity, "milestone")
-        r.wins.forEachIndexed {
-            i,
-            (title, msg),
-            ->
-            handler.postDelayed({ win(title, msg, r.levelUp && title.startsWith("Level")) }, 250L * i)
-        }
+        r.wins.forEachIndexed { i, w -> handler.postDelayed({ win(w) }, 250L * i) }
         bar.juice(r.multUp)
     }
 
@@ -205,24 +206,19 @@ class XpReview private constructor(
 
     private fun comboBroken(was: Int) {
         if (was < 3) return
-        pop("COMBO BROKEN ×$was", Color.rgb(0xff, 0x30, 0x30), 26f)
+        pop(activity.getString(R.string.kuma3_xp_combo_broken, was), Color.rgb(0xff, 0x30, 0x30), 26f)
         XpSound.slide()
         XpSound.buzz(activity, "break")
     }
 
-    private fun win(
-        title: String,
-        msg: String,
-        levelUp: Boolean,
-    ) {
-        balloon(title, msg)
-        when {
-            levelUp -> XpSound.chime(listOf(523.0, 784.0, 1047.0, 1568.0))
-            title.startsWith(
-                "🏆",
-            ) || title.startsWith("👑 Boss") -> XpSound.chime(listOf(659.0, 784.0, 988.0, 1319.0, 1568.0), XpSound.Wave.SQUARE)
-            title.endsWith("combo!") -> XpSound.chime(listOf(523.0, 659.0, 784.0, 1047.0, 1319.0), XpSound.Wave.SQUARE)
-            else -> XpSound.chime(listOf(784.0, 988.0, 1175.0))
+    private fun win(w: XpGame.Win) {
+        balloon(w.title, w.msg)
+        when (w.kind) {
+            XpGame.WinKind.LEVEL -> XpSound.chime(listOf(523.0, 784.0, 1047.0, 1568.0))
+            XpGame.WinKind.TROPHY, XpGame.WinKind.BOSS ->
+                XpSound.chime(listOf(659.0, 784.0, 988.0, 1319.0, 1568.0), XpSound.Wave.SQUARE)
+            XpGame.WinKind.COMBO -> XpSound.chime(listOf(523.0, 659.0, 784.0, 1047.0, 1319.0), XpSound.Wave.SQUARE)
+            XpGame.WinKind.OTHER -> XpSound.chime(listOf(784.0, 988.0, 1175.0))
         }
     }
 
@@ -519,9 +515,17 @@ class XpBar(
         // what TalkBack reads for the bar (it opens the quests)
         val toGoal = g.goal - g.reps
         val said =
-            (if (toGoal > 0) "$toGoal reps to the daily goal" else "Daily goal met") +
-                (if (cardsLeft >= 0) ", $cardsLeft cards left" else "") +
-                ", streak ${g.streak} days, level ${XpGame.level(g.xp) + 1}, combo ${XpGame.combo}. Opens the daily quests."
+            (
+                if (toGoal >
+                    0
+                ) {
+                    context.getString(R.string.kuma3_xp_bar_said_to_goal, toGoal)
+                } else {
+                    context.getString(R.string.kuma3_xp_bar_said_goal_met)
+                }
+            ) +
+                (if (cardsLeft >= 0) context.getString(R.string.kuma3_xp_bar_said_left, cardsLeft) else "") +
+                context.getString(R.string.kuma3_xp_bar_said_rest, g.streak, XpGame.level(g.xp) + 1, XpGame.combo)
         if (contentDescription != said) contentDescription = said
         // the combo clock along the bottom edge: blue while waiting for the word audio, green, red in the last 3 s
         val clockH = 4 * d
@@ -552,8 +556,12 @@ class XpBar(
             x += pt.measureText(s) + 8 * d
         }
         // the finish lines: reps to the daily goal (green once met) and cards left today
-        if (toGoal > 0) word("$toGoal to goal", bold) else word("goal ✓", bold, Color.rgb(0x00, 0x6b, 0x00))
-        if (cardsLeft >= 0) word("$cardsLeft left")
+        if (toGoal > 0) {
+            word(context.getString(R.string.kuma3_xp_bar_to_goal, toGoal), bold)
+        } else {
+            word(context.getString(R.string.kuma3_xp_bar_goal_met), bold, Color.rgb(0x00, 0x6b, 0x00))
+        }
+        if (cardsLeft >= 0) word(context.getString(R.string.kuma3_xp_bar_left, cardsLeft))
         word("🔥${g.streak}")
         val lv = XpGame.level(g.xp)
         word("Lv ${lv + 1}", bold)
@@ -561,7 +569,7 @@ class XpBar(
         val combo = XpGame.combo
         val mult = XpGame.mult()
         val multText = if (combo >= 5) "×${if (mult % 1.0 == 0.0) mult.toInt() else mult} " else ""
-        val comboText = "combo $combo"
+        val comboText = context.getString(R.string.kuma3_xp_bar_combo, combo)
         val cp = Paint(if (combo >= 5) bold else text)
         cp.color =
             when {

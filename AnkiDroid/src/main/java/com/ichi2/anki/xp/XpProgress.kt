@@ -31,7 +31,7 @@ object XpProgress {
     @Suppress("DEPRECATION") // ProgressDialog, like its caller
     fun show(dialog: android.app.ProgressDialog) {
         if (!XpChrome.isOn()) return dialog.show()
-        dialog.setCustomTitle(XpWindows.titleBar(dialog.context, "Please wait..."))
+        dialog.setCustomTitle(XpWindows.titleBar(dialog.context, dialog.context.getString(R.string.kuma3_xp_please_wait)))
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(R.drawable.xp_dialog)
         val spinner = dialog.findViewById<ProgressBar>(android.R.id.progress) ?: return
@@ -111,15 +111,16 @@ object XpProgress {
             val secs = (now - firstAt) / 1000.0 / (done - firstDone) * (total - done)
             remaining.visibility = View.VISIBLE
             remaining.text =
-                when {
-                    secs < 60 -> "${secs.toInt().coerceAtLeast(1)} Seconds Remaining"
-                    secs < 120 -> "1 Minute Remaining"
-                    else -> "${(secs / 60).toInt()} Minutes Remaining"
+                with(remaining.resources) {
+                    when {
+                        secs < 60 -> secs.toInt().coerceAtLeast(1).let { getQuantityString(R.plurals.kuma3_xp_seconds_left, it, it) }
+                        else -> (secs / 60).toInt().let { getQuantityString(R.plurals.kuma3_xp_minutes_left, it, it) }
+                    }
                 }
         }
         return androidx.appcompat.app.AlertDialog
             .Builder(context)
-            .setCustomTitle(XpWindows.titleBar(context, "Please wait..."))
+            .setCustomTitle(XpWindows.titleBar(context, context.getString(R.string.kuma3_xp_please_wait)))
             .setView(body)
             .setCancelable(cancellable)
             .create()

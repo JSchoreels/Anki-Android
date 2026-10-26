@@ -10,6 +10,7 @@ import android.webkit.WebView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
+import com.ichi2.anki.R
 import com.ichi2.anki.common.time.TimeManager
 import java.text.DateFormat
 import java.util.Date
@@ -82,9 +83,14 @@ body{padding:10px 14px}
             .setCustomTitle(titleBar(context, title))
             .setView(web)
             .apply(build)
-            .setNegativeButton("Close", null)
+            .setNegativeButton(R.string.kuma3_xp_close, null)
             .show()
     }
+
+    private fun days(
+        context: Context,
+        n: Int,
+    ) = context.resources.getQuantityString(R.plurals.kuma3_xp_days, n, n)
 
     /** a Luna title bar with the red close box, for every Anki XP window */
     fun titleBar(
@@ -118,14 +124,19 @@ body{padding:10px 14px}
                     q.text,
                 )} (${minOf(q.have, q.need)}/${q.need})</span>"
             }
-        window(
-            context,
-            "Daily Quests",
-            "$list<p class=hint>Each quest: +${XpGame.QUEST_XP} XP · ${g.xp} XP total · level ${XpGame.level(g.xp) + 1} · " +
-                "best combo today ${g.today.best} · best ever ${g.record} · daily goal ${g.goal} reps</p>",
-        ) {
-            setPositiveButton("Trophies") { _, _ -> trophies(context) }
-            setNeutralButton("More") { _, _ -> more(context) }
+        val hint =
+            context.getString(
+                R.string.kuma3_xp_quests_hint,
+                XpGame.QUEST_XP,
+                g.xp,
+                XpGame.level(g.xp) + 1,
+                g.today.best,
+                g.record,
+                g.goal,
+            )
+        window(context, context.getString(R.string.kuma3_xp_quests_title), "$list<p class=hint>${esc(hint)}</p>") {
+            setPositiveButton(R.string.kuma3_xp_trophies) { _, _ -> trophies(context) }
+            setNeutralButton(R.string.kuma3_xp_more) { _, _ -> more(context) }
         }
     }
 
@@ -133,7 +144,9 @@ body{padding:10px 14px}
         AlertDialog
             .Builder(context)
             .setCustomTitle(titleBar(context, "Anki XP"))
-            .setItems(arrayOf("Statistics", "Settings")) { _, i -> if (i == 0) stats(context) else settings(context) }
+            .setItems(
+                arrayOf(context.getString(R.string.kuma3_xp_statistics), context.getString(R.string.kuma3_xp_settings)),
+            ) { _, i -> if (i == 0) stats(context) else settings(context) }
             .show()
     }
 
@@ -147,7 +160,7 @@ body{padding:10px 14px}
                     (at?.let { "<br><small>${esc(DateFormat.getDateInstance(DateFormat.SHORT).format(Date(it)))}</small>" } ?: "") +
                     "</div>"
             }
-        window(context, "Trophies · $n of ${XpGame.TROPHIES.size}", html)
+        window(context, context.getString(R.string.kuma3_xp_trophies_title, n, XpGame.TROPHIES.size), html)
     }
 
     /** the last 30 days of reps (green = goal done) and the totals, from every device's merged parts */
@@ -166,36 +179,38 @@ body{padding:10px 14px}
         val lv = XpGame.level(g.xp)
         val rows =
             listOf(
-                "Today" to "${g.reps}/${g.goal} reps",
-                "Streak" to if (g.streak > 0) "🔥 ${g.streak} day${if (g.streak > 1) "s" else ""}" else "0",
-                "Longest streak" to "$longest day${if (longest == 1) "" else "s"}",
-                "Best combo ever" to g.record,
-                "Level" to "${lv + 1} (${g.xp} XP)",
-                "Total reps" to g.days.values.sumOf { it.reps },
-                "Days studied" to g.days.values.count { it.reps > 0 },
-                "Devices" to 1 + XpGame.others.size,
+                context.getString(R.string.kuma3_xp_today) to context.getString(R.string.kuma3_xp_reps_of_goal, g.reps, g.goal),
+                context.getString(R.string.kuma3_xp_streak) to if (g.streak > 0) "🔥 ${days(context, g.streak)}" else "0",
+                context.getString(R.string.kuma3_xp_longest_streak) to days(context, longest),
+                context.getString(R.string.kuma3_xp_best_combo_ever) to g.record,
+                context.getString(R.string.kuma3_xp_level) to context.getString(R.string.kuma3_xp_level_xp, lv + 1, g.xp),
+                context.getString(R.string.kuma3_xp_total_reps) to g.days.values.sumOf { it.reps },
+                context.getString(R.string.kuma3_xp_days_studied) to g.days.values.count { it.reps > 0 },
+                context.getString(R.string.kuma3_xp_devices) to 1 + XpGame.others.size,
             )
         window(
             context,
-            "Statistics",
+            context.getString(R.string.kuma3_xp_statistics),
             "<div class=chart><b style='bottom:${100 * g.goal / top}%'></b>$bars</div>" +
-                "<div class=cx><span>30 days ago</span><span>today</span></div>" +
-                rows.joinToString("", "<table class=report>", "</table>") { (k, v) -> "<tr><td>$k</td><td>${esc(v)}</td></tr>" },
+                "<div class=cx><span>${esc(context.getString(R.string.kuma3_xp_30_days_ago))}</span>" +
+                "<span>${esc(context.getString(R.string.kuma3_xp_today_lower))}</span></div>" +
+                rows.joinToString("", "<table class=report>", "</table>") { (k, v) -> "<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>" },
         )
     }
 
     fun settings(context: Context) {
+        fun onOff(on: Boolean) = context.getString(if (on) R.string.kuma3_xp_on else R.string.kuma3_xp_off)
         val items =
             arrayOf(
-                "Game sounds: ${if (XpGame.sound) "on" else "off"}",
-                "Vibration: ${if (XpGame.vibrate) "on" else "off"}",
-                "Retro CRT screen: ${if (XpGame.crt) "on" else "off"}",
-                "Daily goal: ${XpGame.g.goal} reps",
-                "Speed bonus time: ${XpGame.limit} s",
+                context.getString(R.string.kuma3_xp_setting_sounds, onOff(XpGame.sound)),
+                context.getString(R.string.kuma3_xp_setting_vibration, onOff(XpGame.vibrate)),
+                context.getString(R.string.kuma3_xp_setting_crt, onOff(XpGame.crt)),
+                context.getString(R.string.kuma3_xp_setting_goal, XpGame.g.goal),
+                context.getString(R.string.kuma3_xp_setting_speed, XpGame.limit),
             )
         AlertDialog
             .Builder(context)
-            .setCustomTitle(titleBar(context, "Anki XP Settings"))
+            .setCustomTitle(titleBar(context, context.getString(R.string.kuma3_xp_settings_title)))
             .setItems(items) { _, i ->
                 when (i) {
                     0 -> XpGame.sound = !XpGame.sound
@@ -208,7 +223,7 @@ body{padding:10px 14px}
                 if (i == 1) XpSound.buzz(context, "3")
                 if (i == 2) XpChrome.crtChanged(context)
                 settings(context)
-            }.setNegativeButton("Close", null)
+            }.setNegativeButton(R.string.kuma3_xp_close, null)
             .show()
     }
 
@@ -216,7 +231,7 @@ body{padding:10px 14px}
         val goals = (2..30).map { it * 10 }
         AlertDialog
             .Builder(context)
-            .setCustomTitle(titleBar(context, "Daily goal (reps)"))
+            .setCustomTitle(titleBar(context, context.getString(R.string.kuma3_xp_goal_title)))
             .setSingleChoiceItems(goals.map { "$it" }.toTypedArray(), goals.indexOf(XpGame.g.goal)) { d, i ->
                 XpGame.setGoal(goals[i])
                 d.dismiss()
@@ -258,20 +273,32 @@ body{padding:10px 14px}
         val mins = max(1, ((TimeManager.time.intTimeMS() - s.start) / 60000).toInt())
         val rows =
             listOf(
-                "Reps" to s.reps,
-                "XP earned" to "+${g.xp - s.xp0}",
-                "Best combo" to "${s.best}${if (s.best > 0 && s.best >= g.record) " (record!)" else ""}",
-                "Correct" to "${Math.round(100.0 * (s.reps - s.again) / s.reps)}%",
-                "Average answer" to if (s.thinkN > 0) "%.1f s".format(s.think / s.thinkN / 1000.0) else "-",
-                "Time" to "$mins min",
-                "Streak" to if (g.streak > 0) "🔥 ${g.streak} day${if (g.streak > 1) "s" else ""}" else "goal ${g.reps}/${g.goal} today",
-                "Level" to XpGame.level(g.xp) + 1,
+                context.getString(R.string.kuma3_xp_report_reps) to s.reps,
+                context.getString(R.string.kuma3_xp_report_xp) to "+${g.xp - s.xp0}",
+                context.getString(R.string.kuma3_xp_report_best_combo) to
+                    if (s.best > 0 && s.best >= g.record) context.getString(R.string.kuma3_xp_report_record, s.best) else "${s.best}",
+                context.getString(R.string.kuma3_xp_report_correct) to "${Math.round(100.0 * (s.reps - s.again) / s.reps)}%",
+                context.getString(R.string.kuma3_xp_report_average) to
+                    if (s.thinkN > 0) "%.1f s".format(s.think / s.thinkN / 1000.0) else "-",
+                context.getString(R.string.kuma3_xp_report_time) to context.getString(R.string.kuma3_xp_minutes, mins),
+                context.getString(R.string.kuma3_xp_streak) to
+                    if (g.streak >
+                        0
+                    ) {
+                        "🔥 ${days(context, g.streak)}"
+                    } else {
+                        context.getString(R.string.kuma3_xp_report_goal_today, g.reps, g.goal)
+                    },
+                context.getString(R.string.kuma3_xp_level) to XpGame.level(g.xp) + 1,
             )
+        val sweep = XpGame.TROPHIES.first { it.id == "perfect" }.name
         window(
             context,
-            "Session report",
-            "<div class=q>✔ Well done${if (perfect) " · 💎 Clean sweep" else ""}</div>" +
-                rows.joinToString("", "<table class=report>", "</table>") { (k, v) -> "<tr><td>$k</td><td>${esc(v)}</td></tr>" },
+            context.getString(R.string.kuma3_xp_report_title),
+            "<div class=q>${esc(
+                context.getString(R.string.kuma3_xp_report_well_done),
+            )}${if (perfect) " · 💎 ${esc(sweep)}" else ""}</div>" +
+                rows.joinToString("", "<table class=report>", "</table>") { (k, v) -> "<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>" },
         )
     }
 }

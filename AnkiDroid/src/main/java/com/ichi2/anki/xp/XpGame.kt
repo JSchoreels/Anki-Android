@@ -4,13 +4,16 @@ package com.ichi2.anki.xp
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.core.content.edit
+import com.ichi2.anki.R
 import com.ichi2.anki.common.time.TimeManager
 import com.ichi2.anki.libanki.Collection
 import com.ichi2.anki.libanki.SortOrder
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.math.floor
@@ -71,7 +74,16 @@ object XpGame {
         get() = prefs.getInt("limit", 10)
         set(v) = prefs.edit { putInt("limit", v) }
 
+    /** For the game's texts (res/values/kuma3_strings.xml, Spanish in values-es) */
+    private lateinit var app: Context
+
+    private fun s(
+        @StringRes id: Int,
+        vararg args: Any,
+    ) = app.getString(id, *args)
+
     fun init(context: Context) {
+        app = context.applicationContext
         if (::prefs.isInitialized) return
         prefs = context.applicationContext.getSharedPreferences("kuma3_xp", Context.MODE_PRIVATE)
         device =
@@ -225,41 +237,70 @@ object XpGame {
         val combo = listOf(15, 20, 25, 30)[(h % 4).toInt()]
         val fast = Math.round(g.goal * listOf(0.4, 0.5, 0.6)[((h shr 3) % 3).toInt()]).toInt()
         return listOf(
-            Quest("reps", "Do $reps reps", reps, g.reps),
-            Quest("combo", "Reach a $combo-rep combo", combo, g.today.best),
-            Quest("fast", "$fast speed bonuses", fast, g.today.fast),
+            Quest("reps", s(R.string.kuma3_xp_quest_reps, reps), reps, g.reps),
+            Quest("combo", s(R.string.kuma3_xp_quest_combo, combo), combo, g.today.best),
+            Quest("fast", s(R.string.kuma3_xp_quest_fast, fast), fast, g.today.fast),
         )
     }
 
     class Trophy(
         val id: String,
         val icon: String,
-        val name: String,
-        val desc: String,
+        private val nameOf: () -> String,
+        private val descOf: () -> String,
         val ok: () -> Boolean,
-    )
+    ) {
+        val name get() = nameOf()
+        val desc get() = descOf()
+    }
+
+    private fun trophy(
+        id: String,
+        icon: String,
+        @StringRes name: Int,
+        desc: () -> String,
+        ok: () -> Boolean,
+    ) = Trophy(id, icon, { s(name) }, desc, ok)
+
+    private fun thousands(n: Int) = NumberFormat.getIntegerInstance().format(n)
 
     private fun totalReps() = g.days.values.sumOf { it.reps }
 
     val TROPHIES =
         listOf(
-            Trophy("goal", "🎯", "Goal getter", "Reach the daily goal") { g.goalHit },
-            Trophy("overtime", "⏱️", "Overtime", "Double the daily goal in a day") { g.reps >= 2 * g.goal },
-            Trophy("speed", "🏎️", "Speedy", "50 speed bonuses in a day") { g.today.fast >= 50 },
-            Trophy("combo10", "⚡", "On a roll", "A 10-rep combo") { g.record >= 10 },
-            Trophy("combo25", "⚡", "Unstoppable", "A 25-rep combo") { g.record >= 25 },
-            Trophy("combo50", "🌩️", "Lightning", "A 50-rep combo") { g.record >= 50 },
-            Trophy("combo100", "💯", "Hundred in a row", "A 100-rep combo") { g.record >= 100 },
-            Trophy("streak7", "🔥", "One week", "A 7-day streak") { g.streak >= 7 },
-            Trophy("streak30", "🔥", "One month", "A 30-day streak") { g.streak >= 30 },
-            Trophy("streak100", "🔥", "Hundred days", "A 100-day streak") { g.streak >= 100 },
-            Trophy("reps1000", "📚", "Thousand", "1,000 reps here") { totalReps() >= 1000 },
-            Trophy("reps10000", "🏛️", "Ten thousand", "10,000 reps here") { totalReps() >= 10000 },
-            Trophy("level10", "⭐", "Level 10", "Reach level 10") { level(g.xp) + 1 >= 10 },
-            Trophy("level25", "🌟", "Level 25", "Reach level 25") { level(g.xp) + 1 >= 25 },
-            Trophy("perfect", "💎", "Clean sweep", "Finish a sitting of 20+ reps") { false },
-            Trophy("boss", "👑", "Boss slayer", "Beat a boss card") { g.bosses >= 1 },
-            Trophy("boss10", "👑", "Boss hunter", "Beat 10 boss cards") { g.bosses >= 10 },
+            trophy("goal", "🎯", R.string.kuma3_xp_trophy_goal, { s(R.string.kuma3_xp_trophy_goal_desc) }) { g.goalHit },
+            trophy("overtime", "⏱️", R.string.kuma3_xp_trophy_overtime, { s(R.string.kuma3_xp_trophy_overtime_desc) }) {
+                g.reps >= 2 * g.goal
+            },
+            trophy("speed", "🏎️", R.string.kuma3_xp_trophy_speed, { s(R.string.kuma3_xp_trophy_speed_desc) }) { g.today.fast >= 50 },
+            trophy("combo10", "⚡", R.string.kuma3_xp_trophy_combo10, { s(R.string.kuma3_xp_trophy_combo_desc, 10) }) { g.record >= 10 },
+            trophy("combo25", "⚡", R.string.kuma3_xp_trophy_combo25, { s(R.string.kuma3_xp_trophy_combo_desc, 25) }) { g.record >= 25 },
+            trophy("combo50", "🌩️", R.string.kuma3_xp_trophy_combo50, { s(R.string.kuma3_xp_trophy_combo_desc, 50) }) { g.record >= 50 },
+            trophy("combo100", "💯", R.string.kuma3_xp_trophy_combo100, { s(R.string.kuma3_xp_trophy_combo_desc, 100) }) {
+                g.record >= 100
+            },
+            trophy("streak7", "🔥", R.string.kuma3_xp_trophy_streak7, { s(R.string.kuma3_xp_trophy_streak_desc, 7) }) { g.streak >= 7 },
+            trophy("streak30", "🔥", R.string.kuma3_xp_trophy_streak30, { s(R.string.kuma3_xp_trophy_streak_desc, 30) }) {
+                g.streak >= 30
+            },
+            trophy("streak100", "🔥", R.string.kuma3_xp_trophy_streak100, { s(R.string.kuma3_xp_trophy_streak_desc, 100) }) {
+                g.streak >= 100
+            },
+            trophy("reps1000", "📚", R.string.kuma3_xp_trophy_reps1000, { s(R.string.kuma3_xp_trophy_reps_desc, thousands(1000)) }) {
+                totalReps() >= 1000
+            },
+            trophy("reps10000", "🏛️", R.string.kuma3_xp_trophy_reps10000, { s(R.string.kuma3_xp_trophy_reps_desc, thousands(10000)) }) {
+                totalReps() >= 10000
+            },
+            Trophy("level10", "⭐", { s(R.string.kuma3_xp_trophy_level, 10) }, { s(R.string.kuma3_xp_trophy_level_desc, 10) }) {
+                level(g.xp) + 1 >= 10
+            },
+            Trophy("level25", "🌟", { s(R.string.kuma3_xp_trophy_level, 25) }, { s(R.string.kuma3_xp_trophy_level_desc, 25) }) {
+                level(g.xp) + 1 >= 25
+            },
+            trophy("perfect", "💎", R.string.kuma3_xp_trophy_perfect, { s(R.string.kuma3_xp_trophy_perfect_desc) }) { false },
+            trophy("boss", "👑", R.string.kuma3_xp_trophy_boss, { s(R.string.kuma3_xp_trophy_boss_desc) }) { g.bosses >= 1 },
+            trophy("boss10", "👑", R.string.kuma3_xp_trophy_boss10, { s(R.string.kuma3_xp_trophy_boss10_desc) }) { g.bosses >= 10 },
         )
 
     /** newly unlocked trophies (saved into mine.ach) */
@@ -341,9 +382,18 @@ object XpGame {
         val mult: Double,
         val brokeCombo: Int,
         val multUp: Boolean,
-        val wins: List<Pair<String, String>>,
+        val wins: List<Win>,
         val levelUp: Boolean,
     )
+
+    /** A balloon after an answer; [kind] picks its sound */
+    class Win(
+        val title: String,
+        val msg: String,
+        val kind: WinKind = WinKind.OTHER,
+    )
+
+    enum class WinKind { LEVEL, BOSS, TROPHY, COMBO, OTHER }
 
     fun breakCombo(): Int {
         val broke = combo
@@ -423,24 +473,31 @@ object XpGame {
                 it.thinkN++
             }
         }
-        val wins = mutableListOf<Pair<String, String>>()
+        val wins = mutableListOf<Win>()
         if (boss && ease > 1) {
             beatBoss(deckId)
             g = merge()
-            wins += "👑 Boss defeated!" to "Triple XP: +$xp."
+            wins += Win(s(R.string.kuma3_xp_win_boss_defeated), s(R.string.kuma3_xp_win_boss_defeated_msg, xp), WinKind.BOSS)
         } else if (boss) {
-            wins += "👑 The boss won this round" to "Triple XP anyway: +$xp. It comes back later today."
+            wins += Win(s(R.string.kuma3_xp_win_boss_won), s(R.string.kuma3_xp_win_boss_won_msg, xp))
         }
-        if (combo in MILESTONES) wins += "$combo combo!" to "$combo in a row. Keep going!"
+        if (combo in
+            MILESTONES
+        ) {
+            wins += Win(s(R.string.kuma3_xp_win_combo, combo), s(R.string.kuma3_xp_win_combo_msg, combo), WinKind.COMBO)
+        }
         if (combo > record && !recordShown && record >= 5) {
-            wins += "New record!" to "Best combo ever: $combo and counting."
+            wins += Win(s(R.string.kuma3_xp_win_record), s(R.string.kuma3_xp_win_record_msg, combo))
             recordShown = true
         }
         if (firstToday) {
             wins +=
-                "🔥 ${g.streak}-day streak" to (if (g.streak > 1) "Another day in a row. Keep it going!" else "Day 1. Come back tomorrow!")
+                Win(
+                    app.resources.getQuantityString(R.plurals.kuma3_xp_streak_title, g.streak, g.streak),
+                    s(if (g.streak > 1) R.string.kuma3_xp_win_streak_more else R.string.kuma3_xp_win_streak_first),
+                )
         }
-        if (g.goalHit && !wasHit) wins += "Daily goal done!" to "Overtime: every rep now gives 1.5× XP."
+        if (g.goalHit && !wasHit) wins += Win(s(R.string.kuma3_xp_win_goal), s(R.string.kuma3_xp_win_goal_msg))
         for (q in quests()) {
             if (q.have < q.need || q.id in g.today.got) continue
             val got = t.optJSONArray("got") ?: JSONArray().also { t.put("got", it) }
@@ -448,11 +505,11 @@ object XpGame {
             t.put("xp", t.optInt("xp") + QUEST_XP)
             mine.put("xp", mine.optInt("xp") + QUEST_XP)
             g = merge()
-            wins += "Quest complete!" to "${q.text} · +$QUEST_XP XP"
+            wins += Win(s(R.string.kuma3_xp_win_quest), "${q.text} · +$QUEST_XP XP")
         }
         val levelUp = level(g.xp) > lv
-        if (levelUp) wins += "Level ${level(g.xp) + 1}!" to "Keep the combo going."
-        for (tr in checkTrophies()) wins += "🏆 ${tr.icon} ${tr.name}" to tr.desc
+        if (levelUp) wins += Win(s(R.string.kuma3_xp_win_level, level(g.xp) + 1), s(R.string.kuma3_xp_win_level_msg), WinKind.LEVEL)
+        for (tr in checkTrophies()) wins += Win("🏆 ${tr.icon} ${tr.name}", tr.desc, WinKind.TROPHY)
         save()
         return Result(xp, points, mult, broke, mult() > m0 && combo > 0, wins, levelUp)
     }

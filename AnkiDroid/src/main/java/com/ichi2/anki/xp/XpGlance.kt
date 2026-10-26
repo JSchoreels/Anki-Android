@@ -2,8 +2,10 @@
 
 package com.ichi2.anki.xp
 
+import android.content.Context
 import androidx.lifecycle.lifecycleScope
 import com.ichi2.anki.CollectionManager.withCol
+import com.ichi2.anki.R
 import com.ichi2.anki.libanki.Collection
 import com.ichi2.anki.pages.PageFragment
 import kotlinx.coroutines.launch
@@ -43,7 +45,7 @@ object XpGlance {
                     }
                 }.onFailure { Timber.w(it, "Anki XP: reading the glance") }.getOrNull()
                     ?: return@launch
-            runCatching { page.webViewLayout.evaluateJavascript(script(g, deckName), null) }
+            runCatching { page.webViewLayout.evaluateJavascript(script(page.requireContext(), g, deckName), null) }
         }
     }
 
@@ -102,29 +104,32 @@ object XpGlance {
     }
 
     private fun script(
+        c: Context,
         g: Glance,
         deckName: String,
     ): String {
         val goal = (g.target * 100).roundToInt()
+        val retentionLabel = c.getString(R.string.kuma3_xp_glance_retention)
         val retention =
             if (g.reviewed == 0) {
-                cell("–", "retention, last 30 days", "no reviews yet")
+                cell("–", retentionLabel, c.getString(R.string.kuma3_xp_glance_no_reviews))
             } else {
                 val pct = (100.0 * g.passed / g.reviewed).roundToInt()
                 val below = pct < goal
                 cell(
                     "$pct%",
-                    "retention, last 30 days",
-                    "target $goal% · ${if (below) "below" else "on target"}",
+                    retentionLabel,
+                    c.getString(if (below) R.string.kuma3_xp_glance_target_below else R.string.kuma3_xp_glance_target_met, goal),
                     if (below) "below" else "met",
                 )
             }
+        val minutes = if (g.reps > 0) c.getString(R.string.kuma3_xp_minutes, g.minutes) else ""
         val html =
-            """<div class="position-relative"><h1>At a glance</h1></div>
+            """<div class="position-relative"><h1>${esc(c.getString(R.string.kuma3_xp_glance_title))}</h1></div>
             <div class="xp-glance">
-            ${cell("${g.due}", "due today")}
-            ${cell("${g.tomorrow}", "due tomorrow")}
-            ${cell("${g.reps}", "studied today", if (g.reps > 0) "${g.minutes} min" else "")}
+            ${cell("${g.due}", c.getString(R.string.kuma3_xp_glance_due_today))}
+            ${cell("${g.tomorrow}", c.getString(R.string.kuma3_xp_glance_due_tomorrow))}
+            ${cell("${g.reps}", c.getString(R.string.kuma3_xp_glance_studied), minutes)}
             $retention
             </div>
             <p class="xp-glance-deck">${esc(deckName)}</p>"""
@@ -132,29 +137,40 @@ object XpGlance {
         val lv = XpGame.level(p.xp)
         val longest = XpGame.longestStreak
         val player =
-            """<div class="position-relative"><h1>Player</h1></div>
+            """<div class="position-relative"><h1>${esc(c.getString(R.string.kuma3_xp_player))}</h1></div>
             <div class="xp-glance">
-            ${cell("Lv ${lv + 1}", "level", "${p.xp - XpGame.levelStart(lv)}/${100 * (lv + 1)} XP")}
-            ${cell("+${p.today.xp}", "XP today", if (p.today.best > 0) "best combo ${p.today.best}" else "")}
+            ${cell("Lv ${lv + 1}", c.getString(R.string.kuma3_xp_glance_level), "${p.xp - XpGame.levelStart(lv)}/${100 * (lv + 1)} XP")}
+            ${cell(
+                "+${p.today.xp}",
+                c.getString(R.string.kuma3_xp_glance_xp_today),
+                if (p.today.best > 0) c.getString(R.string.kuma3_xp_glance_best_combo, p.today.best) else "",
+            )}
             ${cell(
                 "🔥 ${p.streak}",
-                "day streak",
+                c.getString(R.string.kuma3_xp_glance_day_streak),
                 if (longest > p.streak) {
-                    "longest $longest"
+                    c.getString(R.string.kuma3_xp_glance_longest, longest)
                 } else if (p.streak > 0) {
-                    "your longest"
+                    c.getString(R.string.kuma3_xp_glance_your_longest)
                 } else {
                     ""
                 },
             )}
             ${cell(
                 "${p.reps}/${p.goal}",
-                "daily goal",
-                if (p.goalHit) "done today" else "${p.goal - p.reps} reps to go",
+                c.getString(R.string.kuma3_xp_glance_goal),
+                if (p.goalHit) {
+                    c.getString(R.string.kuma3_xp_glance_goal_done)
+                } else {
+                    c.getString(
+                        R.string.kuma3_xp_glance_reps_to_go,
+                        p.goal - p.reps,
+                    )
+                },
                 if (p.goalHit) "met" else "",
             )}
             </div>
-            <p class="xp-glance-deck">All decks, every device</p>"""
+            <p class="xp-glance-deck">${esc(c.getString(R.string.kuma3_xp_glance_all_decks))}</p>"""
         // The graphs render after the page loads, so wait for the first section; keep the two boxes and refresh them.
         return """(function () {
             var boxes = [["xp-glance", ${JSONObject.quote(html)}], ["xp-player", ${JSONObject.quote(player)}]], tries = 0;

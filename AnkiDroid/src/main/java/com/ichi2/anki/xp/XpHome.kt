@@ -54,13 +54,19 @@ object XpHome {
         // under the group-box labels and cross-faded two summaries over each other for half a second
         picker.deckPickerBinding.decks.itemAnimator = null
         // footers come as Activity, RWKV recall, then the rest: what to act on first, the year of history last
-        val rest = listOf("Today" to t, footers[1], footers[0]) + footers.drop(2)
+        val rest = listOf(picker.getString(R.string.kuma3_xp_today) to t, footers[1], footers[0]) + footers.drop(2)
         if (!XpChrome.isOn()) {
             player = null
             return ConcatAdapter(listOf(decks, d) + rest.map { it.second })
         }
         val p = Player(picker).also { player = it }
-        val labels = mutableMapOf<RecyclerView.Adapter<*>, String>(p to "Player", decks to "Decks", d to "Decks")
+        val deckLabel = picker.getString(R.string.kuma3_xp_decks)
+        val labels =
+            mutableMapOf<RecyclerView.Adapter<*>, String>(
+                p to picker.getString(R.string.kuma3_xp_player),
+                decks to deckLabel,
+                d to deckLabel,
+            )
         rest.forEach { labels[it.second] = it.first }
         val concat = ConcatAdapter(listOf(p, decks, d) + rest.map { it.second })
         picker.deckPickerBinding.decks.addItemDecoration(Boxes(picker, concat, labels))
@@ -161,12 +167,19 @@ object XpHome {
                     setPadding(0, pad / 2, 0, 0)
                     addView(
                         text(c, 13f).apply {
-                            text = "🔥 ${g.streak} day${if (g.streak == 1) "" else "s"}   Goal ${g.reps}/${g.goal}"
+                            text =
+                                "🔥 ${c.resources.getQuantityString(R.plurals.kuma3_xp_days, g.streak, g.streak)}   " +
+                                c.getString(R.string.kuma3_xp_goal_progress, g.reps, g.goal)
                         },
                         LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
                     )
-                    addView(link(c, "Quests $got/${quests.size} ▸") { XpWindows.quests(picker) })
-                    addView(link(c, "Trophies ▸") { XpWindows.trophies(picker) }.apply { setPadding(pad, 0, 0, 0) })
+                    addView(link(c, c.getString(R.string.kuma3_xp_quests_link, got, quests.size)) { XpWindows.quests(picker) })
+                    addView(
+                        link(
+                            c,
+                            c.getString(R.string.kuma3_xp_trophies_link),
+                        ) { XpWindows.trophies(picker) }.apply { setPadding(pad, 0, 0, 0) },
+                    )
                 }
             holder.frame.removeAllViews()
             holder.frame.addView(
@@ -232,7 +245,12 @@ object XpHome {
             holder.frame.removeAllViews()
             holder.frame.addView(
                 text(c, 14f).apply {
-                    text = if (open) "▾ Hide $hidden decks done for today" else "▸ $hidden decks done for today"
+                    text =
+                        c.resources.getQuantityString(
+                            if (open) R.plurals.kuma3_xp_decks_done_hide else R.plurals.kuma3_xp_decks_done,
+                            hidden,
+                            hidden,
+                        )
                     if (XpChrome.isOn()) setTextColor(Color.rgb(0x59, 0x59, 0x59)) else alpha = 0.7f // 7:1 on white
                     setPadding(px(c, 16f), px(c, 10f), px(c, 16f), px(c, 10f))
                     setOnClickListener {

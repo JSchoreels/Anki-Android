@@ -5,11 +5,12 @@ package com.ichi2.anki.pages
 import android.os.Handler
 import android.os.Looper
 import android.webkit.WebView
-import android.widget.Toast
 import com.ichi2.anki.AnkiDroidApp
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.R
 import com.ichi2.anki.RwkvOffline
+import com.ichi2.anki.common.time.TimeManager
+import com.ichi2.anki.common.utils.android.showThemedToast
 import com.ichi2.anki.libanki.Collection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -169,7 +170,7 @@ object SearchStatsExtended {
     private fun Collection.revlogLowerLimit(dayRange: Int): Long {
         if (dayRange <= 0) return 0
         val rollover = getPreferences().scheduling.rollover
-        val today = (System.currentTimeMillis() / 1000 - rollover * 3600L) / DAY_SECONDS.toDouble()
+        val today = (TimeManager.time.intTime() - rollover * 3600L) / DAY_SECONDS.toDouble()
         return ((today - dayRange) * DAY_SECONDS * 1000).toLong()
     }
 
@@ -225,7 +226,7 @@ object SearchStatsExtended {
                 } else {
                     context.getString(R.string.kuma3_sse_rwkv_off)
                 }
-            Handler(Looper.getMainLooper()).post { Toast.makeText(context, message, Toast.LENGTH_LONG).show() }
+            Handler(Looper.getMainLooper()).post { showThemedToast(context, message, shortLength = false) }
             return """{"column":null,"data":[],"warnings":[${JSONObject.quote(message)}]}""".toByteArray()
         }
         Timber.i("RWKV calibration: %d of %d asked-for reviews", out.reviewIdsCount, ids.size)

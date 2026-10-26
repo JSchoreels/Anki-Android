@@ -241,4 +241,73 @@
     <string name="kuma3_lb_signed_in_as">Sesión iniciada como %s</string>
     <string name="kuma3_lb_users_home_title">Usuarios en la pantalla principal</string>
     <string name="kuma3_lb_users_home_message">Cuántas filas muestra la tabla debajo de los mazos (de 1 a %d).</string>
+
+    <!-- deck list boxes, heatmap, RWKV forecast, lofi, reviewer -->
+    <string name="kuma3_box_activity">Actividad</string>
+    <string name="kuma3_box_rwkv_recall">Recuerdo RWKV</string>
+    <string name="kuma3_heatmap_six_months">6 meses</string>
+    <string name="kuma3_heatmap_month">Mes</string>
+    <string name="kuma3_heatmap_today">Hoy</string>
+    <string name="kuma3_heatmap_daily_average">Promedio diario</string>
+    <string name="kuma3_heatmap_days_learned">Días con estudio</string>
+    <string name="kuma3_heatmap_longest_streak">Racha más larga</string>
+    <string name="kuma3_heatmap_current_streak">Racha actual</string>
+    <string name="kuma3_heatmap_no_reviews_on">Sin repasos el %s</string>
+    <string name="kuma3_heatmap_nothing_due_on">Nada pendiente el %s</string>
+    <string name="kuma3_forecast_below_target">%d bajo el objetivo</string>
+    <string name="kuma3_forecast_ready">%d listas</string>
+    <string name="kuma3_forecast_waiting">%d en espera</string>
+    <string name="kuma3_forecast_below_minimum">%d bajo el mínimo</string>
+    <string name="kuma3_forecast_close">%d cerca</string>
+    <string name="kuma3_forecast_safe">%d seguras</string>
+    <string name="kuma3_forecast_if_you_stop">Si paras ahora: </string>
+    <string name="kuma3_forecast_in_1h">+%d en 1 h</string>
+    <string name="kuma3_forecast_in_3h">+%d en 3 h</string>
+    <string name="kuma3_forecast_by_tomorrow">%d para mañana</string>
+    <string name="kuma3_forecast_with_minimum"> (%d con el mínimo)</string>
+    <string name="kuma3_forecast_graph_caption">Recuerdo RWKV ahora · línea roja = retención deseada</string>
+    <string name="kuma3_lofi">Lofi</string>
+    <string name="kuma3_lofi_tooltip">Lofi (mantén pulsado: opciones)</string>
+    <string name="kuma3_lofi_tooltip_track">Lofi: %s</string>
+    <string name="kuma3_lofi_nothing_playing">No suena nada</string>
+    <string name="kuma3_lofi_volume">Volumen</string>
+    <string name="kuma3_lofi_next">Siguiente pista</string>
+    <string name="kuma3_lofi_downloads">Descargas…</string>
+    <string name="kuma3_lofi_pause">Pausa</string>
+    <string name="kuma3_lofi_play">Reproducir</string>
+    <string name="kuma3_lofi_nothing_downloaded">Todavía no hay nada descargado</string>
+    <string name="kuma3_lofi_source_chillhop">Chillhop (en línea)</string>
+    <string name="kuma3_lofi_source_lofigirl">Lofi Girl (en línea)</string>
+    <string name="kuma3_lofi_source_downloaded">Descargadas (sin conexión)</string>
+    <string name="kuma3_lofi_source_folder">Mi carpeta</string>
+    <string name="kuma3_lofi_downloaded">Descargada</string>
+    <string name="kuma3_lofi_download_chillhop">%d pistas de Chillhop</string>
+    <string name="kuma3_lofi_download_lofigirl">%d pistas de Lofi Girl</string>
+    <string name="kuma3_lofi_download_title">Descargar para usar sin conexión (%d descargadas)</string>
+    <string name="kuma3_lofi_downloading">Descargando %1$d pistas. Después elige “%2$s”.</string>
+    <string name="kuma3_lofi_delete_downloads">Borrar descargas</string>
+    <string name="kuma3_undo_nothing_left">No queda nada que deshacer en este repaso</string>
+    <string name="kuma3_type_in_card">Para escribir en esta tarjeta, activa “%s”</string>
+    <string name="kuma3_turn_on">Activar</string>
+    <string name="kuma3_syncing_media">Sincronizando multimedia...</string>
+    <plurals name="kuma3_heatmap_reviews">
+        <item quantity="one">%s repaso</item>
+        <item quantity="other">%s repasos</item>
+        <item quantity="many">%s repasos</item>
+    </plurals>
+    <plurals name="kuma3_heatmap_days">
+        <item quantity="one">%d día</item>
+        <item quantity="other">%d días</item>
+        <item quantity="many">%d días</item>
+    </plurals>
+    <plurals name="kuma3_heatmap_reviews_on">
+        <item quantity="one">%1$s repaso el %2$s</item>
+        <item quantity="other">%1$s repasos el %2$s</item>
+        <item quantity="many">%1$s repasos el %2$s</item>
+    </plurals>
+    <plurals name="kuma3_heatmap_due_on">
+        <item quantity="one">%1$s tarjeta pendiente el %2$s</item>
+        <item quantity="other">%1$s tarjetas pendientes el %2$s</item>
+        <item quantity="many">%1$s tarjetas pendientes el %2$s</item>
+    </plurals>
 </resources>

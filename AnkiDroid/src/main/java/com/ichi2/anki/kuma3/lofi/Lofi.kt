@@ -15,6 +15,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.DocumentsContract
+import androidx.annotation.StringRes
 import androidx.core.content.edit
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -24,6 +25,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.ichi2.anki.AnkiDroidApp
+import com.ichi2.anki.R
 import timber.log.Timber
 import java.io.File
 import java.net.URLDecoder
@@ -39,12 +41,12 @@ import java.net.URLDecoder
  */
 object Lofi {
     enum class Source(
-        val label: String,
+        @StringRes val label: Int,
     ) {
-        CHILLHOP("Chillhop (stream)"),
-        LOFIGIRL("Lofi Girl (stream)"),
-        DOWNLOADED("Downloaded (offline)"),
-        FOLDER("My folder"),
+        CHILLHOP(R.string.kuma3_lofi_source_chillhop),
+        LOFIGIRL(R.string.kuma3_lofi_source_lofigirl),
+        DOWNLOADED(R.string.kuma3_lofi_source_downloaded),
+        FOLDER(R.string.kuma3_lofi_source_folder),
     }
 
     /** One playlist at a time: this many random tracks, then a new random set. */
@@ -132,7 +134,7 @@ object Lofi {
                     .walkTopDown()
                     .filter { it.isFile && it.extension == "mp3" }
                     .map {
-                        item(Uri.fromFile(it), it.nameWithoutExtension, "Downloaded")
+                        item(Uri.fromFile(it), it.nameWithoutExtension, context.getString(R.string.kuma3_lofi_downloaded))
                     }.toList()
             Source.FOLDER -> folderTracks()
         }
@@ -357,7 +359,12 @@ object Lofi {
                     when {
                         mime == DocumentsContract.Document.MIME_TYPE_DIR -> walk(id)
                         mime.startsWith("audio/") ->
-                            out += item(DocumentsContract.buildDocumentUriUsingTree(tree, id), name.substringBeforeLast('.'), "My folder")
+                            out +=
+                                item(
+                                    DocumentsContract.buildDocumentUriUsingTree(tree, id),
+                                    name.substringBeforeLast('.'),
+                                    context.getString(R.string.kuma3_lofi_source_folder),
+                                )
                     }
                 }
             }

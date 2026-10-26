@@ -235,4 +235,69 @@
     <string name="kuma3_lb_signed_in_as">Signed in as %s</string>
     <string name="kuma3_lb_users_home_title">Users on the home screen</string>
     <string name="kuma3_lb_users_home_message">How many rows the board below the decks shows (1 to %d).</string>
+
+    <!-- deck list boxes, heatmap, RWKV forecast, lofi, reviewer -->
+    <string name="kuma3_box_activity">Activity</string>
+    <string name="kuma3_box_rwkv_recall">RWKV recall</string>
+    <string name="kuma3_heatmap_six_months">6 months</string>
+    <string name="kuma3_heatmap_month">Month</string>
+    <string name="kuma3_heatmap_today">Today</string>
+    <string name="kuma3_heatmap_daily_average">Daily average</string>
+    <string name="kuma3_heatmap_days_learned">Days learned</string>
+    <string name="kuma3_heatmap_longest_streak">Longest streak</string>
+    <string name="kuma3_heatmap_current_streak">Current streak</string>
+    <string name="kuma3_heatmap_no_reviews_on">No reviews on %s</string>
+    <string name="kuma3_heatmap_nothing_due_on">Nothing due on %s</string>
+    <string name="kuma3_forecast_below_target">%d below target</string>
+    <string name="kuma3_forecast_ready">%d ready</string>
+    <string name="kuma3_forecast_waiting">%d waiting</string>
+    <string name="kuma3_forecast_below_minimum">%d below minimum</string>
+    <string name="kuma3_forecast_close">%d close</string>
+    <string name="kuma3_forecast_safe">%d safe</string>
+    <string name="kuma3_forecast_if_you_stop">If you stop now: </string>
+    <string name="kuma3_forecast_in_1h">+%d in 1 h</string>
+    <string name="kuma3_forecast_in_3h">+%d in 3 h</string>
+    <string name="kuma3_forecast_by_tomorrow">%d by tomorrow</string>
+    <string name="kuma3_forecast_with_minimum"> (%d with minimum)</string>
+    <string name="kuma3_forecast_graph_caption">RWKV recall now · red line = desired retention</string>
+    <string name="kuma3_lofi">Lofi</string>
+    <string name="kuma3_lofi_tooltip">Lofi (long-press: options)</string>
+    <string name="kuma3_lofi_tooltip_track">Lofi: %s</string>
+    <string name="kuma3_lofi_nothing_playing">Nothing playing</string>
+    <string name="kuma3_lofi_volume">Volume</string>
+    <string name="kuma3_lofi_next">Next track</string>
+    <string name="kuma3_lofi_downloads">Downloads…</string>
+    <string name="kuma3_lofi_pause">Pause</string>
+    <string name="kuma3_lofi_play">Play</string>
+    <string name="kuma3_lofi_nothing_downloaded">Nothing downloaded yet</string>
+    <string name="kuma3_lofi_source_chillhop">Chillhop (stream)</string>
+    <string name="kuma3_lofi_source_lofigirl">Lofi Girl (stream)</string>
+    <string name="kuma3_lofi_source_downloaded">Downloaded (offline)</string>
+    <string name="kuma3_lofi_source_folder">My folder</string>
+    <string name="kuma3_lofi_downloaded">Downloaded</string>
+    <string name="kuma3_lofi_download_chillhop">%d Chillhop tracks</string>
+    <string name="kuma3_lofi_download_lofigirl">%d Lofi Girl tracks</string>
+    <string name="kuma3_lofi_download_title">Download for offline (%d downloaded)</string>
+    <string name="kuma3_lofi_downloading">%1$d tracks downloading. Then pick “%2$s”.</string>
+    <string name="kuma3_lofi_delete_downloads">Delete downloads</string>
+    <string name="kuma3_undo_nothing_left">Nothing left to undo in this review</string>
+    <string name="kuma3_type_in_card">To type in this card, turn on “%s”</string>
+    <string name="kuma3_turn_on">Turn on</string>
+    <string name="kuma3_syncing_media">Syncing media...</string>
+    <plurals name="kuma3_heatmap_reviews">
+        <item quantity="one">%s review</item>
+        <item quantity="other">%s reviews</item>
+    </plurals>
+    <plurals name="kuma3_heatmap_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <plurals name="kuma3_heatmap_reviews_on">
+        <item quantity="one">%1$s review on %2$s</item>
+        <item quantity="other">%1$s reviews on %2$s</item>
+    </plurals>
+    <plurals name="kuma3_heatmap_due_on">
+        <item quantity="one">%1$s card due on %2$s</item>
+        <item quantity="other">%1$s cards due on %2$s</item>
+    </plurals>
 </resources>

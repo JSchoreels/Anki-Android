@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import anki.scheduler.RwkvOfflineForecastResponse
 import com.ichi2.anki.CollectionManager.withCol
 import com.ichi2.anki.DeckPicker
+import com.ichi2.anki.R
 import com.ichi2.anki.browser.toIntent
 import com.ichi2.anki.common.destinations.BrowserDestination
 import com.ichi2.anki.kuma3.Kuma3Cache
@@ -164,36 +165,37 @@ object RwkvForecast {
         val safe = now[SAFE].orEmpty().map { it.cardId }
         val minimum = now[MINIMUM].orEmpty().map { it.cardId }
         val waiting = cards.filter { it.waiting }.map { it.cardId }
-        count("${due.size} below target", due, DUE)
+        val c: android.content.Context = deckPicker
+        count(c.getString(R.string.kuma3_forecast_below_target, due.size), due, DUE)
         if (waiting.isNotEmpty()) {
             // reviewable now, and waiting for the repeat spacing
             val waitingIds = waiting.toSet()
             val ready = due.filter { it !in waitingIds }
             out.append(": ")
-            count("${ready.size} ready", ready)
+            count(c.getString(R.string.kuma3_forecast_ready, ready.size), ready)
             out.append(", ")
-            count("${waiting.size} waiting", waiting)
+            count(c.getString(R.string.kuma3_forecast_waiting, waiting.size), waiting)
         }
         out.append("\n")
         if (minimum.isNotEmpty()) {
-            count("${minimum.size} below minimum", minimum, MINIMUM)
+            count(c.getString(R.string.kuma3_forecast_below_minimum, minimum.size), minimum, MINIMUM)
             out.append(" · ")
         }
-        count("${near.size} close", near, NEAR)
+        count(c.getString(R.string.kuma3_forecast_close, near.size), near, NEAR)
         out.append(" · ")
-        count("${safe.size} safe", safe, SAFE)
+        count(c.getString(R.string.kuma3_forecast_safe, safe.size), safe, SAFE)
         out.append("\n")
-        out.append("If you stop now: ")
+        out.append(c.getString(R.string.kuma3_forecast_if_you_stop))
         val in1h = dueAt(1).filter { it !in dueNow }
         val in3h = dueAt(2).filter { it !in dueNow }
         val tomorrow = dueAt(3)
-        count("+${in1h.size} in 1 h", in1h)
+        count(c.getString(R.string.kuma3_forecast_in_1h, in1h.size), in1h)
         out.append(" · ")
-        count("+${in3h.size} in 3 h", in3h)
+        count(c.getString(R.string.kuma3_forecast_in_3h, in3h.size), in3h)
         out.append(" · ")
-        count("${tomorrow.size} by tomorrow", tomorrow)
+        count(c.getString(R.string.kuma3_forecast_by_tomorrow, tomorrow.size), tomorrow)
         if (forecast.hasRolloverWithMinimum() && forecast.rolloverWithMinimum > tomorrow.size) {
-            out.append(" (${forecast.rolloverWithMinimum} with minimum)")
+            out.append(c.getString(R.string.kuma3_forecast_with_minimum, forecast.rolloverWithMinimum))
         }
         return out
     }
@@ -239,7 +241,7 @@ object RwkvForecast {
                     setPadding(pad, pad / 2, pad, pad)
                     addView(
                         TextView(context).apply {
-                            text = "RWKV recall now · red line = desired retention"
+                            text = context.getString(R.string.kuma3_forecast_graph_caption)
                             textSize = 12f
                             alpha = 0.7f
                             gravity = android.view.Gravity.CENTER

@@ -8,9 +8,12 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.view.MotionEvent
 import android.view.View
+import com.ichi2.anki.R
+import java.text.NumberFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
@@ -117,6 +120,8 @@ internal class HeatmapGrid(
         }
 
     @SuppressLint("ClickableViewAccessibility") // the squares are described by the caption they set
+    private fun thousands(n: Int) = NumberFormat.getIntegerInstance().format(n)
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val data = data ?: return false
         if (event.action == MotionEvent.ACTION_DOWN) return true
@@ -129,14 +134,14 @@ internal class HeatmapGrid(
         selected = day
         invalidate()
         val offset = ChronoUnit.DAYS.between(data.today, day).toInt()
-        val date = day.format(DateTimeFormatter.ofPattern("EEEE MMMM d, yyyy", Locale.getDefault()))
+        val date = day.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault()))
         val count = (if (offset <= 0) data.past[offset] else data.future[offset]) ?: 0
         onDayTapped(
             when {
-                offset <= 0 && count == 0 -> "No reviews on $date"
-                offset <= 0 -> String.format(Locale.US, "%,d review%s on %s", count, if (count == 1) "" else "s", date)
-                count == 0 -> "Nothing due on $date"
-                else -> String.format(Locale.US, "%,d card%s due on %s", count, if (count == 1) "" else "s", date)
+                offset <= 0 && count == 0 -> context.getString(R.string.kuma3_heatmap_no_reviews_on, date)
+                offset <= 0 -> context.resources.getQuantityString(R.plurals.kuma3_heatmap_reviews_on, count, thousands(count), date)
+                count == 0 -> context.getString(R.string.kuma3_heatmap_nothing_due_on, date)
+                else -> context.resources.getQuantityString(R.plurals.kuma3_heatmap_due_on, count, thousands(count), date)
             },
         )
         return true

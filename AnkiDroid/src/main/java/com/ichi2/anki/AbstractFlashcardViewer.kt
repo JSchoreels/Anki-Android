@@ -798,7 +798,7 @@ abstract class AbstractFlashcardViewer :
         launchCatchingTask {
             // kuma3: choosing the deck happened before this review; undoing it here would silently switch decks
             if (withCol { undoStatus().undo } == TR.browsingSelectDeck()) {
-                showSnackbar("Nothing left to undo in this review", Snackbar.LENGTH_LONG)
+                showSnackbar(getString(R.string.kuma3_undo_nothing_left), Snackbar.LENGTH_LONG)
                 return@launchCatchingTask
             }
             // kuma3: long enough to read what was undone (the reviewer's other messages stay short)
@@ -1307,8 +1307,8 @@ abstract class AbstractFlashcardViewer :
 
     private fun cardTextBoxTapped() {
         if (typeAnswer?.useInputTag != false || ++textBoxTaps != 3) return
-        showSnackbar("To type in this card, turn on \u201cType answer into the card\u201d", Snackbar.LENGTH_INDEFINITE) {
-            setAction("Turn on") {
+        showSnackbar(getString(R.string.kuma3_type_in_card, getString(R.string.use_input_tag)), Snackbar.LENGTH_INDEFINITE) {
+            setAction(R.string.kuma3_turn_on) {
                 sharedPrefs().edit { putBoolean(getString(R.string.use_input_tag_key), true) }
                 typeAnswer = createInstance(sharedPrefs())
                 webView?.isFocusableInTouchMode = true

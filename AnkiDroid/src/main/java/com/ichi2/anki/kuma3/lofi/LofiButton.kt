@@ -35,7 +35,7 @@ object LofiButton {
         val button =
             ImageButton(activity, null, androidx.appcompat.R.attr.actionButtonStyle).apply {
                 setImageResource(R.drawable.ic_kuma3_lofi)
-                contentDescription = "Lofi"
+                contentDescription = activity.getString(R.string.kuma3_lofi)
                 setOnClickListener { Lofi.toggle() }
                 setOnLongClickListener {
                     menu(activity)
@@ -45,7 +45,11 @@ object LofiButton {
 
         fun refresh() {
             button.alpha = if (Lofi.isPlaying) 1f else 0.55f
-            TooltipCompat.setTooltipText(button, Lofi.trackTitle?.let { "Lofi: $it" } ?: "Lofi (long-press: options)")
+            TooltipCompat.setTooltipText(
+                button,
+                Lofi.trackTitle?.let { activity.getString(R.string.kuma3_lofi_tooltip_track, it) }
+                    ?: activity.getString(R.string.kuma3_lofi_tooltip),
+            )
         }
         refresh()
         val listener = ::refresh
@@ -61,15 +65,15 @@ object LofiButton {
             },
         )
         menu
-            .add(Menu.NONE, R.id.action_kuma3_lofi, Menu.NONE, "Lofi")
+            .add(Menu.NONE, R.id.action_kuma3_lofi, Menu.NONE, R.string.kuma3_lofi)
             .setActionView(button)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
     }
 
     private fun menu(activity: AppCompatActivity) {
         val pad = (16 * activity.resources.displayMetrics.density).toInt()
-        val track = TextView(activity).apply { text = Lofi.trackTitle ?: "Nothing playing" }
-        val volumeLabel = TextView(activity).apply { text = "Volume" }
+        val track = TextView(activity).apply { text = Lofi.trackTitle ?: activity.getString(R.string.kuma3_lofi_nothing_playing) }
+        val volumeLabel = TextView(activity).apply { text = activity.getString(R.string.kuma3_lofi_volume) }
         val volume =
             SeekBar(activity).apply {
                 max = 100
@@ -104,14 +108,17 @@ object LofiButton {
         dialog =
             AlertDialog
                 .Builder(activity)
-                .setTitle("Lofi")
+                .setTitle(R.string.kuma3_lofi)
                 .setView(layout)
-                .setSingleChoiceItems(sources.map { it.label }.toTypedArray(), sources.indexOf(Lofi.source)) { _, which ->
+                .setSingleChoiceItems(
+                    sources.map { activity.getString(it.label) }.toTypedArray(),
+                    sources.indexOf(Lofi.source),
+                ) { _, which ->
                     pick(activity, sources[which])
                     dialog.dismiss()
-                }.setPositiveButton("Next track") { _, _ -> Lofi.next() }
-                .setNeutralButton("Downloads…") { _, _ -> downloads(activity) }
-                .setNegativeButton(if (Lofi.isPlaying) "Pause" else "Play") { _, _ -> Lofi.toggle() }
+                }.setPositiveButton(R.string.kuma3_lofi_next) { _, _ -> Lofi.next() }
+                .setNeutralButton(R.string.kuma3_lofi_downloads) { _, _ -> downloads(activity) }
+                .setNegativeButton(if (Lofi.isPlaying) R.string.kuma3_lofi_pause else R.string.kuma3_lofi_play) { _, _ -> Lofi.toggle() }
                 .show()
     }
 
@@ -122,7 +129,7 @@ object LofiButton {
         when {
             source == Lofi.Source.FOLDER -> chooseFolder(activity)
             source == Lofi.Source.DOWNLOADED && Lofi.downloadedCount() == 0 -> {
-                showThemedToast(activity, "Nothing downloaded yet", true)
+                showThemedToast(activity, activity.getString(R.string.kuma3_lofi_nothing_downloaded), true)
                 downloads(activity)
             }
             else -> Lofi.source = source
@@ -133,18 +140,19 @@ object LofiButton {
     private fun downloads(activity: AppCompatActivity) {
         val choices =
             listOf(
-                "20 Chillhop tracks" to { Lofi.download(Lofi.Source.CHILLHOP, 20) },
-                "50 Chillhop tracks" to { Lofi.download(Lofi.Source.CHILLHOP, 50) },
-                "20 Lofi Girl tracks" to { Lofi.download(Lofi.Source.LOFIGIRL, 20) },
-                "50 Lofi Girl tracks" to { Lofi.download(Lofi.Source.LOFIGIRL, 50) },
+                activity.getString(R.string.kuma3_lofi_download_chillhop, 20) to { Lofi.download(Lofi.Source.CHILLHOP, 20) },
+                activity.getString(R.string.kuma3_lofi_download_chillhop, 50) to { Lofi.download(Lofi.Source.CHILLHOP, 50) },
+                activity.getString(R.string.kuma3_lofi_download_lofigirl, 20) to { Lofi.download(Lofi.Source.LOFIGIRL, 20) },
+                activity.getString(R.string.kuma3_lofi_download_lofigirl, 50) to { Lofi.download(Lofi.Source.LOFIGIRL, 50) },
             )
         AlertDialog
             .Builder(activity)
-            .setTitle("Download for offline (${Lofi.downloadedCount()} downloaded)")
+            .setTitle(activity.getString(R.string.kuma3_lofi_download_title, Lofi.downloadedCount()))
             .setItems(choices.map { it.first }.toTypedArray()) { _, which ->
                 val queued = choices[which].second()
-                showThemedToast(activity, "$queued tracks downloading. Then pick \"Downloaded (offline)\".", false)
-            }.setNegativeButton("Delete downloads") { _, _ -> Lofi.deleteDownloads() }
+                val downloaded = activity.getString(R.string.kuma3_lofi_source_downloaded)
+                showThemedToast(activity, activity.getString(R.string.kuma3_lofi_downloading, queued, downloaded), false)
+            }.setNegativeButton(R.string.kuma3_lofi_delete_downloads) { _, _ -> Lofi.deleteDownloads() }
             .show()
     }
 

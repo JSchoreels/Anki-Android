@@ -584,13 +584,13 @@ open class DeckPicker :
                 this,
                 deckListAdapter,
                 listOf(
-                    "Activity" to
+                    getString(R.string.kuma3_box_activity) to
                         com.ichi2.anki.heatmap
                             .HeatmapFooter(this),
-                    "RWKV recall" to
+                    getString(R.string.kuma3_box_rwkv_recall) to
                         com.ichi2.anki.forecast.RwkvForecast
                             .graphFooter(this),
-                    "Leaderboard" to
+                    getString(R.string.kuma3_leaderboard) to
                         com.ichi2.anki.leaderboard
                             .LeaderboardFooter(this),
                 ),

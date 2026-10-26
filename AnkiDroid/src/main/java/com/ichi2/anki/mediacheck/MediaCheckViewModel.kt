@@ -137,7 +137,8 @@ class MediaCheckViewModel :
             val report =
                 result.report
                     .lines()
-                    .filterNot { line -> line.startsWith("Unused: ") && line.removePrefix("Unused: ") in used }
+                    // by the file name after the label: the backend writes the report in the app's language
+                    .filterNot { line -> line.substringAfter(": ", "") in used }
                     .map { line -> if (line.startsWith("Unused files:")) line.replace(Regex("""\d+"""), unused.size.toString()) else line }
                     .joinToString("\n")
             return result

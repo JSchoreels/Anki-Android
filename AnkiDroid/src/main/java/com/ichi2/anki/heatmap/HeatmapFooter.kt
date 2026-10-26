@@ -12,11 +12,13 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.ichi2.anki.DeckPicker
+import com.ichi2.anki.R
 import com.ichi2.anki.kuma3.FrameAdapter
 import com.ichi2.anki.kuma3.Kuma3Cache
 import com.ichi2.anki.kuma3.quietly
 import com.ichi2.anki.utils.ext.launchCollectionInLifecycleScope
 import com.ichi2.anki.xp.XpChrome
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -98,7 +100,7 @@ class HeatmapFooter(
                 val fmt = DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())
                 caption.text = "${first.format(fmt)} – ${last.format(fmt)}"
             }
-            zoom.text = if (monthView) "6 months" else "Month"
+            zoom.text = deckPicker.getString(if (monthView) R.string.kuma3_heatmap_six_months else R.string.kuma3_heatmap_month)
         }
 
         /** < and > move one month in month view, half a year in the six-month view. */
@@ -138,7 +140,7 @@ class HeatmapFooter(
                         marginEnd = (3 * density).toInt()
                     }
                 addView(button("<") { move(-1) }, spacing)
-                addView(button("Today") { shown = null }, spacing)
+                addView(button(deckPicker.getString(R.string.kuma3_heatmap_today)) { shown = null }, spacing)
                 addView(button(">") { move(1) }, spacing)
                 addView(zoom, spacing)
             }
@@ -184,11 +186,30 @@ class HeatmapFooter(
             line.setSpan(StyleSpan(android.graphics.Typeface.BOLD), start, line.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 
-        fun days(count: Int) = "$count day" + if (count == 1) "" else "s"
-        add("Daily average", String.format(Locale.US, "%,d reviews", data.dailyAverage), GREENS[2])
-        add("Days learned", "${data.daysLearnedPercent}%", GREENS[if (data.daysLearnedPercent >= 50) 2 else 1])
-        add("Longest streak", days(data.longestStreak), GREENS[2])
-        add("Current streak", days(data.currentStreak), GREENS[if (data.currentStreak >= 7) 2 else 1])
+        val r = deckPicker.resources
+
+        fun days(count: Int) = r.getQuantityString(R.plurals.kuma3_heatmap_days, count, count)
+        val average = NumberFormat.getIntegerInstance().format(data.dailyAverage)
+        add(
+            r.getString(R.string.kuma3_heatmap_daily_average),
+            r.getQuantityString(R.plurals.kuma3_heatmap_reviews, data.dailyAverage, average),
+            GREENS[2],
+        )
+        add(
+            r.getString(R.string.kuma3_heatmap_days_learned),
+            "${data.daysLearnedPercent}%",
+            GREENS[
+                if (data.daysLearnedPercent >=
+                    50
+                ) {
+                    2
+                } else {
+                    1
+                },
+            ],
+        )
+        add(r.getString(R.string.kuma3_heatmap_longest_streak), days(data.longestStreak), GREENS[2])
+        add(r.getString(R.string.kuma3_heatmap_current_streak), days(data.currentStreak), GREENS[if (data.currentStreak >= 7) 2 else 1])
         return line
     }
 }

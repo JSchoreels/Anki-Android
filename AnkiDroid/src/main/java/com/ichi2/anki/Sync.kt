@@ -336,7 +336,7 @@ suspend fun monitorMediaSync(deckPicker: DeckPicker) {
                 }.setNegativeButton(TR.syncAbortButton()) { _, _ ->
                     isAborted = true
                     cancelMediaSync(backend)
-                }.apply { XpProgress.dress(this, "Syncing media...") } // kuma3: an XP progress window with Anki XP
+                }.apply { XpProgress.dress(this, deckPicker.getString(R.string.kuma3_syncing_media)) } // kuma3: an XP progress window with Anki XP
                 .show()
         }
 

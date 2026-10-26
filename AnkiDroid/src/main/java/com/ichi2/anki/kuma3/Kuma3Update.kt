@@ -6,9 +6,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
@@ -16,6 +16,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.ichi2.anki.BuildConfig
 import com.ichi2.anki.R
+import com.ichi2.anki.common.time.TimeManager
+import com.ichi2.anki.common.utils.android.showThemedToast
 import com.ichi2.anki.settings.Prefs
 import com.ichi2.anki.web.HttpFetcher
 import kotlinx.coroutines.Dispatchers
@@ -111,7 +113,7 @@ object Kuma3Update {
         File(activity.cacheDir, DOWNLOADS).deleteRecursively()
         if (!available || !autoCheck) return
         val prefs = activity.getSharedPreferences("kuma3_update", Context.MODE_PRIVATE)
-        val now = System.currentTimeMillis()
+        val now = TimeManager.time.intTimeMS()
         if (now - prefs.getLong(LAST_CHECK, 0) < DAY_MS) return
         prefs.edit { putLong(LAST_CHECK, now) }
         check(activity, quiet = true)
@@ -152,7 +154,8 @@ object Kuma3Update {
         release: Release,
     ) {
         // Android asks once per app: "Allow from this source"
-        if (!activity.packageManager.canRequestPackageInstalls()) {
+        // Android 8+: an "Install unknown apps" permission per app (before it, the installer asks itself)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.packageManager.canRequestPackageInstalls()) {
             // offered again when the deck list is next shown, not only tomorrow
             activity.getSharedPreferences("kuma3_update", Context.MODE_PRIVATE).edit { remove(LAST_CHECK) }
             toast(activity, activity.getString(R.string.kuma3_update_allow_installs))
@@ -268,5 +271,5 @@ object Kuma3Update {
     private fun toast(
         context: Context,
         text: String,
-    ) = Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+    ) = showThemedToast(context, text, false)
 }

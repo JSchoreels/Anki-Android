@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.core.content.edit
+import com.ichi2.anki.AnkiDroidApp
 import com.ichi2.anki.R
 import com.ichi2.anki.common.time.TimeManager
 import com.ichi2.anki.libanki.Collection
@@ -74,8 +75,8 @@ object XpGame {
         get() = prefs.getInt("limit", 10)
         set(v) = prefs.edit { putInt("limit", v) }
 
-    /** For the game's texts (res/values/kuma3_strings.xml, Spanish in values-es) */
-    private lateinit var app: Context
+    /** The game's texts (res/values/kuma3_strings.xml, Spanish in values-es) */
+    private val app get() = AnkiDroidApp.instance
 
     private fun s(
         @StringRes id: Int,
@@ -83,7 +84,6 @@ object XpGame {
     ) = app.getString(id, *args)
 
     fun init(context: Context) {
-        app = context.applicationContext
         if (::prefs.isInitialized) return
         prefs = context.applicationContext.getSharedPreferences("kuma3_xp", Context.MODE_PRIVATE)
         device =

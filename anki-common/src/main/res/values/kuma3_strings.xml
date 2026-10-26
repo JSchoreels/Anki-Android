@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- kuma3's RWKV messages (RwkvOffline). Spanish: values-es -->
-<resources>
+<!-- not on Crowdin: DuplicateCrowdInStrings is for AnkiDroid's own files -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="DuplicateCrowdInStrings">
     <string name="kuma3_rwkv_rebuilding">Rebuilding RWKV (%d reviews): standard order until done</string>
     <string name="kuma3_rwkv_unavailable">RWKV unavailable: standard review order</string>
     <string name="kuma3_rwkv_rebuilt">Rebuilt from %1$d reviews in %2$d s: reviews use RWKV\'s order</string>

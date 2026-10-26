@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- kuma3's own texts. Spanish: values-es/kuma3_strings.xml (keep both in step). Keys and fixed values: kuma3.xml -->
-<resources>
+<!-- not on Crowdin: DuplicateCrowdInStrings is for AnkiDroid's own files -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="DuplicateCrowdInStrings">
     <!-- Settings > kuma3 (preferences_kuma3.xml, Kuma3SettingsFragment) -->
     <string name="kuma3_settings_summary">Heatmap • Time per deck • Leaderboard • RWKV • Updates</string>
     <string name="kuma3_pref_deck_list">Deck list</string>

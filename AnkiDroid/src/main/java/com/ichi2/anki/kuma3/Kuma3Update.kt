@@ -172,7 +172,10 @@ object Kuma3Update {
         // Android 8+: an "Install unknown apps" permission per app (before it, the installer asks itself)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.packageManager.canRequestPackageInstalls()) {
             // offered again when the deck list is next shown, not only tomorrow
-            activity.getSharedPreferences("kuma3_update", Context.MODE_PRIVATE).edit { remove(LAST_CHECK) }
+            activity.getSharedPreferences("kuma3_update", Context.MODE_PRIVATE).edit {
+                remove(LAST_CHECK)
+                remove(LAST_TRY)
+            }
             toast(activity, activity.getString(R.string.kuma3_update_allow_installs))
             activity.startActivity(
                 Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${activity.packageName}")),
@@ -230,8 +233,12 @@ object Kuma3Update {
             }
             dialog.dismiss()
             val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.apkgfileprovider", file)
+
+            // INSTALL_PACKAGE, not VIEW: only package installers take it (VIEW also offers file apps like Termux)
+            @Suppress("DEPRECATION")
+            val install = Intent.ACTION_INSTALL_PACKAGE
             activity.startActivity(
-                Intent(Intent.ACTION_VIEW)
+                Intent(install)
                     .setDataAndType(uri, "application/vnd.android.package-archive")
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK),
             )

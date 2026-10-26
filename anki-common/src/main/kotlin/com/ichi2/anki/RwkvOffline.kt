@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.ichi2.anki.ankicommon.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -132,12 +133,12 @@ object RwkvOffline {
             Timber.i("RWKV prepare: replaying %s reviews in the background; %d ms", replayed, SystemClock.elapsedRealtime() - started)
             val announced = replayed >= TOAST_AFTER_REPLAYED && toastEnabled(context)
             if (announced) {
-                showToast(context, "Rebuilding RWKV ($replayed reviews): standard order until done")
+                showToast(context, context.getString(R.string.kuma3_rwkv_rebuilding, replayed))
             }
             refreshWhenReady(context, replayed, announced)
         } catch (e: Exception) {
             Timber.w(e, "RWKV preparation failed; using the standard scheduler")
-            showToast(context, "RWKV unavailable: standard review order")
+            showToast(context, context.getString(R.string.kuma3_rwkv_unavailable))
         }
     }
 
@@ -175,7 +176,7 @@ object RwkvOffline {
                             readyFlow.tryEmit(Unit)
                             if (announced) {
                                 val seconds = (SystemClock.elapsedRealtime() - started + 999) / 1000
-                                notifyReady(context, "Rebuilt from $replayed reviews in $seconds s: reviews use RWKV's order")
+                                notifyReady(context, context.getString(R.string.kuma3_rwkv_rebuilt, replayed, seconds))
                             }
                             return@launch
                         }
@@ -221,15 +222,19 @@ object RwkvOffline {
             val left =
                 if (done > firstDone) {
                     val minutes = ((total - done) / rate / 60_000).toInt()
-                    if (minutes < 1) " · less than a minute left" else " · about $minutes min left"
+                    if (minutes < 1) {
+                        context.getString(R.string.kuma3_rwkv_left_under_minute)
+                    } else {
+                        context.getString(R.string.kuma3_rwkv_left_minutes, minutes)
+                    }
                 } else {
                     ""
                 }
             val notification =
                 notification(
                     context,
-                    "Preparing RWKV: $percent%$left",
-                    "First start with this history ($total reviews). Reviews use the standard order until it is done.",
+                    context.getString(R.string.kuma3_rwkv_preparing_percent, percent) + left,
+                    context.getString(R.string.kuma3_rwkv_first_start, total),
                 ).setProgress(100, percent, false)
                     .setOngoing(true)
                     .setSilent(true)
@@ -258,8 +263,11 @@ object RwkvOffline {
 
     /** [RwkvRebuildService]'s notification until [ReplayProgress] shows the first percentage. */
     fun preparingNotification(context: Context): Notification =
-        notification(context, "Preparing RWKV", "Reviews use the standard order until it is done.")
-            .setProgress(0, 0, true)
+        notification(
+            context,
+            context.getString(R.string.kuma3_rwkv_preparing),
+            context.getString(R.string.kuma3_rwkv_standard_until_done),
+        ).setProgress(0, 0, true)
             .setOngoing(true)
             .setSilent(true)
             .build()
@@ -274,8 +282,9 @@ object RwkvOffline {
         text: String,
     ) {
         val manager = NotificationManagerCompat.from(context)
-        if (!canNotify(context, manager)) return showToast(context, "RWKV ready")
-        val notification = notification(context, "RWKV ready", text).setAutoCancel(true).build()
+        val ready = context.getString(R.string.kuma3_rwkv_ready)
+        if (!canNotify(context, manager)) return showToast(context, ready)
+        val notification = notification(context, ready, text).setAutoCancel(true).build()
         manager.notify(READY_NOTIFICATION_ID, notification)
     }
 

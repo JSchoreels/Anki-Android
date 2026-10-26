@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- kuma3's RWKV messages in Spanish. English: values -->
+<resources>
+    <string name="kuma3_rwkv_rebuilding">Reconstruyendo RWKV (%d repasos): orden estándar hasta que termine</string>
+    <string name="kuma3_rwkv_unavailable">RWKV no disponible: orden de repaso estándar</string>
+    <string name="kuma3_rwkv_rebuilt">Reconstruido a partir de %1$d repasos en %2$d s: los repasos usan el orden de RWKV</string>
+    <string name="kuma3_rwkv_preparing">Preparando RWKV</string>
+    <string name="kuma3_rwkv_preparing_percent">Preparando RWKV: %d %%</string>
+    <string name="kuma3_rwkv_left_under_minute"> · queda menos de un minuto</string>
+    <string name="kuma3_rwkv_left_minutes"> · quedan unos %d min</string>
+    <string name="kuma3_rwkv_first_start">Primer inicio con este historial (%d repasos). Los repasos usan el orden estándar hasta que termine.</string>
+    <string name="kuma3_rwkv_standard_until_done">Los repasos usan el orden estándar hasta que termine.</string>
+    <string name="kuma3_rwkv_ready">RWKV listo</string>
+</resources>

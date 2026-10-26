@@ -22,6 +22,7 @@ import androidx.core.net.toUri
 import androidx.core.view.ContentInfoCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.test.core.app.ActivityScenario
 import androidx.test.filters.SdkSuppress
 import anki.backend.backendError
@@ -512,17 +513,20 @@ class DeckPickerTest : RobolectricTest() {
 
     private fun DeckPicker.longPressDeck(name: String): View {
         val decks = deckPickerBinding.decks
-        val adapter = decks.adapter as DeckAdapter
+        // kuma3: the list is a ConcatAdapter (Player box, decks, extras): positions shift by the rows above the decks
+        val concat = decks.adapter as ConcatAdapter
+        val adapter = concat.adapters.filterIsInstance<DeckAdapter>().single()
+        val offset = concat.adapters.takeWhile { it !== adapter }.sumOf { it.itemCount }
         // Background list diffs can finish after the initial main looper drain.
         advanceRobolectricLooperUntil(lazyMessage = { "Deck '$name' was not laid out" }) {
             val position = adapter.currentList.indexOfFirst { it.lastDeckNameComponent == name }
-            position >= 0 && decks.findViewHolderForAdapterPosition(position) != null
+            position >= 0 && decks.findViewHolderForAdapterPosition(offset + position) != null
         }
         val deck = adapter.currentList.single { it.lastDeckNameComponent == name }
         val position = adapter.currentList.indexOf(deck)
-        decks.findViewHolderForAdapterPosition(position)!!.itemView.performLongClick()
+        decks.findViewHolderForAdapterPosition(offset + position)!!.itemView.performLongClick()
         advanceRobolectricLooperUntil { adapter.currentList[position].isSelected }
-        return decks.findViewHolderForAdapterPosition(position)!!.itemView
+        return decks.findViewHolderForAdapterPosition(offset + position)!!.itemView
     }
 
     private fun keyDownEvent(
@@ -669,7 +673,8 @@ class DeckPickerTest : RobolectricTest() {
     @Test
     fun `deck search stays open while filtering`() {
         addBasicNote()
-        repeat(10) { addDeck("Test Deck $it") }
+        // kuma3: decks with nothing due fold under "decks done for today", so each gets a card
+        repeat(10) { addBasicNote("q$it", "a").moveToDeck("Test Deck $it") }
 
         deckPicker {
             advanceRobolectricLooper()

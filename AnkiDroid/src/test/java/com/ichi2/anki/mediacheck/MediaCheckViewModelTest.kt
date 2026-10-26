@@ -4,7 +4,9 @@ package com.ichi2.anki.mediacheck
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
+import com.ichi2.anki.CollectionManager.TR
 import com.ichi2.anki.RobolectricTest
+import com.ichi2.anki.libanki.withoutUnicodeIsolation
 import com.ichi2.anki.progress.ViewModelProgress
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +52,23 @@ class MediaCheckViewModelTest : RobolectricTest() {
         }
 
     @Test
+    fun `files played by audio tags are not unused`() =
+        runViewModelTest {
+            addBasicNote("word [audio:word.mp3]", "back")
+            addUnusedMediaFile("word.mp3")
+            addUnusedMediaFile("unused.png")
+
+            viewModel.checkMedia().await()
+
+            val result = assertNotNull(viewModel.mediaCheckResult.value)
+            assertEquals(listOf("unused.png"), result.unusedList)
+            // the report's file line goes and its count follows, as the backend wrote them
+            assertTrue("word.mp3" !in result.report, result.report)
+            assertTrue("unused.png" in result.report, result.report)
+            assertTrue(withoutUnicodeIsolation(TR.mediaCheckUnusedCount(1)) in withoutUnicodeIsolation(result.report), result.report)
+        }
+
+    @Test
     fun `tagMissing reports progress and tags the notes with missing media`() =
         runViewModelTest {
             val note = addBasicNote("""<img src="missing.png">""", "back")
@@ -70,7 +89,10 @@ class MediaCheckViewModelTest : RobolectricTest() {
             op().await()
             val active = assertIs<ViewModelProgress.Active<MediaCheckProgress>>(awaitItem())
             assertEquals(message, active.message)
-            assertIs<ViewModelProgress.Idle>(awaitItem())
+            // kuma3: deletes report done/total per batch, each a further Active state
+            var next = awaitItem()
+            while (next is ViewModelProgress.Active<*>) next = awaitItem()
+            assertIs<ViewModelProgress.Idle>(next)
             expectNoEvents()
         }
     }

@@ -3,11 +3,13 @@
 <!-- kuma3's own texts in Spanish (any Spanish locale). English: values/kuma3_strings.xml -->
 <resources>
     <!-- Statistics: Search Stats Extended's RWKV graphs -->
-    <string name="kuma3_sse_rwkv_computing">RWKV está calculando sus predicciones para los gráficos de calibración (%d%%). Los repasos usan el orden normal hasta que termine; luego abre las estadísticas otra vez.</string>
-    <string name="kuma3_sse_rwkv_off">RWKV no está cargado, así que los gráficos muestran solo FSRS.</string>
-    <string name="kuma3_sse_fsrs_computing">FSRS está calculando sus predicciones para los gráficos de calibración (menos de un minuto en la mayoría de las colecciones); luego abre las estadísticas otra vez.</string>
-    <string name="kuma3_sse_folds" maxLength="41">Calibración con pliegues de prueba</string>
-    <string name="kuma3_sse_folds_message">Como en el escritorio: FSRS se entrena una vez por pliegue de prueba, cada vez solo con los repasos anteriores, y los gráficos de calibración muestran sus predicciones en repasos con los que no se entrenó. Luego RWKV calcula sus predicciones para los mismos repasos en segundo plano. Tarda minutos en una colección grande.</string>
+    <string name="kuma3_cal_fsrs">FSRS se está evaluando con repasos con los que no se entrenó (una vez por pliegue de prueba, como en el escritorio). Tiempo restante: %s.</string>
+    <string name="kuma3_cal_rwkv">RWKV está recorriendo todo tu historial una vez (%1$d%%). Tiempo restante: %2$s. Hasta que termine, los repasos usan el orden normal; puedes salir de las estadísticas.</string>
+    <string name="kuma3_cal_rwkv_wait">Esperando a que RWKV termine de cargar (%d%%).</string>
+    <string name="kuma3_cal_confirm">Para su línea, RWKV tiene que recorrer todo tu historial una vez: %s. Hasta que termine, los repasos usan el orden normal; puedes salir de las estadísticas. Se guarda después.</string>
+    <string name="kuma3_cal_start" maxLength="41">Empezar</string>
+    <string name="kuma3_cal_minutes">unos %d min</string>
+    <string name="kuma3_cal_under_minute">menos de un minuto</string>
     <!-- Settings > kuma3 -->
     <string name="kuma3_settings_summary">Mapa de calor • Tiempo por mazo • Clasificación • RWKV • Actualizaciones</string>
     <string name="kuma3_pref_deck_list">Lista de mazos</string>

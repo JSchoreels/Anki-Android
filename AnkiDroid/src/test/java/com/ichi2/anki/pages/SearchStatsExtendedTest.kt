@@ -3,7 +3,9 @@
 package com.ichi2.anki.pages
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ichi2.anki.AnkiDroidApp
 import com.ichi2.anki.RobolectricTest
+import com.ichi2.anki.pages.SearchStatsExtended.fsrsSettings
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -50,7 +52,7 @@ class SearchStatsExtendedTest : RobolectricTest() {
     }
 
     @Test
-    fun `FSRS predictions come from the core's test folds, unless newer parameters replaced them`() {
+    fun `FSRS predictions come from the core's test folds made with the current settings`() {
         val table = "retrievability_cache.search_stats_fsrs_review_retrievability"
         // the core's schema (storage/revlog/mod.rs); it makes the table when the collection opens
         col.db.execute(
@@ -72,9 +74,18 @@ class SearchStatsExtendedTest : RobolectricTest() {
         row(2, 0.6, 2, "final_fit")
         row(3, 0.9, 3, "post_optimization")
 
-        val out = call("fsrsReviewRetrievability", """{"cids":[],"day_range":0,"revlog_ids":[1,2,3,4]}""") as JSONObject
-        val data = out.getJSONArray("data")
-        val predictions = (0 until data.length()).associate { data.getJSONArray(it).let { r -> r.getLong(0) to r.getDouble(1) } }
-        assertEquals(mapOf(1L to 0.7, 3L to 0.9), predictions)
+        fun predictions(): Map<Long, Double> {
+            val out = call("fsrsReviewRetrievability", """{"cids":[],"day_range":0,"revlog_ids":[1,2,3,4]}""") as JSONObject
+            val data = out.getJSONArray("data")
+            return (0 until data.length()).associate { data.getJSONArray(it).let { r -> r.getLong(0) to r.getDouble(1) } }
+        }
+        // folds made with other FSRS settings: none (the calibration job makes them again)
+        assertEquals(emptyMap(), predictions())
+        AnkiDroidApp
+            .sharedPrefs()
+            .edit()
+            .putLong(SearchStatsExtended.FOLDS_KEY, col.fsrsSettings())
+            .apply()
+        assertEquals(mapOf(1L to 0.7, 3L to 0.9), predictions())
     }
 }

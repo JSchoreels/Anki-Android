@@ -88,4 +88,28 @@ class SearchStatsExtendedTest : RobolectricTest() {
             .apply()
         assertEquals(mapOf(1L to 0.7, 3L to 0.9), predictions())
     }
+
+    @Test
+    fun `the calibration compares reviews a day or more after the card's previous one`() {
+        val cid = addBasicNote("Front", "Back").firstCard().id
+        val day = 86_400_000L
+        val now = collectionTime.intTimeMS()
+
+        // id, cid, usn, ease, ivl, lastIvl, factor, time, type
+        fun review(
+            id: Long,
+            ease: Int,
+            type: Int = 1,
+            factor: Int = 2500,
+        ) = col.db.execute("insert into revlog values (?, ?, -1, ?, 1, 0, ?, 5000, ?)", id, cid, ease, factor, type)
+        review(now - 10 * day, 3) // first review: not compared
+        review(now - 10 * day + 60_000, 1) // same day
+        review(now - 7 * day, 3, type = 3, factor = 0) // cram: skipped
+        review(now - 5 * day, 1) // forgotten, 5 days later
+        review(now - 2 * day, 3) // recalled
+        val samples = call("kuma3CalibrationSamples", """{"cids":[$cid],"day_range":0}""") as JSONObject
+        val data = samples.getJSONArray("data")
+        val rows = (0 until data.length()).map { data.getJSONArray(it).let { r -> Triple(r.getLong(0), r.getLong(1), r.getInt(2)) } }
+        assertEquals(listOf(Triple(now - 5 * day, cid, 0), Triple(now - 2 * day, cid, 1)), rows)
+    }
 }

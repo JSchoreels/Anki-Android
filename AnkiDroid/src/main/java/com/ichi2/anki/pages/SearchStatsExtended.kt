@@ -94,6 +94,7 @@ object SearchStatsExtended {
             "cancelRwkvMemorisedHistory" to { _ -> """{"cancelled":false,"checkpointed":false}""".toByteArray() },
             "kuma3CalibrationStatus" to { _ -> calibrationStatus() },
             "kuma3CalibrationStart" to { _ -> calibrationStart() },
+            "kuma3CalibrationSamples" to { bytes -> calibrationSamples(JSONObject(bytes.decodeToString())) },
             "writeConfig" to { bytes -> writeConfig(JSONObject(bytes.decodeToString())) },
             "openLocaleFolder" to { _ -> ByteArray(0) },
         )
@@ -325,6 +326,45 @@ object SearchStatsExtended {
                 .associate { out.getReviewIds(it) to out.getPredictions(it) }
         Timber.i("RWKV calibration: %d of %d asked-for reviews", rows.size, ids.size)
         return predictions("rwkv_offline", rows)
+    }
+
+    /**
+     * The reviews the calibration graphs compare, `[review id, card id, recalled]`: those of the page's cards
+     * in its period that come a day or more after the card's previous review (the add-on's rule; cram and
+     * manual entries are skipped). The page's FSRS replay of every review picked them before, which takes
+     * minutes for millions of reviews; this is one query.
+     */
+    private fun Collection.calibrationSamples(request: JSONObject): ByteArray {
+        val lower = revlogLowerLimit(request.optInt("day_range"))
+        // day numbers from the rollover, kept positive for the integer division
+        val day = { column: String -> "(($column / 1000 - ${sched.dayCutoff}) + 864000000) / 86400" }
+        val out = StringBuilder("""{"data":[""")
+        var count = 0
+        for (chunk in longs(request.getJSONArray("cids")).chunked(10_000)) {
+            db
+                .query(
+                    """
+                    select id, cid, ease from (
+                        select id, cid, ease, lag(id) over (partition by cid order by id) as prev from revlog
+                        where cid in (${chunk.joinToString(",")}) and ease > 0 and not (type = 3 and factor = 0))
+                    where prev is not null and id > $lower and ${day("id")} > ${day("prev")}
+                    """,
+                ).use { cursor ->
+                    while (cursor.moveToNext()) {
+                        if (count++ > 0) out.append(',')
+                        out
+                            .append('[')
+                            .append(cursor.getLong(0))
+                            .append(',')
+                            .append(cursor.getLong(1))
+                            .append(',')
+                            .append(if (cursor.getInt(2) > 1) 1 else 0)
+                            .append(']')
+                    }
+                }
+        }
+        Timber.i("calibration: %d reviews to compare", count)
+        return out.append("]}").toString().toByteArray()
     }
 
     private fun minutes(ms: Double): String {

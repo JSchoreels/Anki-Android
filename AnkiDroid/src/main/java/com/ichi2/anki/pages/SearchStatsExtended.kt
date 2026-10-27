@@ -5,25 +5,34 @@ package com.ichi2.anki.pages
 import android.os.Handler
 import android.os.Looper
 import android.webkit.WebView
+import androidx.appcompat.app.AlertDialog
 import com.ichi2.anki.AnkiDroidApp
+import com.ichi2.anki.CollectionManager
 import com.ichi2.anki.CollectionManager.withCol
+import com.ichi2.anki.ProgressContext
 import com.ichi2.anki.R
 import com.ichi2.anki.RwkvOffline
+import com.ichi2.anki.common.coroutines.applicationScope
 import com.ichi2.anki.common.time.TimeManager
 import com.ichi2.anki.common.utils.android.showThemedToast
+import com.ichi2.anki.launchCatchingTask
 import com.ichi2.anki.libanki.Collection
+import com.ichi2.anki.withProgress
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * kuma3: the desktop "Search Stats Extended" add-on (JSchoreels' fork, with the Calibration, UM+ and RWKV
  * comparison graphs) on the statistics page. Its page code is bundled as is in `assets/sse/` (built by
  * kuma3-build/sse_build.sh); this file is its Python half: the values it is started with and the endpoints it
- * posts to (`/_anki/<name>`, JSON in and out), answered from the collection. RWKV's numbers come from the
- * backend's replay (`RwkvOfflineCalibration`).
+ * posts to (`/_anki/<name>`, JSON in and out), answered from the collection. FSRS's predictions per review come
+ * from the core's FSRS cache (`FsrsCalibrationFinalFit`, the test folds of `RebuildFsrsReviewRetrievabilityCache`),
+ * RWKV's from the backend's replay (`RwkvOfflineCalibration`).
  */
 object SearchStatsExtended {
     private const val PREFS_KEY = "kuma3_sse_config"
@@ -81,9 +90,8 @@ object SearchStatsExtended {
             "cardData" to { bytes -> cardData(longs(JSONArray(bytes.decodeToString()))) },
             "fsrsPresetData" to { bytes -> fsrsPresetData(longs(JSONArray(bytes.decodeToString()))) },
             "revlogs" to { bytes -> revlogs(JSONObject(bytes.decodeToString())) },
-            // ponytail: no FSRS cache; the page replays FSRS itself each time (the desktop caches its
-            // optimizer's validation folds, which the phone doesn't run)
-            "fsrsReviewRetrievability" to { _ -> """{"column":null,"data":[]}""".toByteArray() },
+            "fsrsReviewRetrievability" to { bytes -> fsrsReviewRetrievability(JSONObject(bytes.decodeToString())) },
+            // the page's own FSRS replay (ts-fsrs, only the period shown): not kept
             "cacheFsrsReviewRetrievability" to { _ -> """{"stored":0}""".toByteArray() },
             "rwkvReviewRetrievability" to { bytes -> rwkvReviewRetrievability(JSONObject(bytes.decodeToString())) },
             // ponytail: RWKV Memorised over time is the desktop's per-day replay of every card; the page
@@ -201,21 +209,186 @@ object SearchStatsExtended {
         return out.toString().toByteArray()
     }
 
+    /** The page's asked-for reviews: its ids, or every review of its cards in its period. */
+    private fun Collection.askedReviews(request: JSONObject): List<Long> =
+        longs(request.optJSONArray("revlog_ids") ?: JSONArray()).ifEmpty {
+            val lower = revlogLowerLimit(request.optInt("day_range"))
+            longs(request.optJSONArray("cids") ?: JSONArray()).chunked(10_000).flatMap { chunk ->
+                db.queryLongList("select id from revlog where cid in (${chunk.joinToString(",")}) and id > $lower")
+            }
+        }
+
+    private fun toast(message: String) {
+        val context = AnkiDroidApp.instance
+        Handler(Looper.getMainLooper()).post { showThemedToast(context, message, shortLength = false) }
+    }
+
+    private fun predictions(
+        column: String,
+        rows: Map<Long, Number>,
+        warning: String? = null,
+    ): ByteArray {
+        val data = rows.entries.joinToString(",") { "[${it.key},${it.value}]" }
+        val warnings = listOfNotNull(warning).joinToString(",", "[", "]") { JSONObject.quote(it) }
+        return """{"column":${if (rows.isEmpty()) "null" else "\"$column\""},"data":[$data],"warnings":$warnings}"""
+            .toByteArray()
+    }
+
+    // The core's FSRS predictions per review (the fork's cache, kept in a file next to the collection and
+    // attached to it; the table is made by its first write). Rows: final_fit = each preset's current
+    // parameters over the whole history; validation_fold = FSRS trained only on the reviews before that
+    // fold, as the desktop's calibration graph uses; post_optimization = made when the card was answered.
+    private const val FSRS_TABLE = "search_stats_fsrs_review_retrievability"
+    private const val FSRS_CACHE = "retrievability_cache.$FSRS_TABLE"
+    private const val FIT_KEY = "kuma3_sse_fsrs_fit"
+
+    /** A final fit or test-fold rebuild is running (one at a time). */
+    private val fitting = AtomicBoolean(false)
+
+    private fun Collection.hasFsrsCache() =
+        db.queryScalar("select count() from retrievability_cache.sqlite_master where name = '$FSRS_TABLE'") > 0
+
+    /** The test folds were made ([prepareFolds]): the graphs then use them, as the desktop does. */
+    private fun Collection.hasFsrsFolds() =
+        hasFsrsCache() &&
+            db.queryScalar("select exists (select 1 from $FSRS_CACHE where sample_role = 'validation_fold')") == 1
+
     /**
-     * RWKV's prediction before each asked-for review, as the desktop without FSRS validation folds: the newest
-     * 30% of the answers (`_rwkv_calibration_fold_role_maps`). The backend records them with a replay in the
-     * background the first time (minutes for millions of reviews), with the rebuild notification; the page
-     * shows FSRS only until then.
+     * FSRS's prediction before each of [ids], the newest row per review (the add-on's
+     * `_read_fsrs_calibration_retrievability_cache`): with [folds] a test-fold or answer prediction, unless
+     * a newer final fit replaced it; without, a final fit or answer one.
+     */
+    private fun Collection.fsrsRows(
+        ids: List<Long>,
+        folds: Boolean,
+    ): Map<Long, Double> {
+        val out = HashMap<Long, Double>()
+        if (!hasFsrsCache()) return out
+        val used = if (folds) "'validation_fold','post_optimization'" else "'final_fit','post_optimization'"
+        for (chunk in ids.chunked(10_000)) {
+            db
+                .query(
+                    """
+                    with latest as (
+                        select revlog_id, max(updated_at) as updated_at from $FSRS_CACHE
+                        where revlog_id in (${chunk.joinToString(",")})
+                            and sample_role in ('final_fit','validation_fold','post_optimization')
+                        group by revlog_id)
+                    select c.revlog_id, c.prediction from $FSRS_CACHE c
+                    join latest l on l.revlog_id = c.revlog_id and l.updated_at = c.updated_at
+                    where c.sample_role in ($used)
+                    """,
+                ).use { cursor -> while (cursor.moveToNext()) out[cursor.getLong(0)] = cursor.getDouble(1) }
+        }
+        return out
+    }
+
+    /**
+     * FSRS's prediction before each asked-for review, from the core (FSRS-7 with the whole history, as the
+     * desktop): its test folds once made, else its final fit. Without either the page replays FSRS itself
+     * (ts-fsrs over the period shown only, which put long-known cards back to new: the flat line nyawo saw).
+     */
+    private fun Collection.fsrsReviewRetrievability(request: JSONObject): ByteArray {
+        val ids = askedReviews(request)
+        val folds = hasFsrsFolds()
+        val rows = fsrsRows(ids, folds)
+        Timber.i("FSRS calibration: %d of %d asked-for reviews (test folds: %b)", rows.size, ids.size, folds)
+        if (folds || !refitIfStale(ids.size, rows.size)) return predictions(FSRS_TABLE, rows)
+        val message = AnkiDroidApp.instance.getString(R.string.kuma3_sse_fsrs_computing)
+        toast(message)
+        return predictions(FSRS_TABLE, rows, message)
+    }
+
+    /**
+     * Starts the core's final fit on its own thread (tens of seconds for millions of reviews) when the FSRS
+     * settings changed since the last one, or when a tenth of the asked-for reviews have no prediction and
+     * there are reviews since (answers made here get theirs when answered). Returns whether one is running.
+     */
+    private fun Collection.refitIfStale(
+        asked: Int,
+        found: Int,
+    ): Boolean {
+        val settings =
+            decks
+                .allConfig()
+                .joinToString(";") { config ->
+                    val json = config.jsonObject
+                    json
+                        .keys()
+                        .asSequence()
+                        .filter { "fsrs" in it.lowercase() || it == "ignoreRevlogsBeforeDate" }
+                        .sorted()
+                        .joinToString { "$it=${json.get(it)}" }
+                }.hashCode()
+                .toLong()
+        val newest = db.queryLongScalar("select max(id) from revlog")
+        val prefs = AnkiDroidApp.sharedPrefs()
+        val last = prefs.getString(FIT_KEY, null)?.split(":")?.mapNotNull(String::toLongOrNull)
+        val stale = last?.getOrNull(0) != settings || (found < asked * 9 / 10 && last.getOrNull(1) != newest)
+        if (!stale || !fitting.compareAndSet(false, true)) return fitting.get()
+        applicationScope.launch(Dispatchers.IO) {
+            try {
+                val rows = CollectionManager.getBackend().fsrsCalibrationFinalFit()
+                Timber.i("FSRS calibration: final fit of %d reviews", rows)
+                prefs.edit().putString(FIT_KEY, "$settings:$newest").apply()
+            } catch (e: Exception) {
+                Timber.w(e, "FSRS calibration: final fit failed")
+            } finally {
+                fitting.set(false)
+            }
+        }
+        return true
+    }
+
+    /**
+     * The statistics' "Calibration on test folds" (the desktop's "prepare calibration data"): FSRS trained
+     * once per test fold (minutes for a big collection; a progress dialog that can be cancelled), then the
+     * page again, whose RWKV request starts the replay recording the whole history.
+     */
+    fun prepareFolds(fragment: PageFragment) {
+        val activity = fragment.requireActivity()
+        AlertDialog
+            .Builder(activity)
+            .setTitle(R.string.kuma3_sse_folds)
+            .setMessage(R.string.kuma3_sse_folds_message)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                fragment.launchCatchingTask {
+                    if (!fitting.compareAndSet(false, true)) {
+                        showThemedToast(activity, activity.getString(R.string.kuma3_sse_fsrs_computing), shortLength = false)
+                        return@launchCatchingTask
+                    }
+                    try {
+                        activity.withProgress(
+                            extractProgress = {
+                                text = activity.getString(R.string.kuma3_sse_folds)
+                                amount =
+                                    progress.computeParams
+                                        .takeIf { progress.hasComputeParams() && it.total > 0 }
+                                        ?.let { ProgressContext.Amount(it.current.toLong(), it.total.toLong()) }
+                            },
+                        ) {
+                            withContext(Dispatchers.IO) { CollectionManager.getBackend().rebuildFsrsReviewRetrievabilityCache() }
+                        }
+                    } finally {
+                        fitting.set(false)
+                    }
+                    fragment.webViewLayout.reload()
+                }
+            }.show()
+    }
+
+    /**
+     * RWKV's prediction before each asked-for review. As the desktop: with FSRS test folds, on the reviews
+     * FSRS has a prediction for (so both lines are on the same reviews; RWKV then records the whole
+     * history), else on the newest 30% of the answers (`_rwkv_calibration_fold_role_maps`). The backend
+     * records them with a replay in the background the first time (minutes for millions of reviews), with
+     * the rebuild notification; the page shows FSRS only until then.
      */
     private fun Collection.rwkvReviewRetrievability(request: JSONObject): ByteArray {
-        val ids =
-            longs(request.optJSONArray("revlog_ids") ?: JSONArray()).ifEmpty {
-                val lower = revlogLowerLimit(request.optInt("day_range"))
-                longs(request.optJSONArray("cids") ?: JSONArray()).chunked(10_000).flatMap { chunk ->
-                    db.queryLongList("select id from revlog where cid in (${chunk.joinToString(",")}) and id > $lower")
-                }
-            }
-        val out = backend.rwkvOfflineCalibration(reviewIds = ids)
+        val ids = askedReviews(request)
+        val folds = hasFsrsFolds()
+        val out = backend.rwkvOfflineCalibration(reviewIds = ids, allReviews = folds)
         val context = AnkiDroidApp.instance
         if (out.started) RwkvOffline.watchRebuild(context, out.replayTotal)
         if (!out.available) {
@@ -226,13 +399,16 @@ object SearchStatsExtended {
                 } else {
                     context.getString(R.string.kuma3_sse_rwkv_off)
                 }
-            Handler(Looper.getMainLooper()).post { showThemedToast(context, message, shortLength = false) }
-            return """{"column":null,"data":[],"warnings":[${JSONObject.quote(message)}]}""".toByteArray()
+            toast(message)
+            return predictions("rwkv_offline", emptyMap(), message)
         }
-        Timber.i("RWKV calibration: %d of %d asked-for reviews", out.reviewIdsCount, ids.size)
-        val data = (0 until out.reviewIdsCount).map { "[${out.getReviewIds(it)},${out.getPredictions(it)}]" }
-        return """{"column":${if (data.isEmpty()) "null" else "\"rwkv_offline\""},"data":[${data.joinToString(",")}]}"""
-            .toByteArray()
+        val fsrs = if (folds) fsrsRows(ids, folds = true).keys else null
+        val rows =
+            (0 until out.reviewIdsCount)
+                .filter { fsrs == null || out.getReviewIds(it) in fsrs }
+                .associate { out.getReviewIds(it) to out.getPredictions(it) }
+        Timber.i("RWKV calibration: %d of %d asked-for reviews (test folds: %b)", rows.size, ids.size, folds)
+        return predictions("rwkv_offline", rows)
     }
 
     private fun writeConfig(request: JSONObject): ByteArray {

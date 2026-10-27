@@ -58,6 +58,8 @@ class Statistics : PageFragment(R.layout.page_statistics) {
                 if (item.itemId == R.id.action_export_stats) {
                     exportWebViewContentAsPDF()
                 }
+                // kuma3: FSRS test folds for the calibration graphs
+                if (item.itemId == R.id.action_kuma3_calibration_folds) SearchStatsExtended.prepareFolds(this@Statistics)
                 true
             }
         }

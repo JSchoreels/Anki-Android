@@ -5,6 +5,9 @@
     <!-- Statistics: Search Stats Extended's RWKV graphs -->
     <string name="kuma3_sse_rwkv_computing">RWKV está calculando sus predicciones para los gráficos de calibración (%d%%). Los repasos usan el orden normal hasta que termine; luego abre las estadísticas otra vez.</string>
     <string name="kuma3_sse_rwkv_off">RWKV no está cargado, así que los gráficos muestran solo FSRS.</string>
+    <string name="kuma3_sse_fsrs_computing">FSRS está calculando sus predicciones para los gráficos de calibración (menos de un minuto en la mayoría de las colecciones); luego abre las estadísticas otra vez.</string>
+    <string name="kuma3_sse_folds" maxLength="41">Calibración con pliegues de prueba</string>
+    <string name="kuma3_sse_folds_message">Como en el escritorio: FSRS se entrena una vez por pliegue de prueba, cada vez solo con los repasos anteriores, y los gráficos de calibración muestran sus predicciones en repasos con los que no se entrenó. Luego RWKV calcula sus predicciones para los mismos repasos en segundo plano. Tarda minutos en una colección grande.</string>
     <!-- Settings > kuma3 -->
     <string name="kuma3_settings_summary">Mapa de calor • Tiempo por mazo • Clasificación • RWKV • Actualizaciones</string>
     <string name="kuma3_pref_deck_list">Lista de mazos</string>

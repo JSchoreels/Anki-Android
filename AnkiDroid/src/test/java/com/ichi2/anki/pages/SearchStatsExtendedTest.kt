@@ -27,7 +27,8 @@ class SearchStatsExtendedTest : RobolectricTest() {
     @Test
     fun `cards, reviews and presets come back in the add-on's shapes`() {
         val cid = addBasicNote("Front", "Back").firstCard().id
-        val reviewId = 1_700_000_000_000L
+        // two days before the test clock (2020-07-07)
+        val reviewId = collectionTime.intTimeMS() - 2 * 86_400_000L
         // id, cid, usn, ease, ivl, lastIvl, factor, time, type
         col.db.execute("insert into revlog values (?, ?, -1, 3, 1, 0, 2500, 5000, 1)", reviewId, cid)
 
@@ -46,5 +47,34 @@ class SearchStatsExtendedTest : RobolectricTest() {
 
         val presets = call("fsrsPresetData", "[$cid]") as JSONObject
         assertEquals("Default", presets.getJSONObject(cid.toString()).getString("name"))
+    }
+
+    @Test
+    fun `FSRS predictions come from the core's test folds, unless newer parameters replaced them`() {
+        val table = "retrievability_cache.search_stats_fsrs_review_retrievability"
+        // the core's schema (storage/revlog/mod.rs); it makes the table when the collection opens
+        col.db.execute(
+            """create table if not exists $table (revlog_id integer not null, prediction real not null, source text not null,
+               updated_at integer not null, sample_role text not null default 'final_fit',
+               fold_index integer not null default -1, primary key (revlog_id, sample_role, fold_index, source))""",
+        )
+
+        fun row(
+            id: Long,
+            prediction: Double,
+            updatedAt: Long,
+            role: String,
+        ) = col.db.execute("insert into $table values (?, ?, 'test', ?, ?, 0)", id, prediction, updatedAt, role)
+        row(1, 0.5, 1, "final_fit")
+        row(1, 0.7, 2, "validation_fold")
+        // a final fit after the folds: new parameters, its fold prediction no longer counts
+        row(2, 0.8, 1, "validation_fold")
+        row(2, 0.6, 2, "final_fit")
+        row(3, 0.9, 3, "post_optimization")
+
+        val out = call("fsrsReviewRetrievability", """{"cids":[],"day_range":0,"revlog_ids":[1,2,3,4]}""") as JSONObject
+        val data = out.getJSONArray("data")
+        val predictions = (0 until data.length()).associate { data.getJSONArray(it).let { r -> r.getLong(0) to r.getDouble(1) } }
+        assertEquals(mapOf(1L to 0.7, 3L to 0.9), predictions)
     }
 }

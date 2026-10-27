@@ -13,4 +13,9 @@
             tools:title="Save PDF"
             android:icon="@drawable/ic_export_file"
             app:showAsAction="ifRoom"/>
+        <!-- kuma3: pages/SearchStatsExtended.prepareFolds -->
+        <item
+            android:id="@+id/action_kuma3_calibration_folds"
+            android:title="@string/kuma3_sse_folds"
+            app:showAsAction="never"/>
 </menu>

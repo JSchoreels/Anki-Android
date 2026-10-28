@@ -153,11 +153,18 @@ signed with a different key cannot be installed over an existing one: sync, then
   Desktop derives a stable ID for these presets, but the current phone backend
   does not supply one. The collection and review logs are still present; RWKV
   cannot reliably prepare its state for the affected history until this is fixed.
+  A [Kuma core fix is proposed](https://github.com/Pedrubik2000/kuma3-anki-core/pull/6).
 - **Dynamic Desired Retention add-on:** Its search, note-field and grade rules
   are desktop add-on settings and are not synced to Kuma. Desktop can use those
   rules for review and Curve rescheduling; Kuma uses the available deck/preset
   and native scheduler settings instead. This add-on is separate from the
   fork's built-in FSRS Dynamic DR setting.
+  [Companion desktop add-on](https://github.com/JSchoreels/anki-addon-dynamic-desired-retention/pull/3)
+  and [Kuma core](https://github.com/Pedrubik2000/kuma3-anki-core/pull/7) changes
+  propose syncing and evaluating these rules. They require a desktop sync, a
+  rule-table save, another desktop sync, and then a Kuma sync to share existing
+  rules. Anki syncs collection configuration as a snapshot, so a stale device
+  can still remove or revert rules if it syncs newer unrelated changes.
 - **Old reviews downloaded to desktop:** In its incremental post-sync recovery,
   the desktop fork can deliberately exclude newly downloaded reviews older than
   its eight-day recovery window to avoid an unbounded replay. Kuma's offline
@@ -165,6 +172,11 @@ signed with a different key cannot be installed over an existing one: sync, then
   when reviews are excluded; **Build Cache** in desktop Deck Options → RWKV
   reconstructs the full retained history and clears that exclusion. The reviews
   themselves are not deleted.
+  A [desktop fix is proposed](https://github.com/JSchoreels/anki/pull/22) to
+  rebuild the state automatically when older synced reviews require it.
+- **Add-on grade targets with native Dynamic DR:** Both desktop and the proposed
+  Kuma rule implementation can store a native grade-mapped retention that
+  differs from the exact add-on grade target used for the answer-button interval.
 
 ## Licences
 

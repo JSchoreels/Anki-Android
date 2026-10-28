@@ -47,6 +47,31 @@ the merges.
   time answered today on each deck row.
 - **Custom study** button on the finished-deck screen.
 
+## Matching RWKV settings on desktop and phone
+
+The model and state precision are local settings; syncing a collection does not
+sync either choice or the reconstructed RWKV state. Different choices can
+produce different predicted recall, review order, and Curve intervals, even
+when both devices have the same reviews.
+
+| Setting | Kuma default | Current desktop fork default |
+|---|---|---|
+| Model | Big (legacy) | Small (SM56) |
+| State precision | int8 | int4 cards / int8 notes |
+
+For the current desktop defaults, choose **Small** and **int4 cards, int8
+notes** under Settings → kuma3 on the phone. Desktop Deck Options → RWKV →
+Advanced → **Use Smaller Model** selects SM56 when on and the legacy model
+when off; choose **Big** on the phone to match the legacy model. Desktop state
+precision is a hidden profile setting, and an existing profile can retain a
+non-default value. Older desktop models SM40, SM36 and SM55 and desktop's
+all-int4 state precision have no exact phone setting.
+
+Changing either phone setting rebuilds its RWKV state from review history.
+Desktop model changes take effect after reopening the profile. Matching these
+settings removes one source of differences; timing, history, and other
+client-specific behavior can still affect predictions.
+
 ## Where things live
 
 Backend (`kuma3-anki-core`, checked out as `Anki-Android-Backend/anki`):

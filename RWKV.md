@@ -147,6 +147,9 @@ signed with a different key cannot be installed over an existing one: sync, then
 
 ## Known RWKV differences after sync
 
+These observations apply to Kuma 30 and desktop fork builds through 108. Links
+below point to proposed changes; check the version installed on each device.
+
 - **Dynamic Preset Selection overlays:** If a synced add-on preset rule assigns
   a non-numeric preset ID to a card with retained reviews, Kuma's offline RWKV
   history preparation can fail with `missing stable id for add-on FSRS preset`.

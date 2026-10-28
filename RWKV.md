@@ -64,7 +64,9 @@ under Settings → kuma3 on a Kuma 30 phone to match their default model and
 precision. Desktop Deck Options → RWKV → Advanced → **Use Smaller Model**
 selects SM56 when on and the legacy model when off; choose **Big** on the phone
 to match the legacy model. Desktop's newer source switches the small model to
-SM72, which Kuma 30 cannot match. Desktop state precision is a hidden profile
+SM72, which Kuma 30 cannot match; [app](https://github.com/Pedrubik2000/kuma3-anki-app/pull/3)
+and [core](https://github.com/Pedrubik2000/kuma3-anki-core/pull/8) changes
+propose updating it. Desktop state precision is a hidden profile
 setting, and an existing profile can retain a non-default value. Older desktop
 models SM40, SM36 and SM55 and desktop's all-int4 state precision have no exact
 phone setting.

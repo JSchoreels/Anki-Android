@@ -153,6 +153,11 @@ signed with a different key cannot be installed over an existing one: sync, then
   Desktop derives a stable ID for these presets, but the current phone backend
   does not supply one. The collection and review logs are still present; RWKV
   cannot reliably prepare its state for the affected history until this is fixed.
+- **Dynamic Desired Retention add-on:** Its search, note-field and grade rules
+  are desktop add-on settings and are not synced to Kuma. Desktop can use those
+  rules for review and Curve rescheduling; Kuma uses the available deck/preset
+  and native scheduler settings instead. This add-on is separate from the
+  fork's built-in FSRS Dynamic DR setting.
 - **Old reviews downloaded to desktop:** In its incremental post-sync recovery,
   the desktop fork can deliberately exclude newly downloaded reviews older than
   its eight-day recovery window to avoid an unbounded replay. Kuma's offline

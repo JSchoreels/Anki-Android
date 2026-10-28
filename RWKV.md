@@ -145,6 +145,22 @@ signed with a different key cannot be installed over an existing one: sync, then
   read it only through `Leaderboard.board()` (background, cached), and never draw a whole group as
   a table (some groups have over 1,000 members): the dialog uses a list that draws only visible rows.
 
+## Known RWKV differences after sync
+
+- **Dynamic Preset Selection overlays:** If a synced add-on preset rule assigns
+  a non-numeric preset ID to a card with retained reviews, Kuma's offline RWKV
+  history preparation can fail with `missing stable id for add-on FSRS preset`.
+  Desktop derives a stable ID for these presets, but the current phone backend
+  does not supply one. The collection and review logs are still present; RWKV
+  cannot reliably prepare its state for the affected history until this is fixed.
+- **Old reviews downloaded to desktop:** In its incremental post-sync recovery,
+  the desktop fork can deliberately exclude newly downloaded reviews older than
+  its eight-day recovery window to avoid an unbounded replay. Kuma's offline
+  replay includes the retained reviews, so its state can differ. Desktop warns
+  when reviews are excluded; **Rebuild RWKV State** in desktop Deck Options
+  reconstructs the full retained history and clears that exclusion. The reviews
+  themselves are not deleted.
+
 ## Licences
 
 AnkiDroid is GPL-3.0-or-later; Anki and the fork are AGPL-3.0-or-later. These three repositories

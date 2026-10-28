@@ -162,7 +162,7 @@ signed with a different key cannot be installed over an existing one: sync, then
   the desktop fork can deliberately exclude newly downloaded reviews older than
   its eight-day recovery window to avoid an unbounded replay. Kuma's offline
   replay includes the retained reviews, so its state can differ. Desktop warns
-  when reviews are excluded; **Rebuild RWKV State** in desktop Deck Options
+  when reviews are excluded; **Build Cache** in desktop Deck Options → RWKV
   reconstructs the full retained history and clears that exclusion. The reviews
   themselves are not deleted.
 

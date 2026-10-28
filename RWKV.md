@@ -145,6 +145,23 @@ signed with a different key cannot be installed over an existing one: sync, then
   read it only through `Leaderboard.board()` (background, cached), and never draw a whole group as
   a table (some groups have over 1,000 members): the dialog uses a list that draws only visible rows.
 
+## RWKV queue refresh in Kuma 30
+
+From Kuma 22 until the fix in [Kuma 30](https://github.com/Pedrubik2000/kuma3-anki-app/releases/tag/v30),
+RWKV-Instant could update only the answered card's score during a session. The
+rest of the queue could keep its old order, the review count could decrease one
+at a time, and the count could jump after leaving the reviewer. Reports of the
+reviewer ending early may also be consistent with a queue that was not refreshed;
+the specific user reports were not reproduced on their devices.
+
+Kuma 30 refreshes the review queue after the configured number of answers, with
+one answer as the default, and also refreshes when the queue runs out before
+that interval. Its model history catches up before scoring if an answer could
+not be appended immediately. The setting controls queue rescoring; it does
+not mean that an answered review should be omitted from RWKV history. The
+optional approximate mode trades some queue-scoring work for speed; deck counts
+still use a complete score refresh.
+
 ## Known RWKV differences after sync
 
 These observations apply to Kuma 30 and desktop fork builds through 108. Links

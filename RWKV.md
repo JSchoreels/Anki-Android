@@ -180,6 +180,9 @@ below point to proposed changes; check the version installed on each device.
 - **Add-on grade targets with native Dynamic DR:** Both desktop and the proposed
   Kuma rule implementation can store a native grade-mapped retention that
   differs from the exact add-on grade target used for the answer-button interval.
+  Coordinated fixes are proposed for the [desktop scheduler](https://github.com/JSchoreels/anki/pull/23),
+  [desktop add-on](https://github.com/JSchoreels/anki-addon-dynamic-desired-retention/pull/4),
+  and [Kuma core](https://github.com/Pedrubik2000/kuma3-anki-core/pull/9).
 
 ## Licences
 
